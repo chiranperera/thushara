@@ -93,7 +93,7 @@ const referringPage = Astro.request.headers.get("referer") ?? undefined;
 
 <Layout
   title="Book a consultation"
-  description="Book a free, no-obligation consultation with Thushara Rathnayake. Takes about 90 seconds."
+  description="Book a free, no-obligation consultation with Thushara Rathnayake — Senior Financial Consultant, 16 years and 14x MDRT Lifetime Member. Takes about ninety seconds."
   bareChrome
   noindex
 >
@@ -118,6 +118,9 @@ const referringPage = Astro.request.headers.get("referer") ?? undefined;
   </header>
 
   <div class="container-narrow px-5 py-10 md:py-16">
+    <!-- The design shows no page title here, but a document still needs
+         one for screen readers and heading structure. -->
+    <h1 class="sr-only">Book a consultation with {site.name}</h1>
     <div class="md:grid md:grid-cols-[minmax(0,1fr)_300px] md:gap-16 md:items-start">
       <div>
         <BookingForm

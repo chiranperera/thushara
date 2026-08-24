@@ -28,6 +28,36 @@ const {
 
 const fullTitle = title === site.name ? `${site.name} — ${site.title}` : `${title} — ${site.name}`;
 const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
+
+// /services/motor-insurance -> /og/services/motor-insurance
+const ogPath = ogImage ?? `/og${Astro.url.pathname === "/" ? "/home" : Astro.url.pathname.replace(/\/$/, "")}`;
+const ogUrl = new URL(ogPath, Astro.site ?? site.url).toString();
+
+const base = (Astro.site ?? new URL(site.url)).toString().replace(/\/$/, "");
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  name: site.name,
+  description,
+  url: base,
+  image: ogUrl,
+  areaServed: { "@type": "Country", name: "Sri Lanka" },
+  serviceType: "Insurance and financial planning",
+  provider: {
+    "@type": "Person",
+    name: site.name,
+    jobTitle: site.title,
+    worksFor: { "@type": "Organization", name: site.employer },
+    // Only credentials he actually holds. Nothing inferred.
+    hasCredential: [
+      { "@type": "EducationalOccupationalCredential", credentialCategory: "Professional membership",
+        name: `MDRT ${site.credentials.mdrtStatus} (${site.credentials.mdrtYears}x qualifier)` },
+      ...site.qualifications.map((q) => ({
+        "@type": "EducationalOccupationalCredential", credentialCategory: "Diploma", name: q,
+      })),
+    ],
+  },
+};
 ---
 
 <!doctype html>
@@ -46,11 +76,21 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).toString()
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:locale" content={site.locale} />
-    {ogImage && <meta property="og:image" content={new URL(ogImage, Astro.site ?? site.url).toString()} />}
+    {/* The WhatsApp preview card is often seen before the page loads,
+        so every page gets its own. Generated at /og/*. */}
+    <meta property="og:image" content={ogUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={fullTitle} />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={ogUrl} />
 
     <meta name="theme-color" content="#06231F" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    {/* Person + ProfessionalService, so search engines understand this
+        is one named advisor rather than a company. */}
+    <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
 
     {/* Only the two faces used above the fold are preloaded. */}
     <link rel="preload" href="/fonts/satoshi-regular.woff2" as="font" type="font/woff2" crossorigin />

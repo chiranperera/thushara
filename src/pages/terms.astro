@@ -10,7 +10,7 @@ const settings = await getSiteSettings(bindings.DB);
 Astro.response.headers.set("cache-control", EDGE_CACHE);
 ---
 
-<LegalLayout title="Terms of use" heading="Terms of use" settings={settings}>
+<LegalLayout title="Terms of use" heading="Terms of use" settings={settings} description="The terms on which this website is provided, and how reviews and information on it are handled.">
   <p>
     By using this website you accept these terms. If you do not accept them, please do not use
     the site.

@@ -10,7 +10,7 @@ const settings = await getSiteSettings(bindings.DB);
 Astro.response.headers.set("cache-control", EDGE_CACHE);
 ---
 
-<LegalLayout title="Insurance disclaimer" heading="Insurance disclaimer" settings={settings}>
+<LegalLayout title="Insurance disclaimer" heading="Insurance disclaimer" settings={settings} description="What this website is and is not: general information about Sri Lanka Insurance Corporation products, not personalised financial advice.">
   <p>
     This website provides general information about insurance products available from
     {site.employer}. It does not constitute personalised financial advice, and nothing on it

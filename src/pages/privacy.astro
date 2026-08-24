@@ -10,7 +10,7 @@ const settings = await getSiteSettings(bindings.DB);
 Astro.response.headers.set("cache-control", EDGE_CACHE);
 ---
 
-<LegalLayout title="Privacy policy" heading="Privacy policy" settings={settings}>
+<LegalLayout title="Privacy policy" heading="Privacy policy" settings={settings} description="What personal data this site collects through booking, reviews and downloads, why, who sees it, and how to have it removed.">
   <p>
     This site collects personal data in three places: the consultation booking form, the
     testimonial submission form, and guide downloads. This page explains what is collected, why,
