@@ -33,11 +33,15 @@ export const GET: APIRoute = async ({ url, request }) => {
   }
 
   const session = await createSession(email, secret);
-  return new Response(null, {
-    status: 302,
-    headers: {
-      location: "/admin",
-      "set-cookie": sessionCookie(session, url.protocol === "https:"),
-    },
-  });
+
+  // Return them to wherever they were headed, if it was an admin page.
+  const nextCookie = request.headers.get("cookie")?.match(/tr_next=([^;]+)/)?.[1];
+  const next = nextCookie ? decodeURIComponent(nextCookie) : "";
+  const destination = next.startsWith("/admin/") && !next.startsWith("//") ? next : "/admin";
+
+  const headers = new Headers({ location: destination });
+  headers.append("set-cookie", sessionCookie(session, url.protocol === "https:"));
+  headers.append("set-cookie", `tr_next=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0`);
+
+  return new Response(null, { status: 302, headers });
 };

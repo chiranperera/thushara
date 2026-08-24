@@ -1,0 +1,158 @@
+---
+/**
+ * /admin/testimonials — pending and published reviews.
+ *
+ * Full submitted text is shown in place, never truncated, so he can
+ * judge it without opening anything else.
+ */
+export const prerender = false;
+
+import { env } from "cloudflare:workers";
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import { requireAdmin } from "../../../lib/auth";
+import { getCounts, relativeTime, type TestimonialRow } from "../../../lib/admin-data";
+
+const bindings = env as unknown as Record<string, any>;
+const db = bindings.DB;
+
+const admin = await requireAdmin(Astro.request, bindings.AUTH_SECRET ?? "");
+if (!admin) return Astro.redirect("/admin/login");
+
+const counts = await getCounts(db);
+const tab = Astro.url.searchParams.get("tab") === "published" ? "published" : "pending";
+const ok = Astro.url.searchParams.get("ok");
+const err = Astro.url.searchParams.get("e");
+
+let rows: TestimonialRow[] = [];
+if (db) {
+  try {
+    const res = await db
+      .prepare(`SELECT * FROM testimonials WHERE status = ? ORDER BY featured DESC, sort_order, created_at DESC`)
+      .bind(tab)
+      .all();
+    rows = (res.results ?? []) as TestimonialRow[];
+  } catch (e) {
+    console.error("[admin] testimonials query failed", e);
+  }
+}
+
+const notices: Record<string, string> = {
+  published: "Published. It's live on the website now.",
+  already: "That one was already published.",
+};
+const problems: Record<string, string> = {
+  invalid: "That approval link is no longer valid. You can publish it from here instead.",
+  failed: "Something went wrong publishing that. Please try again.",
+};
+---
+
+<AdminLayout title="Reviews" newLeads={counts.newLeads} pendingReviews={counts.pendingReviews}>
+  <div class="px-5 py-8 md:px-11 md:py-9">
+    <h1 class="font-display text-h1 font-extrabold text-ink-900">Reviews</h1>
+    <p class="mt-1.5 text-body text-warm-500">Nothing appears on the website until you approve it.</p>
+
+    {ok && notices[ok] && (
+      <p class="mt-5 rounded-lg border border-teal-200 bg-teal-50 px-4 py-3 text-body text-teal-600">{notices[ok]}</p>
+    )}
+    {err && problems[err] && (
+      <p class="mt-5 rounded-lg border border-gold-300 bg-gold-100 px-4 py-3 text-body text-warm-900">{problems[err]}</p>
+    )}
+
+    <div class="mt-6 flex gap-2">
+      <a
+        href="/admin/testimonials"
+        class={`rounded-full px-4.5 py-2.5 text-small ${tab === "pending" ? "bg-teal-600 font-bold text-cream-50" : "border border-warm-200 text-warm-700"}`}
+      >Pending{counts.pendingReviews ? ` · ${counts.pendingReviews}` : ""}</a>
+      <a
+        href="/admin/testimonials?tab=published"
+        class={`rounded-full px-4.5 py-2.5 text-small ${tab === "published" ? "bg-teal-600 font-bold text-cream-50" : "border border-warm-200 text-warm-700"}`}
+      >Published</a>
+    </div>
+
+    {rows.length === 0 ? (
+      <div class="mt-8 rounded-xl border border-warm-200 bg-cream-100 p-10 text-center">
+        <p class="text-h4 font-bold text-ink-900">
+          {tab === "pending" ? "Nothing waiting for you." : "No published reviews yet."}
+        </p>
+        <p class="mx-auto mt-2 max-w-[46ch] text-body text-warm-500">
+          {tab === "pending"
+            ? "When a client submits a review it will appear here for you to approve."
+            : "Once you approve a review it will show here, and on the website."}
+        </p>
+      </div>
+    ) : (
+      <ul class="mt-7 flex max-w-[720px] flex-col gap-3.5">
+        {rows.map((t) => (
+          <li class="rounded-[18px] border border-warm-200 bg-white p-6">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <p class="text-h4 font-bold text-ink-800">{t.name}</p>
+                <p class="mt-0.5 text-small text-warm-500">
+                  {t.profession}{t.service ? ` · ${t.service}` : ""} · {relativeTime(t.created_at)}
+                </p>
+              </div>
+              {t.rating ? (
+                <div class="flex shrink-0 gap-1" aria-label={`${t.rating} out of 5`}>
+                  {Array.from({ length: 5 }, (_, i) => (
+                    <span class={`size-3 rounded-full ${i < t.rating! ? "bg-gold-500" : "bg-warm-200"}`}></span>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+
+            {tab === "pending" ? (
+              <form method="POST" action="/api/admin/testimonials/update" class="mt-4">
+                <input type="hidden" name="id" value={t.id} />
+                {/* Editable in place. Fixing a typo shouldn't mean rejecting. */}
+                <textarea
+                  name="body" rows="4"
+                  class="w-full rounded-md border border-warm-200 bg-cream-100 p-4 text-body leading-relaxed text-warm-900 focus:border-teal-400 focus:bg-white"
+                >{t.body}</textarea>
+                <div class="mt-3 grid gap-2 sm:grid-cols-2">
+                  <input name="name" value={t.name} class="h-12 rounded-md border border-warm-200 bg-cream-100 px-4 text-body focus:border-teal-400 focus:bg-white" />
+                  <input name="profession" value={t.profession} class="h-12 rounded-md border border-warm-200 bg-cream-100 px-4 text-body focus:border-teal-400 focus:bg-white" />
+                </div>
+                <p class="mt-2 text-small text-warm-500">Edit anything above before publishing.</p>
+
+                <button
+                  type="submit" name="action" value="publish"
+                  class="mt-4 flex min-h-14 w-full items-center justify-center rounded-full bg-teal-600 text-h4 font-bold text-cream-50 hover:bg-teal-500"
+                >Approve &amp; publish</button>
+                <button
+                  type="submit" name="action" value="reject"
+                  class="mt-2.5 flex min-h-12 w-full items-center justify-center rounded-full border-[1.5px] border-warm-200 text-body font-bold text-danger hover:border-danger/40"
+                >Reject</button>
+              </form>
+            ) : (
+              <>
+                <p class="mt-4 rounded-md bg-cream-100 p-4 font-serif text-quote italic leading-relaxed text-warm-900">
+                  {t.body}
+                </p>
+                <form method="POST" action="/api/admin/testimonials/update" class="mt-4 flex flex-wrap gap-2.5">
+                  <input type="hidden" name="id" value={t.id} />
+                  <button
+                    type="submit" name="action" value="feature"
+                    class={`min-h-12 rounded-full px-5 text-small font-bold ${t.featured ? "bg-gold-500 text-ink-900" : "border-[1.5px] border-warm-200 text-teal-600"}`}
+                  >{t.featured ? "★ On the homepage" : "Show on homepage"}</button>
+                  <button
+                    type="submit" name="action" value="unpublish"
+                    class="min-h-12 rounded-full border-[1.5px] border-warm-200 px-5 text-small font-bold text-warm-700"
+                  >Hide</button>
+                </form>
+              </>
+            )}
+          </li>
+        ))}
+      </ul>
+    )}
+
+    <div class="mt-9 max-w-[720px] rounded-[18px] bg-ink-900 p-6">
+      <p class="overline text-gold-400">The workflow that gets used</p>
+      <p class="mt-2.5 text-body leading-relaxed text-cream-50/78">
+        When a review arrives you'll get an email with the full text and an
+        <strong class="text-cream-50"> Approve &amp; publish</strong> button. One tap and it's live —
+        you'll rarely need to open this screen.
+      </p>
+    </div>
+  </div>
+</AdminLayout>

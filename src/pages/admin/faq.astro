@@ -1,0 +1,27 @@
+---
+export const prerender = false;
+import { env } from "cloudflare:workers";
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { requireAdmin } from "../../lib/auth";
+import { getCounts } from "../../lib/admin-data";
+
+const bindings = env as unknown as Record<string, any>;
+const admin = await requireAdmin(Astro.request, bindings.AUTH_SECRET ?? "");
+if (!admin) return Astro.redirect("/admin/login");
+const counts = await getCounts(bindings.DB);
+---
+
+<AdminLayout title="Questions" newLeads={counts.newLeads} pendingReviews={counts.pendingReviews}>
+  <div class="px-5 py-8 md:px-11 md:py-9">
+    <h1 class="font-display text-h1 font-extrabold text-ink-900">Questions</h1>
+    <p class="mt-1.5 text-body text-warm-500">Add and edit the questions people ask you most.</p>
+
+    <div class="mt-8 max-w-[620px] rounded-xl border border-dashed border-warm-300 bg-cream-100 p-9 text-center">
+      <p class="text-h4 font-bold text-ink-900">Not built yet</p>
+      <p class="mx-auto mt-2 max-w-[44ch] text-body leading-relaxed text-warm-700">
+        This screen is specified and coming next. Nothing is lost by it being empty —
+        there is no content waiting for it yet.
+      </p>
+    </div>
+  </div>
+</AdminLayout>

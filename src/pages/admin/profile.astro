@@ -1,0 +1,92 @@
+---
+/**
+ * /admin/profile — the numbers that go stale.
+ * years_experience and mdrt_years appear in the hero, the credentials
+ * band and the footer of every page. He must be able to change them
+ * himself: nobody should call a developer to update a number.
+ */
+export const prerender = false;
+
+import { env } from "cloudflare:workers";
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { requireAdmin } from "../../lib/auth";
+import { getCounts } from "../../lib/admin-data";
+
+const bindings = env as unknown as Record<string, any>;
+const db = bindings.DB;
+const admin = await requireAdmin(Astro.request, bindings.AUTH_SECRET ?? "");
+if (!admin) return Astro.redirect("/admin/login");
+
+const counts = await getCounts(db);
+const saved = Astro.url.searchParams.get("saved");
+
+let settings = new Map<string, string>();
+if (db) {
+  try {
+    const s = await db.prepare(`SELECT key, value FROM settings`).all();
+    settings = new Map((s.results ?? []).map((r: any) => [r.key, r.value]));
+  } catch (e) { console.error("[admin] profile query failed", e); }
+}
+const val = (k: string) => { const v = settings.get(k); return !v || v === "PENDING" ? "" : v; };
+const pending = (k: string) => settings.get(k) === "PENDING";
+---
+
+<AdminLayout title="My details" newLeads={counts.newLeads} pendingReviews={counts.pendingReviews}>
+  <div class="px-5 py-8 md:px-11 md:py-9">
+    <h1 class="font-display text-h1 font-extrabold text-ink-900">My details</h1>
+    <p class="mt-1.5 text-body text-warm-500">These appear across the website.</p>
+
+    {saved && <p class="mt-5 rounded-lg border border-teal-200 bg-teal-50 px-4 py-3 text-body text-teal-600">Saved.</p>}
+
+    <form method="POST" action="/api/admin/settings" class="mt-8 max-w-[520px]">
+      <input type="hidden" name="_section" value="profile" />
+
+      <div class="flex flex-col gap-5">
+        {[
+          { name:"phone", label:"Phone", type:"tel", placeholder:"+94 XX XXX XXXX" },
+          { name:"whatsapp", label:"WhatsApp number", type:"tel", placeholder:"+94 XX XXX XXXX" },
+          { name:"email", label:"Email", type:"email", placeholder:"you@yourdomain.com" },
+          { name:"service_area", label:"Service area", type:"text", placeholder:"Island-wide · Colombo & suburbs" },
+        ].map((f)=>(
+          <div>
+            <label for={f.name} class="text-small font-bold text-warm-800">{f.label}</label>
+            <input
+              id={f.name} name={f.name} type={f.type} value={val(f.name)} placeholder={f.placeholder}
+              class="mt-2 h-14 w-full rounded-md border border-warm-200 bg-white px-4 text-body focus:border-teal-400"
+            />
+            {pending(f.name) && (
+              <p class="mt-1.5 text-small text-gold-600">Not set yet — the website hides this until you fill it in.</p>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div class="mt-7 rounded-[18px] bg-ink-900 p-6">
+        <p class="overline text-gold-400">Shown on every page</p>
+        <div class="mt-4 grid grid-cols-2 gap-3.5">
+          {[
+            { name:"years_experience", label:"Years of experience", fallback:"16" },
+            { name:"mdrt_years", label:"MDRT years", fallback:"14" },
+          ].map((f)=>(
+            <div>
+              <label for={f.name} class="text-small font-bold text-cream-50/80">{f.label}</label>
+              <input
+                id={f.name} name={f.name} type="number" min="1" max="80"
+                value={settings.get(f.name) ?? f.fallback}
+                class="mt-2 h-14 w-full rounded-md border border-cream-50/25 bg-cream-50/6 px-4 font-display text-h3 font-extrabold tabular text-cream-50 focus:border-gold-400"
+              />
+            </div>
+          ))}
+        </div>
+        <p class="mt-3.5 text-small leading-relaxed text-cream-50/65">
+          These two numbers appear in the hero, the credentials band and the footer of every page.
+          Update them yourself each year — nobody should have to call the developer to change a number.
+        </p>
+      </div>
+
+      <button type="submit" class="mt-8 flex min-h-14 w-full items-center justify-center rounded-full bg-teal-600 text-h4 font-bold text-cream-50 hover:bg-teal-500 sm:w-auto sm:px-12">
+        Save
+      </button>
+    </form>
+  </div>
+</AdminLayout>

@@ -1,0 +1,128 @@
+---
+/**
+ * /admin/availability — drives the booking slot picker.
+ * Evening and weekend rows are highlighted because they convert
+ * doctors and engineers better than anything else on this screen.
+ */
+export const prerender = false;
+
+import { env } from "cloudflare:workers";
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { requireAdmin } from "../../lib/auth";
+import { getCounts } from "../../lib/admin-data";
+
+const bindings = env as unknown as Record<string, any>;
+const db = bindings.DB;
+const admin = await requireAdmin(Astro.request, bindings.AUTH_SECRET ?? "");
+if (!admin) return Astro.redirect("/admin/login");
+
+const counts = await getCounts(db);
+const saved = Astro.url.searchParams.get("saved");
+
+let windows: any[] = [];
+let settings = new Map<string, string>();
+let blocked: any[] = [];
+if (db) {
+  try {
+    const [w, s, b] = await db.batch([
+      db.prepare(`SELECT * FROM availability ORDER BY day_of_week, start_time`),
+      db.prepare(`SELECT key, value FROM settings`),
+      db.prepare(`SELECT date, reason FROM blocked_dates WHERE date >= date('now') ORDER BY date LIMIT 30`),
+    ]);
+    windows = w.results ?? [];
+    settings = new Map((s.results ?? []).map((r: any) => [r.key, r.value]));
+    blocked = b.results ?? [];
+  } catch (e) { console.error("[admin] availability query failed", e); }
+}
+
+const num = (k: string, d: number) => Number(settings.get(k)) || d;
+const paused = settings.get("bookings_paused") === "1";
+const DAY = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const fmt = (t: string) => { const [h,m]=t.split(":").map(Number); const p=h<12?"am":"pm"; const hr=h%12===0?12:h%12; return `${hr}:${String(m).padStart(2,"0")} ${p}`; };
+/** Evenings and weekends — the slots that win this audience. */
+const isKey = (w: any) => Number(w.start_time.split(":")[0]) >= 17 || w.day_of_week === 0 || w.day_of_week === 6;
+---
+
+<AdminLayout title="When I'm available" newLeads={counts.newLeads} pendingReviews={counts.pendingReviews}>
+  <div class="px-5 py-8 md:px-11 md:py-9">
+    <h1 class="font-display text-h1 font-extrabold text-ink-900">When I'm available</h1>
+    <p class="mt-1.5 text-body text-warm-500">This controls the times people can pick when they book.</p>
+
+    {saved && <p class="mt-5 rounded-lg border border-teal-200 bg-teal-50 px-4 py-3 text-body text-teal-600">Saved.</p>}
+
+    <form method="POST" action="/api/admin/settings" class="mt-8 max-w-[760px]">
+      <input type="hidden" name="_section" value="availability" />
+
+      <div class="overflow-hidden rounded-[18px] border border-warm-200 bg-white">
+        <div class="grid grid-cols-[1fr_1.4fr_auto] border-b border-warm-200 bg-cream-100">
+          {["Day","Hours","On"].map((h)=>(
+            <div class="px-5 py-3.5 text-caption font-bold tracking-[.06em] uppercase text-teal-600/80">{h}</div>
+          ))}
+        </div>
+        {windows.map((w)=>(
+          <div class={`grid grid-cols-[1fr_1.4fr_auto] items-center border-b border-warm-100 last:border-0 ${isKey(w) ? "bg-gold-100/40" : ""}`}>
+            <div class="px-5 py-4 text-body font-bold text-ink-800">
+              {w.label ?? DAY[w.day_of_week]}
+            </div>
+            <div class="px-5 py-4 text-body text-warm-700">{fmt(w.start_time)} – {fmt(w.end_time)}</div>
+            <div class="px-5 py-4">
+              <label class="flex cursor-pointer items-center gap-2">
+                <input type="checkbox" name={`window_${w.id}`} checked={w.active===1} class="size-6 accent-teal-600" />
+                <span class="sr-only">Enable {w.label ?? DAY[w.day_of_week]}</span>
+              </label>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <p class="mt-3 rounded-md border border-gold-300 bg-gold-100 px-4 py-3 text-small leading-relaxed text-warm-900">
+        The highlighted rows are evenings and weekends. They convert doctors and engineers better
+        than anything else here — a Medical Officer can't take a call at 2pm.
+      </p>
+
+      <div class="mt-7 grid gap-4 sm:grid-cols-2">
+        {[
+          { name:"appointment_minutes", label:"Appointment length", value:num("appointment_minutes",30), suffix:"minutes" },
+          { name:"buffer_minutes", label:"Gap between appointments", value:num("buffer_minutes",15), suffix:"minutes" },
+          { name:"max_per_day", label:"Most bookings in a day", value:num("max_per_day",4), suffix:"" },
+        ].map((f)=>(
+          <div>
+            <label for={f.name} class="text-small font-bold text-warm-800">{f.label}</label>
+            <div class="mt-2 flex items-center gap-3">
+              <input id={f.name} name={f.name} type="number" min="1" value={f.value}
+                class="h-14 w-28 rounded-md border border-warm-200 bg-white px-4 text-h4 tabular focus:border-teal-400" />
+              {f.suffix && <span class="text-body text-warm-500">{f.suffix}</span>}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div class="mt-7 flex items-center justify-between gap-6 rounded-[18px] border border-warm-200 bg-cream-100 p-6">
+        <div>
+          <p class="text-h4 font-bold text-ink-800">Pause bookings</p>
+          <p class="mt-1 max-w-[44ch] text-body leading-relaxed text-warm-700">
+            For when you're away. People see a short message and your WhatsApp number instead of the calendar.
+          </p>
+        </div>
+        <input type="checkbox" name="bookings_paused" checked={paused} class="size-7 shrink-0 accent-teal-600" />
+      </div>
+
+      {blocked.length > 0 && (
+        <div class="mt-7">
+          <p class="text-small font-bold text-warm-800">Days you're away</p>
+          <ul class="mt-2 flex flex-wrap gap-2">
+            {blocked.map((b)=>(
+              <li class="rounded-full border border-warm-200 bg-white px-4 py-2 text-small text-warm-700">
+                {b.date}{b.reason ? ` · ${b.reason}` : ""}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <button type="submit" class="mt-8 flex min-h-14 w-full items-center justify-center rounded-full bg-teal-600 text-h4 font-bold text-cream-50 hover:bg-teal-500 sm:w-auto sm:px-12">
+        Save
+      </button>
+    </form>
+  </div>
+</AdminLayout>

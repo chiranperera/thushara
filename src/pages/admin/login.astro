@@ -8,6 +8,16 @@ const bindings = env as unknown as Record<string, any>;
 const already = await readSession(Astro.request.headers.get("cookie"), bindings.AUTH_SECRET ?? "");
 if (already) return Astro.redirect("/admin");
 
+// A forwarded approve link sends people here first. Remember where
+// they were going so the magic link returns them to it.
+const next = Astro.url.searchParams.get("next") ?? "";
+if (next.startsWith("/admin/") && !next.startsWith("//")) {
+  Astro.cookies.set("tr_next", next, {
+    path: "/", httpOnly: true, sameSite: "lax", maxAge: 900,
+    secure: Astro.url.protocol === "https:",
+  });
+}
+
 const errorCode = Astro.url.searchParams.get("e");
 const errors: Record<string, string> = {
   expired: "That link has expired or was already used. Here's a fresh one.",
