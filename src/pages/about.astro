@@ -35,17 +35,29 @@ const career = [
   { year: "Today", label: "Life & General, island-wide", mdrt: false },
 ];
 
-/** From his copy. His phrasing, kept as written. */
+/**
+ * The eight areas from his own "My Services" list, his labels kept as
+ * written. The line under each says what it means in practice, because
+ * on its own "Family Financial Protection" tells a reader very little.
+ */
 const whatIDo = [
-  { label: "Motor and Property Insurance Solutions", href: "/services/motor-insurance" },
-  { label: "Life Insurance Planning", href: "/services/life-income-protection" },
-  { label: "Retirement Planning", href: "/services/retirement-plan" },
-  { label: "Children's Education Planning", href: "/services/children-education" },
-  { label: "Travel Insurance Solutions", href: "/services/travel-insurance" },
-  { label: "Family Financial Protection", href: "/services/life-income-protection" },
-  { label: "Business Risk Protection", href: "/services/professional-indemnity" },
-  { label: "Personalized Insurance Consultation", href: "/book" },
+  { label: "Motor and Property Insurance Solutions", note: "Vehicles, homes and their contents — the two things most people insure first.", href: "/services/motor-insurance" },
+  { label: "Life Insurance Planning", note: "Cover sized to what your family would actually need, not to a round number.", href: "/services/life-income-protection" },
+  { label: "Retirement Planning", note: "Building an income for the years after the salary stops.", href: "/services/retirement-plan" },
+  { label: "Children's Education Planning", note: "A dedicated fund timed to arrive when the fees do.", href: "/services/children-education" },
+  { label: "Travel Insurance Solutions", note: "Medical cover abroad, and the proof a visa or university asks for.", href: "/services/travel-insurance" },
+  { label: "Family Financial Protection", note: "Looking at the household as a whole rather than one policy at a time.", href: "/services/life-income-protection" },
+  { label: "Business Risk Protection", note: "Professional indemnity and the exposures that come with running a practice.", href: "/services/professional-indemnity" },
+  { label: "Personalized Insurance Consultation", note: "A conversation first. No decision required at the end of it.", href: "/book" },
 ];
+
+/**
+ * His "Professional Achievements" section. Three of the four are in the
+ * figures above; this is the fourth, which is a claim about how he
+ * works rather than a number.
+ */
+const serviceStandard =
+  "Dedicated to delivering exceptional customer service and building lasting client relationships — which in practice means the call after the sale matters more than the one before it.";
 
 const qualifications = [
   { title: "National Diploma in Sales Management", sub: "SLIM — Sri Lanka Institute of Marketing" },
@@ -153,6 +165,10 @@ const mdrtBars = Array.from({ length: settings.mdrtYears }, (_, i) => i);
           </div>
         ))}
       </dl>
+
+      <p class="mt-10 max-w-[70ch] border-l-2 border-gold-500 pl-6 text-body-lg leading-relaxed text-cream-50/78">
+        {serviceStandard}
+      </p>
 
       <div class="mt-14 grid gap-10 border-t border-cream-50/20 pt-12 lg:grid-cols-2 lg:gap-16">
         <div>
@@ -270,19 +286,21 @@ const mdrtBars = Array.from({ length: settings.mdrtYears }, (_, i) => i);
   <section class="bg-cream-50 py-16 md:py-20">
     <div class="container-default px-5">
       <h2 class="font-display text-h2 font-extrabold text-teal-600">What I do</h2>
+      <p class="mt-4 max-w-[58ch] text-body-lg leading-relaxed text-warm-700">
+        Eight areas, though most people only ever need two or three of them at a time. Each one
+        goes through to the page that explains it properly.
+      </p>
 
       <ul class="mt-9 grid overflow-hidden rounded-xl border border-warm-200 sm:grid-cols-2 lg:grid-cols-4">
         {whatIDo.map((w, i) => (
           <li class={`border-warm-200 ${i % 4 !== 3 ? "lg:border-r" : ""} ${i % 2 === 0 ? "sm:border-r lg:border-r" : ""} ${i < whatIDo.length - (whatIDo.length % 4 || 4) ? "border-b" : ""} ${i < 4 ? "lg:border-b" : ""}`}>
-            <a href={w.href} class="flex h-full min-h-[132px] flex-col justify-end bg-white p-6 transition-colors hover:bg-cream-100">
+            <a href={w.href} class="flex h-full flex-col bg-white p-6 transition-colors hover:bg-cream-100">
               <span class="text-h4 font-bold leading-snug text-teal-600">{w.label}</span>
+              <span class="mt-2.5 text-body leading-relaxed text-warm-700">{w.note}</span>
             </a>
           </li>
         ))}
       </ul>
-      <p class="mt-4 font-mono text-caption text-warm-400">
-        His own phrasing, kept as written. Each item links to the nearest matching service page.
-      </p>
     </div>
   </section>
 

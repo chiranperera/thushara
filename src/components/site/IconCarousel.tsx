@@ -1,9 +1,15 @@
 /**
  * Hero icon carousel.
  *
- * Ported from the `Component` class in "03 Home.dc.html": eight icons
- * orbit a centre slot, advancing every 2s, with scale and opacity
- * falling away by distance and the centre one glowing.
+ * Eight icons drift continuously right to left through a centre slot,
+ * growing and brightening as they pass it. The design file stepped one
+ * slot every 2s; continuous motion at the same pace reads as a carousel
+ * rather than a slideshow, which is what it is.
+ *
+ * Position, scale and opacity are written straight to the elements in a
+ * rAF loop rather than through state — at 60fps a React render per
+ * frame would be absurd for eight images. The only state here is the
+ * caption, which changes eight times a minute.
  *
  * Additions the design file didn't need but a real page does:
  *  - stops when scrolled out of view or the tab is hidden, so it isn't
@@ -22,15 +28,30 @@ export interface CarouselIcon {
 
 interface Props {
   icons: CarouselIcon[];
-  /** Slot spacing and icon size. Halved under 1280px. */
+  /** Slot spacing and icon size. Tightened under 1280px. */
   spacing?: number;
   size?: number;
+  /** Time to travel one slot. */
   intervalMs?: number;
 }
 
-// Distance from centre -> scale / opacity. Straight from the design.
-const SCALE = [1, 0.68, 0.44];
-const ALPHA = [1, 0.75, 0.4];
+/** Distance from centre, in slots -> scale / opacity. From the design. */
+const SCALE = [1, 0.68, 0.44, 0.24];
+const ALPHA = [1, 0.75, 0.4, 0];
+
+/** Piecewise-linear read of the curves above at a fractional distance. */
+function at(curve: number[], d: number) {
+  if (d >= curve.length - 1) return curve[curve.length - 1];
+  const i = Math.floor(d);
+  return curve[i] + (curve[i + 1] - curve[i]) * (d - i);
+}
+
+/** Signed distance from the centre slot, wrapped the short way round. */
+function slot(i: number, offset: number, n: number) {
+  let p = (((i - offset) % n) + n) % n;
+  if (p > n / 2) p -= n;
+  return p;
+}
 
 export default function IconCarousel({
   icons,
@@ -38,10 +59,14 @@ export default function IconCarousel({
   size = 140,
   intervalMs = 2000,
 }: Props) {
-  const [index, setIndex] = useState(0);
+  const [centre, setCentre] = useState(0);
   const [compact, setCompact] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  const visible = useRef(true);
+  const wrap = useRef<HTMLDivElement>(null);
+  const items = useRef<(HTMLImageElement | null)[]>([]);
+  const caption = useRef<HTMLParagraphElement>(null);
+  const offset = useRef(0);
+  const shown = useRef(0);
+  const onscreen = useRef(true);
 
   // Narrow viewports get a tighter orbit so five slots still fit.
   useEffect(() => {
@@ -53,34 +78,76 @@ export default function IconCarousel({
   }, []);
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const n = icons.length;
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const sp = compact ? spacing * 0.62 : spacing;
 
-    const el = ref.current;
-    let timer: ReturnType<typeof setInterval> | null = null;
+    // Lay the icons out for a given offset, measured in slots travelled.
+    const paint = (o: number) => {
+      for (let i = 0; i < n; i++) {
+        const el = items.current[i];
+        if (!el) continue;
+
+        // Wrapped, so an icon leaving on the left reappears on the
+        // right rather than flying back across the whole row.
+        const p = slot(i, o, n);
+        const d = Math.abs(p);
+        const near = Math.max(0, 1 - d); // 1 at dead centre, 0 a slot out
+        el.style.transform = `translate3d(${p * sp}px,0,0) scale(${at(SCALE, d)})`;
+        el.style.opacity = `${at(ALPHA, d)}`;
+        el.style.filter = `drop-shadow(0 0 ${16 + near * 18}px rgba(46,214,196,${0.35 + near * 0.25}))`;
+      }
+
+      // The caption belongs to whichever icon is nearest the centre, and
+      // fades out through the handover so it never appears to mislabel.
+      const nearest = Math.round(o);
+      const frac = Math.abs(o - nearest);
+      if (caption.current) {
+        caption.current.style.opacity = `${Math.max(0, 1 - frac * 2.4)}`;
+      }
+      const c = ((nearest % n) + n) % n;
+      if (c !== shown.current) {
+        shown.current = c;
+        setCentre(c);
+      }
+    };
+
+    paint(offset.current);
+    if (still) return;
+
+    let raf = 0;
+    let last = 0;
+
+    const tick = (now: number) => {
+      if (last) offset.current = (offset.current + (now - last) / intervalMs) % n;
+      last = now;
+      paint(offset.current);
+      raf = requestAnimationFrame(tick);
+    };
 
     const start = () => {
-      if (timer) return;
-      timer = setInterval(() => setIndex((i) => i + 1), intervalMs);
+      if (raf) return;
+      last = 0; // don't jump by however long we were paused
+      raf = requestAnimationFrame(tick);
     };
     const stop = () => {
-      if (!timer) return;
-      clearInterval(timer);
-      timer = null;
+      if (!raf) return;
+      cancelAnimationFrame(raf);
+      raf = 0;
     };
+    const evaluate = () => (onscreen.current && !document.hidden ? start() : stop());
 
-    const evaluate = () => (visible.current && !document.hidden ? start() : stop());
-
+    const el = wrap.current;
     const io = el
       ? new IntersectionObserver(
           ([e]) => {
-            visible.current = e.isIntersecting;
+            onscreen.current = e.isIntersecting;
             evaluate();
           },
           { threshold: 0.1 },
         )
       : null;
     io?.observe(el!);
-
     document.addEventListener("visibilitychange", evaluate);
     evaluate();
 
@@ -89,58 +156,48 @@ export default function IconCarousel({
       io?.disconnect();
       document.removeEventListener("visibilitychange", evaluate);
     };
-  }, [intervalMs]);
+  }, [icons.length, spacing, intervalMs, compact]);
 
-  const n = icons.length;
-  const sp = compact ? spacing * 0.62 : spacing;
   const sz = compact ? size * 0.62 : size;
-  const centre = icons[((index % n) + n) % n];
 
   return (
-    <div ref={ref} aria-hidden="true" className="select-none">
-      <div className="relative h-[150px] overflow-hidden" style={{ height: sz + 10 }}>
-        {icons.map((item, i) => {
-          // Shortest signed distance from the active index, wrapped.
-          let p = (((i - index) % n) + n) % n;
-          if (p > n / 2) p -= n;
-          const a = Math.abs(p);
-          const shown = a <= 2;
-
-          return (
-            <img
-              key={item.icon}
-              src={`/icons/cut-${item.icon}.png`}
-              alt=""
-              width={Math.round(sz)}
-              height={Math.round(sz)}
-              loading="lazy"
-              decoding="async"
-              className="pointer-events-none absolute left-1/2 top-1/2 object-contain"
-              style={{
-                width: `${sz}px`,
-                height: `${sz}px`,
-                marginLeft: `${-sz / 2}px`,
-                marginTop: `${-sz / 2}px`,
-                transform: `translateX(${p * sp}px) scale(${shown ? SCALE[a] : 0.3})`,
-                opacity: shown ? ALPHA[a] : 0,
-                filter: `drop-shadow(0 0 ${a === 0 ? 34 : 16}px rgba(46,214,196,${a === 0 ? 0.6 : 0.35}))`,
-                // Icons wrapping round the back must not animate across
-                // the whole width — they teleport instead.
-                transition:
-                  a <= 3
-                    ? "transform 480ms cubic-bezier(.4,0,.2,1), opacity 480ms ease, filter 480ms ease"
-                    : "none",
-              }}
-            />
-          );
-        })}
+    <div ref={wrap} aria-hidden="true" className="select-none">
+      <div className="relative overflow-hidden" style={{ height: sz + 10 }}>
+        {icons.map((item, i) => (
+          <img
+            key={item.icon}
+            ref={(el) => {
+              items.current[i] = el;
+            }}
+            src={`/icons/cut-${item.icon}.png`}
+            alt=""
+            width={Math.round(sz)}
+            height={Math.round(sz)}
+            decoding="async"
+            className="pointer-events-none absolute left-1/2 top-1/2 object-contain will-change-transform"
+            style={{
+              width: `${sz}px`,
+              height: `${sz}px`,
+              marginLeft: `${-sz / 2}px`,
+              marginTop: `${-sz / 2}px`,
+              // The first frame, rendered on the server so the row is
+              // never blank before the island hydrates. From here the
+              // rAF loop writes these three directly; React leaves them
+              // alone because this object doesn't change between
+              // renders.
+              transform: `translate3d(${slot(i, 0, icons.length) * (compact ? spacing * 0.62 : spacing)}px,0,0) scale(${at(SCALE, Math.abs(slot(i, 0, icons.length)))})`,
+              opacity: at(ALPHA, Math.abs(slot(i, 0, icons.length))),
+              filter: `drop-shadow(0 0 ${i === 0 ? 34 : 16}px rgba(46,214,196,${i === 0 ? 0.6 : 0.35}))`,
+            }}
+          />
+        ))}
       </div>
 
       <p
+        ref={caption}
         className="mt-1.5 h-8 text-center font-display text-h4 font-semibold tracking-[-0.02em] text-cyan-500/50"
-        style={{ transition: "opacity 240ms ease" }}
       >
-        {centre.label}
+        {icons[centre].label}
       </p>
     </div>
   );

@@ -135,7 +135,10 @@ const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask abou
       <!-- Icon carousel — eight services orbiting a centre slot,
            advancing every 2s. Ported from the design component. -->
       <div class="mt-10 hidden lg:block">
-        <IconCarousel client:visible icons={carouselIcons} />
+        {/* client:load, not client:visible — this sits in the hero and
+            is on screen the moment the page opens, so waiting for an
+            intersection callback only delays it. 1.1KB. */}
+        <IconCarousel client:load icons={carouselIcons} />
       </div>
     </div>
 

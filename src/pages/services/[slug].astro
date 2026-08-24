@@ -116,6 +116,11 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
     <div class="container-default px-5">
       <h2 class="font-display text-h2 font-extrabold text-teal-600">Is this for you?</h2>
 
+      <p class="mt-4 max-w-[62ch] text-body-lg leading-relaxed text-warm-700">
+        Most people recognise themselves in one of these straight away. If you don't, that is
+        worth a conversation rather than a guess.
+      </p>
+
       <ul class="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {content.audiences.map((a, i) => {
           // The first two are the priority audiences for this page.
@@ -125,15 +130,14 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
               <span aria-hidden="true" class={`flex size-10 items-center justify-center rounded-[10px] ${lead ? "bg-cream-50/8" : "bg-cream-100"}`}>
                 <span class={`size-3 rotate-45 ${lead ? "bg-cyan-300" : "bg-warm-300"}`}></span>
               </span>
-              <span class={`mt-14 text-h4 font-bold leading-snug ${lead ? "text-cream-50" : "text-ink-900"}`}>{a}</span>
+              <span class={`mt-8 text-h4 font-bold leading-snug ${lead ? "text-cream-50" : "text-ink-900"}`}>{a.label}</span>
+              <span class={`mt-2.5 text-body leading-relaxed ${lead ? "text-cream-50/70" : "text-warm-700"}`}>{a.note}</span>
+              {a.caption && (
+                <span class={`mt-2 text-small ${lead ? "text-cream-50/50" : "text-warm-500"}`}>{a.caption}</span>
+              )}
             </li>
           );
         })}
-        {content.audienceNote && (
-          <li class="hidden rounded-[20px] border border-dashed border-warm-300 p-7 lg:flex">
-            <span class="self-center font-mono text-caption leading-relaxed text-warm-400">{content.audienceNote}</span>
-          </li>
-        )}
       </ul>
     </div>
   </section>
@@ -170,6 +174,34 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
           </p>
         </div>
       )}
+    </div>
+  </section>
+
+  <!-- ============ WHY THIS COVER / THIS INSURER ============
+       The copy's own second argument section. On most products it asks
+       "why Sri Lanka Insurance"; on the two savings plans it asks why
+       start early, and why have a plan at all. Different questions, so
+       the heading comes from the document rather than the template. -->
+  <section class="bg-cream-50 py-16 md:py-20">
+    <div class="container-default px-5">
+      <div class="max-w-[60ch]">
+        <h2 class="font-display text-h2 font-extrabold leading-tight text-teal-600">{content.why.heading}</h2>
+        <p class="mt-5 text-body-lg leading-relaxed text-warm-700">{content.why.standfirst}</p>
+      </div>
+
+      <ul class="mt-11 grid gap-x-14 gap-y-8 md:grid-cols-2">
+        {content.why.items.map((item) => (
+          <li class="border-t-2 border-gold-500/45 pt-6">
+            <p class="text-h4 font-bold leading-snug text-ink-900">
+              <GlossedText text={item.lead} />
+            </p>
+            <p class="mt-2.5 text-body leading-relaxed text-warm-700">
+              <GlossedText text={item.body} />
+              {item.caption && <span class="mt-1.5 block text-small text-warm-500">{item.caption}</span>}
+            </p>
+          </li>
+        ))}
+      </ul>
     </div>
   </section>
 
@@ -299,6 +331,11 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
         <h2 class="mt-4 max-w-[18ch] font-display text-h2 font-extrabold text-teal-600">
           {settings.yearsExperience} years of the same straight answer.
         </h2>
+        {/* His own framing line, with the year count read from settings
+            so it never has to be corrected in two places. */}
+        <p class="mt-5 max-w-[52ch] text-body-lg leading-relaxed text-warm-700">
+          {content.whyMeIntro.replace("{years}", String(settings.yearsExperience))}
+        </p>
         <ul class="mt-8 flex flex-col gap-4">
           {content.whyMe.map((w) => (
             <li class="flex gap-3.5">
@@ -404,6 +441,9 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
         <h2 class="max-w-[20ch] font-display text-h1 font-extrabold leading-tight text-cream-50">
           {content.closing}
         </h2>
+        {content.closingBody && (
+          <p class="mt-5 max-w-[56ch] text-body-lg leading-relaxed text-cream-50/78">{content.closingBody}</p>
+        )}
         <p class="mt-5 max-w-[52ch] text-body-lg leading-relaxed text-cream-50/70">
           Contact me today for a free consultation and a personalised {content.title.toLowerCase()} plan.
         </p>

@@ -43,16 +43,21 @@ const byslug = (s: string) => services.find((x) => x.slug === s)!;
           Services
           <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         </a>
-        {/* Mega-menu. Hover and focus-within so it is keyboard reachable. */}
-        <div class="invisible absolute left-1/2 top-full z-50 w-[720px] -translate-x-1/2 pt-4 opacity-0 transition-[opacity,visibility] duration-200 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
-          <div class="grid grid-cols-[1fr_1fr_1fr_auto] gap-7 rounded-xl border border-warm-200 bg-cream-50 p-7 shadow-lg">
+        {/* Mega-menu. Hover and focus-within so it is keyboard reachable.
+            Columns size to their content and nothing wraps — a service
+            name broken over two lines reads as two services. */}
+        <div class="invisible absolute left-1/2 top-full z-50 w-max max-w-[calc(100vw-2.5rem)] -translate-x-1/2 pt-4 opacity-0 transition-[opacity,visibility] duration-200 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+          {/* Gaps tighten at lg — at 1024px the full-width panel is
+              centred on a trigger sitting left of centre, and would
+              otherwise run off the left edge. */}
+          <div class="grid grid-cols-[auto_auto_auto_auto] gap-x-6 rounded-xl border border-warm-200 bg-cream-50 px-6 py-7 shadow-lg xl:gap-x-10 xl:px-8">
             {groups.map((g) => (
               <div>
-                <p class="overline mb-3 text-teal-400">{g.label}</p>
+                <p class="overline mb-3.5 whitespace-nowrap text-teal-400">{g.label}</p>
                 <ul class="flex flex-col gap-2.5">
                   {g.slugs.map((slug) => (
                     <li>
-                      <a href={`/services/${slug}`} class="block text-small font-medium text-warm-700 hover:text-teal-600">
+                      <a href={`/services/${slug}`} class="block whitespace-nowrap text-caption font-medium text-warm-700 hover:text-teal-600">
                         {byslug(slug).title}
                       </a>
                     </li>
@@ -60,11 +65,11 @@ const byslug = (s: string) => services.find((x) => x.slug === s)!;
                 </ul>
               </div>
             ))}
-            <div class="border-l border-warm-200 pl-7">
-              <p class="overline mb-3 text-gold-600">For your profession</p>
+            <div class="border-l border-warm-200 pl-6 xl:pl-10">
+              <p class="overline mb-3.5 whitespace-nowrap text-gold-600">For your profession</p>
               <ul class="flex flex-col gap-2.5">
-                <li><a href="/for/doctors" class="block text-small font-bold text-teal-600 hover:text-teal-400">For Doctors →</a></li>
-                <li><a href="/for/engineers" class="block text-small font-bold text-teal-600 hover:text-teal-400">For Engineers →</a></li>
+                <li><a href="/for/doctors" class="block whitespace-nowrap text-caption font-bold text-teal-600 hover:text-teal-400">For Doctors →</a></li>
+                <li><a href="/for/engineers" class="block whitespace-nowrap text-caption font-bold text-teal-600 hover:text-teal-400">For Engineers →</a></li>
               </ul>
             </div>
           </div>
