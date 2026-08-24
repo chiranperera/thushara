@@ -1,0 +1,181 @@
+---
+/**
+ * /admin/leads — the screen he uses most.
+ * Table on desktop, cards on mobile. Newest first.
+ */
+export const prerender = false;
+
+import { env } from "cloudflare:workers";
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import { requireAdmin } from "../../../lib/auth";
+import {
+  getCounts,
+  appointmentLabel,
+  relativeTime,
+  professionSummary,
+  serviceNames,
+  STATUS_LABEL,
+  STATUS_STYLE,
+  PROFESSION_LABEL,
+  type LeadRow,
+} from "../../../lib/admin-data";
+
+const bindings = env as unknown as Record<string, any>;
+const db = bindings.DB;
+
+const admin = await requireAdmin(Astro.request, bindings.AUTH_SECRET ?? "");
+if (!admin) return Astro.redirect("/admin/login");
+
+const counts = await getCounts(db);
+const filter = Astro.url.searchParams.get("filter") ?? "all";
+const q = (Astro.url.searchParams.get("q") ?? "").trim();
+
+let leads: LeadRow[] = [];
+if (db) {
+  try {
+    let sql = `SELECT * FROM leads`;
+    const where: string[] = [];
+    const binds: any[] = [];
+    if (filter !== "all") { where.push(`status = ?`); binds.push(filter); }
+    if (q) { where.push(`(name LIKE ? OR email LIKE ? OR phone_whatsapp LIKE ?)`); binds.push(`%${q}%`, `%${q}%`, `%${q}%`); }
+    if (where.length) sql += ` WHERE ${where.join(" AND ")}`;
+    sql += ` ORDER BY created_at DESC LIMIT 200`;
+    const res = await db.prepare(sql).bind(...binds).all();
+    leads = (res.results ?? []) as LeadRow[];
+  } catch (err) {
+    console.error("[admin] leads query failed", err);
+  }
+}
+
+const filters = [
+  { id: "all", label: "All" },
+  { id: "new", label: "New" },
+  { id: "contacted", label: "Contacted" },
+  { id: "confirmed", label: "Confirmed" },
+  { id: "met", label: "Met" },
+  { id: "converted", label: "Converted" },
+  { id: "not_proceeding", label: "Not proceeding" },
+];
+
+const href = (f: string) => `/admin/leads?filter=${f}${q ? `&q=${encodeURIComponent(q)}` : ""}`;
+---
+
+<AdminLayout title="Enquiries" newLeads={counts.newLeads} pendingReviews={counts.pendingReviews}>
+  <div class="px-5 py-8 md:px-11 md:py-9">
+    <div class="flex flex-wrap items-end justify-between gap-6">
+      <div>
+        <h1 class="font-display text-h1 font-extrabold text-ink-900">Enquiries</h1>
+        <p class="mt-1.5 text-body text-warm-500">Newest first.</p>
+      </div>
+      <div class="flex w-full items-center gap-3 md:w-auto">
+        <form method="get" class="flex-1 md:flex-none">
+          <input type="hidden" name="filter" value={filter} />
+          <input
+            type="search" name="q" value={q} placeholder="Search by name"
+            class="h-12 w-full rounded-full border border-warm-200 bg-white px-5 text-body placeholder:text-warm-400 focus:border-teal-400 md:w-70"
+          />
+        </form>
+        <a
+          href="/api/admin/leads/export"
+          class="flex h-12 shrink-0 items-center rounded-full border-[1.5px] border-warm-200 px-5 text-body font-bold text-teal-600 hover:border-teal-300"
+        >Export</a>
+      </div>
+    </div>
+
+    {/* Filters */}
+    <div class="mt-6 -mx-5 flex gap-2 overflow-x-auto px-5 pb-1 md:mx-0 md:flex-wrap md:px-0">
+      {filters.map((f) => (
+        <a
+          href={href(f.id)}
+          class={`shrink-0 rounded-full px-4.5 py-2.5 text-small transition-colors ${
+            filter === f.id
+              ? "bg-teal-600 font-bold text-cream-50"
+              : "border border-warm-200 text-warm-700 hover:border-teal-300"
+          }`}
+        >{f.label}</a>
+      ))}
+    </div>
+
+    {leads.length === 0 ? (
+      <div class="mt-8 rounded-xl border border-warm-200 bg-cream-100 p-10 text-center">
+        <p class="text-h4 font-bold text-ink-900">Nothing here yet.</p>
+        <p class="mx-auto mt-2 max-w-[42ch] text-body text-warm-500">
+          {q
+            ? `No enquiries match “${q}”.`
+            : filter === "all"
+              ? "When someone books a consultation, it will appear here."
+              : `No enquiries with the status “${STATUS_LABEL[filter] ?? filter}”.`}
+        </p>
+        {(filter !== "all" || q) && (
+          <a href="/admin/leads" class="mt-5 inline-block text-body font-bold text-teal-600 underline underline-offset-4">
+            Show everything
+          </a>
+        )}
+      </div>
+    ) : (
+      <>
+        {/* ---- desktop table ---- */}
+        <div class="mt-7 hidden overflow-hidden rounded-xl border border-warm-200 md:block">
+          <div class="grid grid-cols-[1.2fr_1fr_1.3fr_1.1fr_.9fr_.8fr] border-b border-warm-200 bg-cream-100">
+            {["Name", "Profession", "Interested in", "Requested", "Status", "Received"].map((h) => (
+              <div class="px-5 py-3.5 text-caption font-bold tracking-[.06em] uppercase text-teal-600/80">{h}</div>
+            ))}
+          </div>
+          {leads.map((lead) => (
+            <a
+              href={`/admin/leads/${lead.id}`}
+              class="grid grid-cols-[1.2fr_1fr_1.3fr_1.1fr_.9fr_.8fr] items-center border-b border-warm-100 bg-white last:border-0 hover:bg-cream-50"
+            >
+              <div class="px-5 py-5 text-h4 font-bold text-ink-800">
+                {lead.name}
+                {lead.notification_failed === 1 && (
+                  <span class="ml-2 text-caption font-bold text-gold-600" title="Notification failed">!</span>
+                )}
+              </div>
+              <div class="px-5 py-5 text-body text-warm-700">{PROFESSION_LABEL[lead.profession_category]}</div>
+              <div class="px-5 py-5 text-body text-warm-700">{serviceNames(lead.services)}</div>
+              <div class="px-5 py-5 text-body text-warm-700">{appointmentLabel(lead.preferred_date, lead.preferred_time)}</div>
+              <div class="px-5 py-5">
+                <span class={`rounded-full px-3.5 py-1.5 text-caption font-bold ${STATUS_STYLE[lead.status] ?? "bg-warm-200 text-warm-700"}`}>
+                  {STATUS_LABEL[lead.status] ?? lead.status}
+                </span>
+              </div>
+              <div class="px-5 py-5 text-small text-warm-500">{relativeTime(lead.created_at)}</div>
+            </a>
+          ))}
+        </div>
+
+        {/* ---- mobile cards ---- */}
+        <ul class="mt-6 flex flex-col gap-3 md:hidden">
+          {leads.map((lead) => (
+            <li>
+              <a href={`/admin/leads/${lead.id}`} class="block rounded-lg border border-warm-200 bg-white p-5">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <p class="truncate text-h4 font-bold text-ink-800">{lead.name}</p>
+                    <p class="mt-0.5 text-small text-warm-500">{professionSummary(lead)}</p>
+                  </div>
+                  <span class={`shrink-0 rounded-full px-3 py-1 text-caption font-bold ${STATUS_STYLE[lead.status] ?? "bg-warm-200 text-warm-700"}`}>
+                    {STATUS_LABEL[lead.status] ?? lead.status}
+                  </span>
+                </div>
+                <p class="mt-3 text-body text-warm-700">{serviceNames(lead.services)}</p>
+                <div class="mt-3 flex items-baseline justify-between gap-3">
+                  <span class="text-body font-bold text-teal-600">
+                    {appointmentLabel(lead.preferred_date, lead.preferred_time)}
+                  </span>
+                  <span class="text-small text-warm-500">{relativeTime(lead.created_at)}</span>
+                </div>
+                {lead.notification_failed === 1 && (
+                  <p class="mt-3 rounded-md bg-gold-100 px-3 py-2 text-small text-gold-600">
+                    No notification was sent for this one.
+                  </p>
+                )}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </>
+    )}
+  </div>
+</AdminLayout>

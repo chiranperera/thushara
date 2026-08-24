@@ -1,0 +1,93 @@
+---
+export const prerender = false;
+import "../../styles/global.css";
+import { env } from "cloudflare:workers";
+import { readSession } from "../../lib/auth";
+
+const bindings = env as unknown as Record<string, any>;
+const already = await readSession(Astro.request.headers.get("cookie"), bindings.AUTH_SECRET ?? "");
+if (already) return Astro.redirect("/admin");
+
+const errorCode = Astro.url.searchParams.get("e");
+const errors: Record<string, string> = {
+  expired: "That link has expired or was already used. Here's a fresh one.",
+  config: "Sign-in isn't set up yet. Check with your developer.",
+};
+const emailConfigured = bindings.ADMIN_EMAIL && bindings.ADMIN_EMAIL !== "PENDING";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sign in</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="preload" href="/fonts/satoshi-regular.woff2" as="font" type="font/woff2" crossorigin />
+  </head>
+  <body class="flex min-h-screen items-center justify-center bg-cream-100 p-5 antialiased">
+    <main class="w-full max-w-[460px] rounded-xl bg-ink-900 p-9 sm:p-11">
+      <svg width="34" height="32" viewBox="0 0 34 32" fill="none" aria-hidden="true">
+        <path d="M1 9h32" stroke="#FBFAF6" stroke-width="2" stroke-linecap="round" />
+        <path d="M16 9v22" stroke="#FBFAF6" stroke-width="2" stroke-linecap="round" />
+        <circle cx="26" cy="8" r="5" fill="#C9962F" />
+      </svg>
+
+      <h1 class="mt-9 font-display text-h2 font-extrabold text-cream-50">Sign in</h1>
+      <p class="mt-2.5 text-body leading-relaxed text-cream-50/70">
+        Enter your email and I'll send you a link. No password to remember.
+      </p>
+
+      {errorCode && errors[errorCode] && (
+        <p class="mt-5 rounded-md border border-gold-400/40 bg-gold-400/10 px-4 py-3 text-small text-gold-300">
+          {errors[errorCode]}
+        </p>
+      )}
+
+      {!emailConfigured && (
+        <p class="mt-5 rounded-md border border-gold-400/40 bg-gold-400/10 px-4 py-3 text-small text-gold-300">
+          Email isn't configured yet, so links can't be sent. See design-brief/11, item A5.
+        </p>
+      )}
+
+      <form id="f" class="mt-7">
+        <label for="email" class="text-small font-bold text-cream-50/80">Email</label>
+        <input
+          id="email" name="email" type="email" required autocomplete="email"
+          class="mt-2 h-14 w-full rounded-md border border-cream-50/25 bg-cream-50/6 px-4 text-body text-cream-50 placeholder:text-cream-50/35 focus:border-gold-400"
+          placeholder="you@example.com"
+        />
+        <button
+          type="submit" id="btn"
+          class="mt-5 flex min-h-14 w-full items-center justify-center rounded-full bg-gold-500 text-[17px] font-bold text-ink-900 transition-colors hover:bg-gold-400 disabled:opacity-70"
+        >Send me a link</button>
+      </form>
+
+      <p id="sent" class="mt-5 hidden text-body leading-relaxed text-teal-300">
+        Check your email — if that address is set up here, a sign-in link is on its way. It works once and expires in 15 minutes.
+      </p>
+
+      <a href="/" class="mt-8 inline-block text-small text-cream-50/50 hover:text-cream-50">← Back to the website</a>
+    </main>
+
+    <script>
+      const form = document.getElementById("f") as HTMLFormElement;
+      const btn = document.getElementById("btn") as HTMLButtonElement;
+      const sent = document.getElementById("sent")!;
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        btn.disabled = true;
+        btn.textContent = "Sending…";
+        try {
+          await fetch("/api/auth/request", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ email: (document.getElementById("email") as HTMLInputElement).value }),
+          });
+        } catch { /* reported the same way either way */ }
+        form.classList.add("hidden");
+        sent.classList.remove("hidden");
+      });
+    </script>
+  </body>
+</html>

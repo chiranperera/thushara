@@ -1,0 +1,152 @@
+---
+/**
+ * Admin shell.
+ *
+ * Thushara is not a technical person, and he will often be doing this
+ * on a phone in a spare ten minutes. Plain English throughout —
+ * "Enquiries", not "Leads". One screen, one job. Big targets.
+ * Brand palette so it feels like his, but no decoration: this is a
+ * tool, and clarity beats beauty.
+ */
+import "../styles/global.css";
+import { site } from "../lib/site";
+
+interface Props {
+  title: string;
+  /** Counts shown as badges in the nav. */
+  newLeads?: number;
+  pendingReviews?: number;
+  /** Mobile screens get a back arrow instead of the full nav. */
+  backTo?: string;
+  backLabel?: string;
+}
+
+const { title, newLeads = 0, pendingReviews = 0, backTo, backLabel } = Astro.props;
+const path = Astro.url.pathname;
+
+const nav = [
+  { href: "/admin", label: "Home" },
+  { href: "/admin/leads", label: "Enquiries", badge: newLeads },
+  { href: "/admin/testimonials", label: "Reviews", badge: pendingReviews },
+  { href: "/admin/gallery", label: "Photos" },
+  { href: "/admin/resources", label: "Guides" },
+  { href: "/admin/faq", label: "Questions" },
+  { href: "/admin/services", label: "Service pages" },
+  { href: "/admin/availability", label: "When I'm available" },
+  { href: "/admin/profile", label: "My details" },
+];
+
+const isActive = (href: string) => (href === "/admin" ? path === "/admin" : path.startsWith(href));
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} — {site.name}</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href="/fonts/satoshi-regular.woff2" as="font" type="font/woff2" crossorigin />
+  </head>
+
+  <body class="bg-cream-50 text-warm-900 antialiased">
+    <div class="md:flex md:min-h-screen">
+      {/* ---------------- desktop sidebar ---------------- */}
+      <nav class="hidden w-62 shrink-0 flex-col bg-ink-900 py-7 md:flex" aria-label="Admin sections">
+        <div class="flex items-center gap-2.5 border-b border-cream-50/12 px-6 pb-7">
+          <svg width="26" height="24" viewBox="0 0 26 24" fill="none" aria-hidden="true">
+            <path d="M1 7h24" stroke="#FBFAF6" stroke-width="2" stroke-linecap="round" />
+            <path d="M12 7v16" stroke="#FBFAF6" stroke-width="2" stroke-linecap="round" />
+            <circle cx="20" cy="7" r="4" fill="#C9962F" />
+          </svg>
+          <span class="font-display text-[15px] font-bold text-cream-50">My website</span>
+        </div>
+
+        <ul class="flex flex-col gap-0.5 p-3">
+          {nav.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                aria-current={isActive(item.href) ? "page" : undefined}
+                class={`flex min-h-13 items-center justify-between rounded-[10px] px-4 text-[16px] transition-colors ${
+                  isActive(item.href)
+                    ? "bg-teal-600 font-bold text-cream-50"
+                    : "text-cream-50/78 hover:bg-cream-50/6 hover:text-cream-50"
+                }`}
+              >
+                {item.label}
+                {item.badge ? (
+                  <span class="flex h-6 min-w-6 items-center justify-center rounded-full bg-gold-500 px-1.5 text-[13px] font-bold tabular text-ink-900">
+                    {item.badge}
+                  </span>
+                ) : null}
+              </a>
+            </li>
+          ))}
+        </ul>
+
+        <div class="mt-auto border-t border-cream-50/12 px-6 pt-5">
+          <a href="/admin/signout" class="text-small text-cream-50/60 hover:text-cream-50">Sign out</a>
+        </div>
+      </nav>
+
+      {/* ---------------- mobile header ---------------- */}
+      <header class="sticky top-0 z-40 flex h-15 items-center gap-3.5 bg-ink-900 px-5 md:hidden">
+        {backTo ? (
+          <a href={backTo} class="flex min-h-11 items-center gap-3.5 text-[16px] font-bold text-cream-50">
+            <span aria-hidden="true" class="text-h4">←</span>
+            {backLabel ?? "Back"}
+          </a>
+        ) : (
+          <>
+            <svg width="24" height="22" viewBox="0 0 26 24" fill="none" aria-hidden="true">
+              <path d="M1 7h24" stroke="#FBFAF6" stroke-width="2" stroke-linecap="round" />
+              <path d="M12 7v16" stroke="#FBFAF6" stroke-width="2" stroke-linecap="round" />
+              <circle cx="20" cy="7" r="4" fill="#C9962F" />
+            </svg>
+            <span class="font-display text-[15px] font-bold text-cream-50">{title}</span>
+            <a href="/admin/signout" class="ml-auto text-small text-cream-50/60">Sign out</a>
+          </>
+        )}
+      </header>
+
+      <div class="min-w-0 flex-1">
+        <slot />
+      </div>
+    </div>
+
+    {/* ---------------- mobile bottom nav ----------------
+        The four he actually uses. Everything else lives on Home. */}
+    {!backTo && (
+      <nav
+        class="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-warm-200 bg-cream-50 pb-[env(safe-area-inset-bottom,0)] md:hidden"
+        aria-label="Main"
+      >
+        {[
+          { href: "/admin", label: "Home" },
+          { href: "/admin/leads", label: "Enquiries", badge: newLeads },
+          { href: "/admin/testimonials", label: "Reviews", badge: pendingReviews },
+          { href: "/admin/gallery", label: "Photos" },
+        ].map((item) => (
+          <a
+            href={item.href}
+            aria-current={isActive(item.href) ? "page" : undefined}
+            class={`relative flex min-h-15 flex-col items-center justify-center gap-1 text-caption font-bold ${
+              isActive(item.href) ? "text-teal-600" : "text-warm-500"
+            }`}
+          >
+            {item.label}
+            {item.badge ? (
+              <span class="absolute top-2 right-1/4 flex h-5 min-w-5 items-center justify-center rounded-full bg-gold-500 px-1 text-[11px] font-bold tabular text-ink-900">
+                {item.badge}
+              </span>
+            ) : null}
+          </a>
+        ))}
+      </nav>
+    )}
+
+    <div class={backTo ? "" : "h-16 md:hidden"}></div>
+  </body>
+</html>

@@ -1,0 +1,172 @@
+---
+/**
+ * /admin — the dashboard.
+ * Answers one question: what needs my attention?
+ */
+export const prerender = false;
+
+import { env } from "cloudflare:workers";
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { requireAdmin } from "../../lib/auth";
+import {
+  getCounts,
+  appointmentLabel,
+  professionSummary,
+  serviceNames,
+  METHOD_LABEL,
+  type LeadRow,
+} from "../../lib/admin-data";
+
+const bindings = env as unknown as Record<string, any>;
+const db = bindings.DB;
+
+const admin = await requireAdmin(Astro.request, bindings.AUTH_SECRET ?? "");
+if (!admin) return Astro.redirect("/admin/login");
+
+const counts = await getCounts(db);
+
+let upcoming: LeadRow[] = [];
+let monthly = { enquiries: 0, met: 0, reviews: 0 };
+let failedCount = 0;
+
+if (db) {
+  try {
+    const [u, e, m, r, f] = await db.batch([
+      db.prepare(
+        `SELECT * FROM leads
+         WHERE status IN ('new','contacted','confirmed')
+           AND preferred_date >= date('now')
+         ORDER BY preferred_date, preferred_time LIMIT 3`,
+      ),
+      db.prepare(`SELECT COUNT(*) AS n FROM leads WHERE created_at >= date('now','start of month')`),
+      db.prepare(`SELECT COUNT(*) AS n FROM leads WHERE status IN ('met','converted') AND created_at >= date('now','start of month')`),
+      db.prepare(`SELECT COUNT(*) AS n FROM testimonials WHERE created_at >= date('now','start of month')`),
+      db.prepare(`SELECT COUNT(*) AS n FROM leads WHERE notification_failed = 1 AND status = 'new'`),
+    ]);
+    upcoming = (u.results ?? []) as LeadRow[];
+    monthly = {
+      enquiries: Number(e.results?.[0]?.n ?? 0),
+      met: Number(m.results?.[0]?.n ?? 0),
+      reviews: Number(r.results?.[0]?.n ?? 0),
+    };
+    failedCount = Number(f.results?.[0]?.n ?? 0);
+  } catch (err) {
+    console.error("[admin] dashboard query failed", err);
+  }
+}
+
+const hour = new Date().getHours();
+const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+---
+
+<AdminLayout title="Home" newLeads={counts.newLeads} pendingReviews={counts.pendingReviews}>
+  <div class="px-5 py-8 md:px-11 md:py-10">
+    <h1 class="font-display text-h1 font-extrabold text-ink-900">{greeting}, Thushara</h1>
+    <p class="mt-2 text-body text-warm-500">Here's what needs you today.</p>
+
+    {failedCount > 0 && (
+      <div class="mt-6 flex gap-3.5 rounded-lg border border-gold-300 bg-gold-100 p-4">
+        <span aria-hidden="true" class="flex size-6 shrink-0 items-center justify-center rounded-full border-[1.5px] border-gold-600 text-small font-bold text-gold-600">!</span>
+        <p class="text-body text-warm-900">
+          {failedCount === 1 ? "One enquiry didn't" : `${failedCount} enquiries didn't`} send you a notification.
+          {" "}They're saved safely — but you'll need to reply manually.
+          <a href="/admin/leads?filter=new" class="ml-1 font-bold text-teal-600 underline underline-offset-2">See them</a>
+        </p>
+      </div>
+    )}
+
+    {/* The two numbers that matter */}
+    <div class="mt-9 grid gap-5 md:grid-cols-[1.3fr_1fr]">
+      <div class="rounded-[20px] bg-teal-600 p-8 md:p-9">
+        <p class="text-small font-bold tracking-[.06em] uppercase text-cream-50/72">New enquiries</p>
+        <p class="mt-4 font-display text-[64px] leading-none font-extrabold tabular text-cream-50 md:text-[84px]">
+          {counts.newLeads}
+        </p>
+        <a
+          href="/admin/leads?filter=new"
+          class="mt-6 inline-flex min-h-13 items-center rounded-full bg-gold-500 px-7 text-body font-bold text-ink-900 hover:bg-gold-400"
+        >See them</a>
+      </div>
+
+      <div class="rounded-[20px] border border-warm-200 bg-white p-8 md:p-9">
+        <p class="text-small font-bold tracking-[.06em] uppercase text-warm-500">Reviews awaiting you</p>
+        <p class="mt-4 font-display text-[64px] leading-none font-extrabold tabular text-teal-600 md:text-[84px]">
+          {counts.pendingReviews}
+        </p>
+        <a
+          href="/admin/testimonials"
+          class="mt-6 inline-flex min-h-13 items-center rounded-full border-[1.5px] border-teal-600 px-7 text-body font-bold text-teal-600 hover:bg-teal-50"
+        >Review them</a>
+      </div>
+    </div>
+
+    {/* Next appointments */}
+    <div class="mt-5 rounded-[20px] border border-warm-200 bg-white p-7 md:p-8">
+      <p class="text-small font-bold tracking-[.06em] uppercase text-warm-500">Next appointments</p>
+
+      {upcoming.length === 0 ? (
+        <p class="mt-5 text-body text-warm-500">Nothing booked yet.</p>
+      ) : (
+        <ul class="mt-5">
+          {upcoming.map((lead, i) => (
+            <li class={i < upcoming.length - 1 ? "border-b border-warm-100" : ""}>
+              <a href={`/admin/leads/${lead.id}`} class="flex flex-wrap items-center justify-between gap-3 py-4.5 hover:opacity-70">
+                <span>
+                  <span class="block text-h4 font-bold text-ink-800">{lead.name}</span>
+                  <span class="mt-0.5 block text-small text-warm-500">
+                    {professionSummary(lead)} · {serviceNames(lead.services)}
+                  </span>
+                </span>
+                <span class="text-right">
+                  <span class="block text-body font-bold text-teal-600">
+                    {appointmentLabel(lead.preferred_date, lead.preferred_time)}
+                  </span>
+                  <span class="mt-0.5 block text-small text-warm-500">{METHOD_LABEL[lead.meeting_method] ?? lead.meeting_method}</span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+
+    {/* Quick actions + this month */}
+    <div class="mt-5 grid gap-5 md:grid-cols-2">
+      <div class="rounded-[20px] border border-warm-200 bg-white p-7 md:p-8">
+        <p class="text-small font-bold tracking-[.06em] uppercase text-warm-500">Quick actions</p>
+        <div class="mt-5 flex flex-col gap-2.5">
+          {[
+            { href: "/admin/gallery", label: "Add a photo" },
+            { href: "/admin/resources", label: "Upload a guide" },
+            { href: "/admin/testimonials/new", label: "Add a review myself" },
+          ].map((a) => (
+            <a
+              href={a.href}
+              class="flex min-h-13 items-center rounded-md border-[1.5px] border-warm-200 px-5 text-body font-bold text-teal-600 hover:border-teal-300"
+            >{a.label}</a>
+          ))}
+        </div>
+      </div>
+
+      {/* Three numbers, no charts. He needs to know what to do next,
+          not to analyse a trend. */}
+      <div class="rounded-[20px] border border-warm-200 bg-cream-100 p-7 md:p-8">
+        <p class="text-small font-bold tracking-[.06em] uppercase text-warm-500">This month</p>
+        <dl class="mt-5 flex flex-col gap-4.5">
+          {[
+            { label: "Enquiries received", value: monthly.enquiries },
+            { label: "Appointments held", value: monthly.met },
+            { label: "Reviews received", value: monthly.reviews },
+          ].map((row) => (
+            <div class="flex items-baseline justify-between gap-4">
+              <dt class="text-body text-warm-700">{row.label}</dt>
+              <dd class="font-display text-h3 font-extrabold tabular text-teal-600">
+                {row.value === 0 ? "—" : row.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </div>
+  </div>
+</AdminLayout>

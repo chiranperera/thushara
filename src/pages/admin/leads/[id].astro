@@ -1,0 +1,160 @@
+---
+/**
+ * /admin/leads/[id] — enquiry detail.
+ *
+ * The WhatsApp button is the primary action: replying is what he
+ * actually came here to do.
+ */
+export const prerender = false;
+
+import { env } from "cloudflare:workers";
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import { requireAdmin } from "../../../lib/auth";
+import {
+  getCounts,
+  appointmentLabel,
+  relativeTime,
+  professionSummary,
+  serviceNames,
+  METHOD_LABEL,
+  STATUS_LABEL,
+  STATUS_STYLE,
+  type LeadRow,
+} from "../../../lib/admin-data";
+
+const bindings = env as unknown as Record<string, any>;
+const db = bindings.DB;
+
+const admin = await requireAdmin(Astro.request, bindings.AUTH_SECRET ?? "");
+if (!admin) return Astro.redirect("/admin/login");
+
+const id = Number(Astro.params.id);
+let lead: LeadRow | null = null;
+if (db && Number.isFinite(id)) {
+  try {
+    lead = await db.prepare(`SELECT * FROM leads WHERE id = ?`).bind(id).first();
+  } catch (err) {
+    console.error("[admin] lead fetch failed", err);
+  }
+}
+if (!lead) return Astro.redirect("/admin/leads");
+
+const counts = await getCounts(db);
+
+const firstName = lead.name.split(" ")[0];
+const waDigits = lead.phone_whatsapp.replace(/\D/g, "");
+const waText = encodeURIComponent(
+  `Hello ${firstName}, thank you for your enquiry. I'd be glad to help — when would suit you to talk?`,
+);
+const CONTACT_LABEL: Record<string,string> = { whatsapp: "WhatsApp", phone: "a call", email: "email" };
+const statuses = ["new", "contacted", "confirmed", "met", "converted", "not_proceeding"];
+---
+
+<AdminLayout
+  title={lead.name}
+  newLeads={counts.newLeads}
+  pendingReviews={counts.pendingReviews}
+  backTo="/admin/leads"
+  backLabel="Enquiries"
+>
+  <div class="px-5 py-7 md:px-11 md:py-9">
+    <a href="/admin/leads" class="mb-6 hidden min-h-11 items-center gap-2 text-body font-bold text-teal-600 md:inline-flex">
+      <span aria-hidden="true">←</span> All enquiries
+    </a>
+
+    <div class="max-w-[720px]">
+      <div class="flex items-start justify-between gap-4">
+        <div class="min-w-0">
+          <h1 class="font-display text-h1 font-extrabold text-ink-900">{lead.name}</h1>
+          <p class="mt-1 text-body text-warm-500">
+            {professionSummary(lead)}{lead.life_stage ? ` · ${lead.life_stage.replace("-", " ")}` : ""}
+          </p>
+        </div>
+        <span class={`shrink-0 rounded-full px-3.5 py-1.5 text-caption font-bold ${STATUS_STYLE[lead.status]}`}>
+          {STATUS_LABEL[lead.status]}
+        </span>
+      </div>
+
+      {lead.notification_failed === 1 && (
+        <div class="mt-5 flex gap-3.5 rounded-lg border border-gold-300 bg-gold-100 p-4">
+          <span aria-hidden="true" class="flex size-6 shrink-0 items-center justify-center rounded-full border-[1.5px] border-gold-600 text-small font-bold text-gold-600">!</span>
+          <p class="text-body text-warm-900">
+            No notification was sent for this enquiry — but it saved safely. Reply below and they'll never know.
+          </p>
+        </div>
+      )}
+
+      {/* Primary action */}
+      <a
+        href={`https://wa.me/${waDigits}?text=${waText}`}
+        target="_blank" rel="noopener"
+        class="mt-7 flex min-h-15 w-full items-center justify-center rounded-full bg-whatsapp text-h4 font-bold text-white hover:brightness-95"
+      >WhatsApp {firstName} now</a>
+
+      <div class="mt-2.5 flex gap-2.5">
+        <a href={`tel:${lead.phone_whatsapp}`} class="flex min-h-13 flex-1 items-center justify-center rounded-full border-[1.5px] border-teal-600 text-body font-bold text-teal-600 hover:bg-teal-50">Call</a>
+        <a href={`mailto:${lead.email}`} class="flex min-h-13 flex-1 items-center justify-center rounded-full border-[1.5px] border-teal-600 text-body font-bold text-teal-600 hover:bg-teal-50">Email</a>
+      </div>
+
+      {/* Everything they told us */}
+      <dl class="mt-8 flex flex-col gap-4.5">
+        {[
+          { label: "Interested in", value: serviceNames(lead.services) },
+          { label: "Requested time", value: `${appointmentLabel(lead.preferred_date, lead.preferred_time)} · ${METHOD_LABEL[lead.meeting_method] ?? lead.meeting_method}` },
+          ...(lead.alt_time ? [{ label: "Or alternatively", value: lead.alt_time }] : []),
+          { label: "Contact", value: `${lead.phone_whatsapp} · ${lead.email} · prefers ${CONTACT_LABEL[lead.preferred_contact] ?? lead.preferred_contact}` },
+          ...(lead.notes ? [{ label: "Their message", value: lead.notes }] : []),
+          ...(lead.referring_page ? [{ label: "Was reading", value: lead.referring_page }] : []),
+          ...(lead.calculator_data ? [{ label: "Calculator values", value: lead.calculator_data }] : []),
+          { label: "Received", value: relativeTime(lead.created_at) },
+        ].map((row) => (
+          <div>
+            <dt class="text-caption font-bold tracking-[.06em] uppercase text-warm-500">{row.label}</dt>
+            <dd class="mt-1.5 text-h4 leading-relaxed text-warm-900">{row.value}</dd>
+          </div>
+        ))}
+      </dl>
+
+      {/* Status + notes */}
+      <form method="POST" action="/api/admin/leads/update" class="mt-9">
+        <input type="hidden" name="id" value={lead.id} />
+
+        <label for="status" class="text-caption font-bold tracking-[.06em] uppercase text-warm-500">Status</label>
+        <select
+          id="status" name="status"
+          class="mt-2 h-14 w-full rounded-md border border-warm-200 bg-white px-4.5 text-h4 text-warm-900 focus:border-teal-400"
+        >
+          {statuses.map((s) => (
+            <option value={s} selected={s === lead!.status}>{STATUS_LABEL[s]}</option>
+          ))}
+        </select>
+
+        <label for="admin_notes" class="mt-7 block text-caption font-bold tracking-[.06em] uppercase text-warm-500">
+          My private notes
+        </label>
+        <textarea
+          id="admin_notes" name="admin_notes" rows="4"
+          class="mt-2 w-full rounded-md border border-warm-200 bg-white p-4 text-body text-warm-900 focus:border-teal-400"
+          placeholder="Anything you want to remember about this person."
+        >{lead.admin_notes ?? ""}</textarea>
+        <p class="mt-1.5 text-small text-warm-500">Only you see this.</p>
+
+        <button
+          type="submit"
+          class="mt-5 flex min-h-14 w-full items-center justify-center rounded-full bg-teal-600 text-h4 font-bold text-cream-50 hover:bg-teal-500"
+        >Save</button>
+      </form>
+
+      {/* Asking for a review before you've met reads badly. */}
+      {(lead.status === "met" || lead.status === "converted") && (
+        <a
+          href={`https://wa.me/${waDigits}?text=${encodeURIComponent(
+            `Hello ${firstName}, it was good speaking with you. If you found it useful, would you mind leaving a short review? It genuinely helps. `,
+          )}`}
+          target="_blank" rel="noopener"
+          class="mt-4 flex min-h-14 w-full items-center justify-center rounded-full border-[1.5px] border-warm-200 text-body font-bold text-teal-600 hover:border-teal-300"
+        >Ask {firstName} for a review</a>
+      )}
+    </div>
+  </div>
+</AdminLayout>
