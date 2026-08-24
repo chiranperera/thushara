@@ -1,0 +1,115 @@
+---
+/**
+ * /resources — "Free guides. No jargon."
+ * Downloads take a name and WhatsApp number only, and tag the lead
+ * with which guide was taken. One guide is deliberately ungated.
+ */
+export const prerender = false;
+
+import { env } from "cloudflare:workers";
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/site/Header.astro";
+import Footer from "../components/site/Footer.astro";
+import StickyBar from "../components/site/StickyBar.astro";
+import { getSiteSettings, EDGE_CACHE } from "../lib/settings";
+import { lifeStages } from "../lib/site";
+
+const bindings = env as unknown as Record<string, any>;
+const db = bindings.DB;
+const settings = await getSiteSettings(db);
+Astro.response.headers.set("cache-control", EDGE_CACHE);
+
+let rows: any[] = [];
+try {
+  if (db) {
+    const res = await db.prepare(
+      `SELECT id, slug, title, description, life_stage, page_count, file_size, gated
+       FROM resources WHERE published = 1 ORDER BY sort_order, id`).all();
+    rows = res.results ?? [];
+  }
+} catch (e) { console.error("[resources] query failed", e); }
+
+/** Planned guides, shown as slots until the PDFs arrive. */
+const planned = [
+  { slug: "insurance-for-newly-qualified-doctors", title: "Insurance for Newly Qualified Doctors", description: "What you actually need — and what you can skip for now.", life_stage: "starting-out", pdf: "PDF-001", gated: 1 },
+  { slug: "your-first-vehicle-insured-properly", title: "Your First Vehicle, Insured Properly", description: "The five things to check before you sign anything.", life_stage: "starting-out", pdf: "PDF-002", gated: 0 },
+  { slug: "how-much-life-cover", title: "How Much Life Cover Does Your Family Need?", description: "Work out your number in about ten minutes.", life_stage: "building-family", pdf: "PDF-003", gated: 1 },
+  { slug: "starting-at-28-38-48", title: "Starting at 28 vs 38 vs 48", description: "The same monthly amount, three different outcomes.", life_stage: "planning-ahead", pdf: "PDF-004", gated: 1 },
+];
+
+const items = rows.length ? rows : planned;
+const groups = lifeStages.map((s) => ({ ...s, items: items.filter((i: any) => i.life_stage === s.id) }));
+const pending = rows.length === 0;
+---
+
+<Layout title="Free guides" description="Written for people who have never bought insurance before, and who would rather read than be sold to.">
+  <Header slot="header" settings={settings} />
+
+  <section class="bg-cream-100 py-14 md:py-20">
+    <div class="container-default px-5">
+      <p class="overline text-teal-600">Resources</p>
+      <h1 class="mt-4 font-display text-display font-extrabold leading-[1.04] tracking-[-0.03em] text-ink-900">
+        Free guides. No jargon.
+      </h1>
+      <p class="mt-6 max-w-[58ch] text-body-lg leading-relaxed text-warm-700">
+        Written for people who have never bought insurance before, and who would rather read than
+        be sold to.
+      </p>
+    </div>
+  </section>
+
+  <section class="bg-cream-50 py-16 md:py-20">
+    <div class="container-default flex flex-col gap-14 px-5">
+      {groups.filter((g) => g.items.length).map((group) => (
+        <div>
+          <h2 class="flex flex-wrap items-baseline gap-4">
+            <span class="font-display text-h2 font-extrabold text-teal-600">{group.label}</span>
+            <span class="font-display text-h4 font-bold tabular text-warm-500">{group.ageRange}</span>
+          </h2>
+          <span aria-hidden="true" class="mt-4 block h-px w-full bg-gold-500/45"></span>
+
+          <ul class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {group.items.map((g: any) => (
+              <li class="flex flex-col rounded-[20px] border border-warm-200 bg-white p-7">
+                <span aria-hidden="true" class="flex h-12 w-9 items-center justify-center rounded-sm bg-cream-100"></span>
+                <span class="mt-5 font-display text-h4 font-bold leading-snug text-ink-900">{g.title}</span>
+                <span class="mt-2.5 flex-1 text-body leading-relaxed text-warm-700">{g.description}</span>
+                <span class="mt-4 font-mono text-caption text-warm-400">
+                  {g.pdf ?? g.slug} · {pending ? "pages pending · size pending" : `${g.page_count ?? "—"} pages`}
+                </span>
+                {g.gated ? (
+                  <a href={`/resources/${g.slug}`}
+                     class="mt-5 flex min-h-13 items-center justify-center rounded-full bg-teal-600 text-body font-bold text-cream-50 hover:bg-teal-500">
+                    Download
+                  </a>
+                ) : (
+                  <a href={`/resources/${g.slug}`}
+                     class="mt-5 flex min-h-13 items-center justify-center rounded-full border-[1.5px] border-teal-600 text-body font-bold text-teal-600 hover:bg-teal-50">
+                    Read without giving details
+                  </a>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+
+      <div class="max-w-[860px] border-l-2 border-gold-500 bg-cream-100 p-6">
+        <p class="text-body-lg leading-relaxed text-warm-800">
+          One guide is deliberately ungated — no form, straight to the PDF. It costs one lead and
+          buys a great deal of goodwill, and the people who read it and come back are better
+          qualified.
+        </p>
+        {pending && (
+          <p class="mt-3 font-mono text-caption leading-relaxed text-warm-400">
+            Files pending. Thushara uploads these from /admin/resources. Downloads ask for a name
+            and WhatsApp number only, and tag the lead with which guide was taken.
+          </p>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <Footer slot="footer" settings={settings} />
+  <StickyBar slot="footer" settings={settings} message="Hello Thushara, I'd like to ask about insurance." />
+</Layout>

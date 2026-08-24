@@ -1,0 +1,55 @@
+---
+export const prerender = false;
+import { env } from "cloudflare:workers";
+import LegalLayout from "../layouts/LegalLayout.astro";
+import { getSiteSettings, EDGE_CACHE } from "../lib/settings";
+import { site } from "../lib/site";
+
+const bindings = env as unknown as Record<string, any>;
+const settings = await getSiteSettings(bindings.DB);
+Astro.response.headers.set("cache-control", EDGE_CACHE);
+---
+
+<LegalLayout title="Privacy policy" heading="Privacy policy" settings={settings}>
+  <p>
+    This site collects personal data in three places: the consultation booking form, the
+    testimonial submission form, and guide downloads. This page explains what is collected, why,
+    and what happens to it.
+  </p>
+
+  <h2>What is collected</h2>
+  <ul>
+    <li><strong>Booking a consultation</strong> — your name, email address, WhatsApp number, profession, the topics you selected, your preferred time, and anything you write in the notes field.</li>
+    <li><strong>Submitting a review</strong> — your name, profession, rating, review text, and an email address used only to verify the submission is genuine.</li>
+    <li><strong>Downloading a guide</strong> — your name and WhatsApp number, and which guide you took.</li>
+  </ul>
+
+  <h2>Why it is collected</h2>
+  <p>
+    So that {site.name} can respond to your enquiry, prepare properly before speaking with you,
+    and send you what you asked for. Nothing more.
+  </p>
+
+  <h2>Who sees it</h2>
+  <p>
+    {site.name} only. Your details are never sold, and are not shared with third parties for
+    marketing. Where a policy is arranged, the information needed to issue it is shared with
+    {site.employer} as the insurer.
+  </p>
+
+  <h2>How long it is kept</h2>
+  <p>Copy pending — the client should confirm a retention period.</p>
+
+  <h2>Your choices</h2>
+  <p>
+    You can ask for your details to be corrected or deleted at any time. Reviews are only
+    published with your explicit consent, and can be removed on request.
+  </p>
+
+  <h2>Cookies</h2>
+  <p>
+    This site does not use advertising or tracking cookies. Your life-stage selection is stored in
+    your browser for the session only, so the site does not forget what you told it while you move
+    between pages.
+  </p>
+</LegalLayout>

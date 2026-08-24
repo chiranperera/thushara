@@ -1,0 +1,121 @@
+---
+/**
+ * /faq — "Questions, including the awkward ones".
+ *
+ * Answering the uncomfortable ones plainly is the most trust-building
+ * thing this site can do. Also the knowledge base for the phase-2
+ * chatbot. Search is a client-side filter — no backend needed for
+ * twenty pages.
+ */
+export const prerender = false;
+
+import { env } from "cloudflare:workers";
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/site/Header.astro";
+import Footer from "../components/site/Footer.astro";
+import StickyBar from "../components/site/StickyBar.astro";
+import { getSiteSettings, EDGE_CACHE } from "../lib/settings";
+import { faqs, faqCategories } from "../lib/faq-content";
+
+const bindings = env as unknown as Record<string, any>;
+const settings = await getSiteSettings(bindings.DB);
+Astro.response.headers.set("cache-control", EDGE_CACHE);
+
+const grouped = faqCategories.map((c) => ({ name: c, items: faqs.filter((f) => f.category === c) })).filter((g) => g.items.length);
+const anchor = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+---
+
+<Layout title="Frequently asked questions" description="Questions, including the awkward ones.">
+  <Header slot="header" settings={settings} />
+
+  <section class="bg-cream-100 py-14 md:py-20">
+    <div class="container-default px-5">
+      <h1 class="max-w-[16ch] font-display text-display font-extrabold leading-[1.04] tracking-[-0.03em] text-ink-900">
+        Questions, including the awkward ones
+      </h1>
+
+      <div class="relative mt-9 max-w-[690px]">
+        <input
+          id="q" type="search" placeholder="Search the questions" autocomplete="off"
+          class="h-16 w-full rounded-full border border-warm-200 bg-white pl-14 pr-6 text-body-lg placeholder:text-warm-400 focus:border-teal-400"
+        />
+        <span aria-hidden="true" class="absolute left-6 top-1/2 size-4 -translate-y-1/2 rounded-full border-2 border-warm-400"></span>
+      </div>
+      <p id="count" class="mt-3 text-small text-warm-500" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <section class="bg-cream-50 py-16 md:py-20">
+    <div class="container-default grid gap-10 px-5 lg:grid-cols-[240px_1fr] lg:gap-16">
+      <nav aria-label="Categories" class="lg:sticky lg:top-28 lg:self-start">
+        <ul class="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0">
+          {grouped.map((g, i) => (
+            <li class="shrink-0 lg:shrink">
+              <a href={`#${anchor(g.name)}`}
+                 class={`block rounded-lg px-4 py-3 text-body transition-colors ${i === 0 ? "bg-teal-600 font-bold text-cream-50" : "text-warm-700 hover:bg-cream-100"}`}>
+                {g.name}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <div id="list" class="min-w-0">
+        {grouped.map((g) => (
+          <section id={anchor(g.name)} class="faq-group mb-12 scroll-mt-28 last:mb-0">
+            <p class="overline text-teal-600">{g.name}</p>
+            <div class="mt-4">
+              {g.items.map((f, i) => (
+                <details class="faq-item group border-t border-warm-200 last:border-b" open={i === 0}>
+                  <summary class="flex cursor-pointer list-none items-center justify-between gap-6 py-6 text-h4 font-bold text-ink-900 [&::-webkit-details-marker]:hidden">
+                    <span class="faq-q">{f.q}</span>
+                    <span aria-hidden="true" class="relative size-5 shrink-0">
+                      <span class="absolute left-0 top-1/2 h-0.5 w-5 -translate-y-1/2 bg-ink-900"></span>
+                      <span class="absolute left-1/2 top-0 h-5 w-0.5 -translate-x-1/2 bg-ink-900 transition-opacity group-open:opacity-0"></span>
+                    </span>
+                  </summary>
+                  {f.ready ? (
+                    <p class="faq-a max-w-[68ch] pb-6 text-body-lg leading-relaxed text-warm-700">{f.a}</p>
+                  ) : (
+                    <p class="faq-a max-w-[68ch] pb-6 font-mono text-caption leading-relaxed text-warm-400">{f.a}</p>
+                  )}
+                </details>
+              ))}
+            </div>
+          </section>
+        ))}
+        <p id="none" class="hidden py-8 text-body-lg text-warm-700">
+          Nothing matches that. <a href="/book" class="font-bold text-teal-600 underline underline-offset-4">Ask me directly</a> — it takes twenty minutes.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <Footer slot="footer" settings={settings} />
+  <StickyBar slot="footer" settings={settings} message="Hello Thushara, I'd like to ask about insurance." />
+</Layout>
+
+<script>
+  const input = document.getElementById("q") as HTMLInputElement;
+  const items = [...document.querySelectorAll<HTMLDetailsElement>(".faq-item")];
+  const groups = [...document.querySelectorAll<HTMLElement>(".faq-group")];
+  const none = document.getElementById("none")!;
+  const count = document.getElementById("count")!;
+
+  const run = () => {
+    const q = input.value.trim().toLowerCase();
+    let shown = 0;
+    for (const it of items) {
+      const text = (it.querySelector(".faq-q")?.textContent + " " + it.querySelector(".faq-a")?.textContent).toLowerCase();
+      const hit = !q || text.includes(q);
+      it.hidden = !hit;
+      if (hit) { shown++; if (q) it.open = true; }
+    }
+    // hide a category heading when nothing in it matched
+    for (const g of groups) g.hidden = ![...g.querySelectorAll<HTMLDetailsElement>(".faq-item")].some((i) => !i.hidden);
+    none.classList.toggle("hidden", shown > 0);
+    count.textContent = q ? `${shown} question${shown === 1 ? "" : "s"} match “${input.value.trim()}”` : "";
+  };
+
+  input.addEventListener("input", run);
+</script>

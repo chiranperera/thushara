@@ -1,0 +1,121 @@
+---
+/**
+ * /services — the overview. Built against "07 Services.dc.html".
+ *
+ * Grouped by life stage rather than product category, which is the
+ * whole argument of the site: people arrive at a moment, not at a
+ * product.
+ */
+export const prerender = false;
+
+import { env } from "cloudflare:workers";
+import Layout from "../../layouts/Layout.astro";
+import Header from "../../components/site/Header.astro";
+import Footer from "../../components/site/Footer.astro";
+import StickyBar from "../../components/site/StickyBar.astro";
+import { getSiteSettings, EDGE_CACHE } from "../../lib/settings";
+import { services, lifeStages } from "../../lib/site";
+
+const bindings = env as unknown as Record<string, any>;
+const settings = await getSiteSettings(bindings.DB);
+Astro.response.headers.set("cache-control", EDGE_CACHE);
+
+const groups = lifeStages.map((stage) => ({
+  ...stage,
+  items: services.filter((s) => s.lifeStage === stage.id),
+}));
+---
+
+<Layout
+  title="Services"
+  description="Eight covers, one advisor. Grouped by where you are, not by product category."
+>
+  <Header slot="header" settings={settings} />
+
+  <!-- ============ HERO ============ -->
+  <section class="bg-cream-100 py-14 md:py-20">
+    <div class="container-default px-5">
+      <p class="overline text-teal-600">Eight covers, one advisor</p>
+      <h1 class="mt-4 font-display text-display font-extrabold leading-[1.04] tracking-[-0.03em] text-ink-900">
+        What I help with
+      </h1>
+      <p class="mt-6 max-w-[58ch] text-body-lg leading-relaxed text-warm-700">
+        Grouped by where you are, not by product category. Most people need two or three of these
+        at any one time — and rarely the ones they expected.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ GROUPED SERVICES ============ -->
+  <section class="bg-cream-50 py-16 md:py-20">
+    <div class="container-default flex flex-col gap-16 px-5">
+      {groups.map((group, gi) => (
+        <div>
+          <h2 class="flex flex-wrap items-baseline gap-4">
+            <span class="font-display text-h2 font-extrabold text-teal-600">{group.label}</span>
+            <span class="font-display text-h4 font-bold tabular text-warm-500">{group.ageRange}</span>
+          </h2>
+          <span aria-hidden="true" class="mt-4 block h-px w-full bg-gold-500/45"></span>
+
+          <ul class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {group.items.map((s) => (
+              <li>
+                <a
+                  href={`/services/${s.slug}`}
+                  class="relative flex h-full flex-col overflow-hidden rounded-[20px] border border-cyan-300/14 px-8 pb-7 pt-24 transition-shadow hover:shadow-[0_0_0_1px_rgba(224,180,87,0.35)]"
+                  style="background:linear-gradient(165deg,#0A3630 0%,#06231F 70%,#041915 100%)"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="pointer-events-none absolute -right-4 -top-4 size-[130px] bg-contain bg-center bg-no-repeat opacity-30"
+                    style={`background-image:url(/icons/cut-${s.icon}.png);filter:drop-shadow(0 0 24px rgba(46,214,196,0.45))`}
+                  ></span>
+                  <span class="relative font-display text-h3 font-extrabold leading-snug text-cream-50">{s.title}</span>
+                  <span class="relative mt-3 flex-1 text-body leading-relaxed text-cream-50/68">{s.short}</span>
+                  <span class="relative mt-6 text-body font-bold text-gold-400">Read this →</span>
+                </a>
+              </li>
+            ))}
+
+            {/* Eight services across three groups leaves one cell over.
+                It stays empty rather than padded with a fabricated
+                product — see design note. */}
+            {gi === groups.length - 1 && group.items.length % 3 !== 0 && (
+              <li class="hidden rounded-[20px] border border-dashed border-warm-300 p-7 lg:block">
+                <span class="font-mono text-caption leading-relaxed text-warm-400">
+                  Eight services, three groups. The ninth cell stays empty rather than padded with
+                  a fabricated product.
+                </span>
+              </li>
+            )}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- ============ NOT SURE ============
+       A large share of visitors genuinely do not know what they need.
+       Saying so plainly converts better than a product grid. -->
+  <section class="bg-ink-900 py-16 md:py-20">
+    <div class="container-default grid gap-10 px-5 lg:grid-cols-[1.4fr_1fr] lg:items-center">
+      <div>
+        <h2 class="max-w-[18ch] font-display text-h1 font-extrabold leading-tight text-cream-50">
+          Not sure which of these applies to you?
+        </h2>
+        <p class="mt-5 max-w-[56ch] text-body-lg leading-relaxed text-cream-50/70">
+          That is the normal starting position, and it is what the first conversation is for.
+          I'll tell you what you need, what you don't, and what it costs.
+        </p>
+      </div>
+      <div class="lg:justify-self-end">
+        <a href="/book" class="flex min-h-15 items-center justify-center rounded-full bg-gold-500 px-9 text-h4 font-bold text-ink-900 hover:bg-gold-400">
+          Book a consultation
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <Footer slot="footer" settings={settings} />
+  <StickyBar slot="footer" settings={settings} message="Hello Thushara, I'd like to ask about insurance." />
+</Layout>

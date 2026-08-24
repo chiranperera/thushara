@@ -1,0 +1,146 @@
+---
+/**
+ * /process — Built against "08 Trust Pages.dc.html".
+ *
+ * Job: remove the fear of "if I contact him, I'll be pressured into
+ * buying something." That objection blocks more conversions than price.
+ */
+export const prerender = false;
+
+import { env } from "cloudflare:workers";
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/site/Header.astro";
+import Footer from "../components/site/Footer.astro";
+import StickyBar from "../components/site/StickyBar.astro";
+import { getSiteSettings, EDGE_CACHE, whatsappHref } from "../lib/settings";
+import { site } from "../lib/site";
+
+const bindings = env as unknown as Record<string, any>;
+const settings = await getSiteSettings(bindings.DB);
+Astro.response.headers.set("cache-control", EDGE_CACHE);
+const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask about insurance.");
+
+const steps = [
+  { lead: "You get in touch", body: "Booking form, WhatsApp, or a call. Free, no obligation." },
+  { lead: "We talk", body: "Twenty to thirty minutes. I ask about your situation, your family, your plans.", emphasis: "You are not asked to decide anything." },
+  { lead: "I come back with options", body: "In writing, in plain English, with the costs and the exclusions stated. Usually two or three options — including doing nothing, if that is the right answer." },
+  { lead: "You decide, in your own time", body: "No deadline, no follow-up pressure. Discuss it with your family." },
+  { lead: "I'm there afterwards", body: "Renewals, reviews as your life changes, and claims support when you need it.", last: true },
+];
+
+const mine = [
+  "Take your call first, before any form is filled in.",
+  "Tell you exactly which documents are needed and in what order.",
+  "Prepare and submit the paperwork on your behalf.",
+  "Chase the insurer through the assessment, and tell you where it stands.",
+];
+const theirs = [
+  "Assesses the claim against the policy terms.",
+  "Appoints assessors or investigators where required.",
+  "Decides the outcome, and pays.",
+  "Sets the timelines — which I can influence, but not overrule.",
+];
+---
+
+<Layout title="How working with me works" description="No pressure. No jargon. Here's exactly what happens.">
+  <Header slot="header" settings={settings} />
+
+  <section class="bg-cream-100 py-14 md:py-20">
+    <div class="container-default px-5">
+      <p class="overline text-teal-600">How working with me works</p>
+      <h1 class="mt-4 max-w-[20ch] font-display text-display font-extrabold leading-[1.04] tracking-[-0.03em] text-ink-900">
+        No pressure. No jargon. Here's exactly what happens.
+      </h1>
+    </div>
+  </section>
+
+  <section class="bg-cream-50 py-16 md:py-20">
+    <div class="container-default px-5">
+      <ol class="relative max-w-[760px]">
+        {steps.map((s, i) => (
+          <li class="relative pb-12 pl-11 last:pb-0">
+            {!s.last && <span aria-hidden="true" class="absolute left-[5px] top-4 h-full w-0.5 bg-gold-500/60"></span>}
+            <span aria-hidden="true" class={`absolute left-0 top-1.5 block size-3 rounded-full ${s.last ? "bg-teal-600" : "bg-gold-500"}`}></span>
+            <h2 class="font-display text-h3 font-extrabold text-ink-900">{s.lead}</h2>
+            <p class="mt-2 text-body-lg leading-relaxed text-warm-700">
+              {s.body}{s.emphasis && <> <strong class="font-bold text-ink-900">{s.emphasis}</strong></>}
+            </p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- Radical transparency about commission. Unusual in this market and
+       the strongest single trust signal available — exact wording still
+       needs Thushara's approval. -->
+  <section class="bg-ink-900 py-16 md:py-20">
+    <div class="container-default grid gap-10 px-5 lg:grid-cols-2 lg:gap-16">
+      <div>
+        <p class="overline text-gold-400">The question nobody asks out loud</p>
+        <h2 class="mt-4 max-w-[14ch] font-display text-h2 font-extrabold text-cream-50">
+          What it costs you to talk to me
+        </h2>
+      </div>
+      <div>
+        <p class="font-serif text-h3 italic leading-snug text-gold-400">
+          Nothing. I'm paid by the insurer when a policy is issued, not by you. If nothing is
+          right for you, I'll say so.
+        </p>
+        <p class="mt-6 font-mono text-caption leading-relaxed text-cream-50/40">
+          Exact wording to be confirmed with the client. Being this direct about commission is
+          unusual in this market and is the strongest single trust signal available to him — it
+          should not be softened in review.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-cream-100 py-16 md:py-20">
+    <div class="container-default px-5">
+      <h2 class="font-display text-h2 font-extrabold text-teal-600">How claims work, in full</h2>
+
+      <div class="mt-9 grid gap-4 md:grid-cols-2">
+        <div class="rounded-[20px] border border-warm-200 bg-white p-8">
+          <p class="overline text-teal-600">What I do</p>
+          <ul class="mt-5 flex flex-col gap-4">
+            {mine.map((m) => <li class="text-body-lg leading-relaxed text-warm-800">{m}</li>)}
+          </ul>
+        </div>
+        <div class="rounded-[20px] border border-warm-200 bg-white p-8">
+          <p class="overline text-warm-500">What {site.employer} does</p>
+          <ul class="mt-5 flex flex-col gap-4">
+            {theirs.map((t) => <li class="text-body-lg leading-relaxed text-warm-800">{t}</li>)}
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-6 max-w-[860px] border-l-2 border-gold-500 bg-white p-6">
+        <p class="text-body-lg leading-relaxed text-warm-800">
+          I am a consultant, not the insurer. I do not assess claims and I do not pay them. What I
+          do is make sure yours is presented correctly and does not sit forgotten on someone's
+          desk — and that is worth more than most people expect.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-ink-950 py-16 md:py-24">
+    <div class="container-default grid gap-10 px-5 lg:grid-cols-[1.4fr_1fr] lg:items-center">
+      <h2 class="max-w-[16ch] font-display text-h1 font-extrabold leading-tight text-cream-50">
+        Twenty minutes, and no decision required.
+      </h2>
+      <div class="flex flex-col gap-3.5">
+        <a href="/book" class="flex min-h-15 items-center justify-center rounded-full bg-gold-500 px-8 text-h4 font-bold text-ink-900 hover:bg-gold-400">Book a consultation</a>
+        {wa && (
+          <a href={wa} class="flex min-h-15 items-center justify-center gap-2.5 rounded-full border border-cream-50/35 px-8 text-h4 font-bold text-cream-50 hover:border-cream-50">
+            <span aria-hidden="true" class="size-2.5 rounded-full bg-whatsapp"></span>WhatsApp
+          </a>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <Footer slot="footer" settings={settings} />
+  <StickyBar slot="footer" settings={settings} message="Hello Thushara, I'd like to ask about insurance." />
+</Layout>

@@ -1,0 +1,49 @@
+---
+export const prerender = false;
+import { env } from "cloudflare:workers";
+import LegalLayout from "../layouts/LegalLayout.astro";
+import { getSiteSettings, EDGE_CACHE } from "../lib/settings";
+import { site } from "../lib/site";
+
+const bindings = env as unknown as Record<string, any>;
+const settings = await getSiteSettings(bindings.DB);
+Astro.response.headers.set("cache-control", EDGE_CACHE);
+---
+
+<LegalLayout title="Terms of use" heading="Terms of use" settings={settings}>
+  <p>
+    By using this website you accept these terms. If you do not accept them, please do not use
+    the site.
+  </p>
+
+  <h2>What this site is</h2>
+  <p>
+    The personal professional profile of {site.name}, a {site.title} at {site.employer}. It is
+    provided for information and to arrange a consultation.
+  </p>
+
+  <h2>Accuracy</h2>
+  <p>
+    Reasonable care is taken to keep the information here accurate and current, but products,
+    terms and premiums change. Nothing here forms part of a contract of insurance. The policy
+    document issued by the insurer prevails in all cases.
+  </p>
+
+  <h2>Reviews</h2>
+  <p>
+    Reviews are submitted by clients and published only after review. Submitting a review does not
+    guarantee publication. Anything defamatory, misleading about a policy, or not from a genuine
+    client will not be published.
+  </p>
+
+  <h2>Links</h2>
+  <p>
+    Where this site links elsewhere, those sites are not under {site.name}'s control and he is not
+    responsible for their content.
+  </p>
+
+  <h2>Contact</h2>
+  <p>
+    Questions about these terms can be raised through the <a href="/contact">contact page</a>.
+  </p>
+</LegalLayout>

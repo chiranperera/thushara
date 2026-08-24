@@ -1,0 +1,45 @@
+---
+/**
+ * 404. Brief and slightly warm — never a joke about lost policies.
+ */
+export const prerender = false;
+
+import { env } from "cloudflare:workers";
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/site/Header.astro";
+import Footer from "../components/site/Footer.astro";
+import { getSiteSettings } from "../lib/settings";
+
+const bindings = env as unknown as Record<string, any>;
+const settings = await getSiteSettings(bindings.DB);
+---
+
+<Layout title="Page not found" noindex>
+  <Header slot="header" settings={settings} />
+
+  <div class="bg-cream-50 py-20 md:py-28">
+    <div class="container-default px-5">
+      <svg width="34" height="32" viewBox="0 0 34 32" fill="none" aria-hidden="true">
+        <path d="M1 9h32" stroke="#12544A" stroke-width="2" stroke-linecap="round" />
+        <path d="M16 9v22" stroke="#12544A" stroke-width="2" stroke-linecap="round" />
+        <circle cx="26" cy="8" r="5" fill="#C9962F" />
+      </svg>
+
+      <h1 class="mt-9 max-w-[18ch] font-display text-h1 font-extrabold text-ink-900">
+        That page isn't here.
+      </h1>
+      <p class="mt-4 max-w-[52ch] text-body-lg leading-relaxed text-warm-700">
+        It may have moved, or the link may be incomplete. These are the places most people are
+        looking for.
+      </p>
+
+      <div class="mt-9 flex flex-wrap gap-3">
+        <a href="/services" class="flex min-h-14 items-center rounded-full bg-teal-600 px-7 text-h4 font-bold text-cream-50 hover:bg-teal-500">Services</a>
+        <a href="/about" class="flex min-h-14 items-center rounded-full border-[1.5px] border-teal-600 px-7 text-h4 font-bold text-teal-600 hover:bg-teal-50">About Thushara</a>
+        <a href="/book" class="flex min-h-14 items-center rounded-full border-[1.5px] border-teal-600 px-7 text-h4 font-bold text-teal-600 hover:bg-teal-50">Book a consultation</a>
+      </div>
+    </div>
+  </div>
+
+  <Footer slot="footer" settings={settings} />
+</Layout>

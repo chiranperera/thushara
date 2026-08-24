@@ -1,0 +1,143 @@
+---
+/**
+ * /testimonials — Built against "08 Trust Pages.dc.html".
+ *
+ * Three states, per the design:
+ *  sparse (2–3)  two columns, asymmetric, no empty third slot — reads
+ *                as edited rather than unfinished. The launch state.
+ *  populated     three-column grid, featured items span two.
+ *  empty (0)     the grid does not render at all. Hero + invitation
+ *                only. Never a placeholder card.
+ */
+export const prerender = false;
+
+import { env } from "cloudflare:workers";
+import Layout from "../../layouts/Layout.astro";
+import Header from "../../components/site/Header.astro";
+import Footer from "../../components/site/Footer.astro";
+import StickyBar from "../../components/site/StickyBar.astro";
+import { getSiteSettings, EDGE_CACHE } from "../../lib/settings";
+
+const bindings = env as unknown as Record<string, any>;
+const db = bindings.DB;
+const settings = await getSiteSettings(db);
+Astro.response.headers.set("cache-control", EDGE_CACHE);
+
+const filter = (Astro.url.searchParams.get("filter") ?? "all").toLowerCase();
+
+let rows: any[] = [];
+try {
+  if (db) {
+    const res = await db
+      .prepare(`SELECT name, profession, service, rating, body, featured FROM testimonials
+                WHERE status='published' ORDER BY featured DESC, sort_order, created_at DESC`)
+      .all();
+    rows = res.results ?? [];
+  }
+} catch (e) { console.error("[testimonials] query failed", e); }
+
+const FILTERS = [
+  { id: "all", label: "All" },
+  { id: "doctor", label: "Doctors" },
+  { id: "engineer", label: "Engineers" },
+  { id: "family", label: "Families" },
+  { id: "business", label: "Business owners" },
+  { id: "retirement", label: "Retirement planning" },
+];
+
+const shown = filter === "all"
+  ? rows
+  : rows.filter((r) => `${r.profession} ${r.service ?? ""}`.toLowerCase().includes(filter));
+
+const sparse = shown.length > 0 && shown.length <= 3;
+---
+
+<Layout title="Testimonials" description="Every review here was submitted by a real client and approved before publication.">
+  <Header slot="header" settings={settings} />
+
+  <section class="bg-ink-900 py-14 md:py-20">
+    <div class="container-default px-5">
+      <p class="overline text-gold-400">In their words</p>
+      <h1 class="mt-4 font-display text-display font-extrabold leading-[1.04] tracking-[-0.03em] text-cream-50">
+        What clients say
+      </h1>
+      <p class="mt-5 max-w-[54ch] text-body-lg leading-relaxed text-cream-50/72">
+        Every review here was submitted by a real client and approved before publication.
+        Nothing is written on their behalf.
+      </p>
+    </div>
+  </section>
+
+  {rows.length > 0 && (
+    <div class="border-b border-warm-200 bg-cream-50">
+      <div class="container-default -mx-1 flex gap-2 overflow-x-auto px-5 py-5">
+        {FILTERS.map((f) => (
+          <a
+            href={f.id === "all" ? "/testimonials" : `/testimonials?filter=${f.id}`}
+            class={`shrink-0 rounded-full px-5 py-2.5 text-small transition-colors ${
+              filter === f.id ? "bg-teal-600 font-bold text-cream-50" : "border border-warm-200 text-warm-700 hover:border-teal-300"
+            }`}
+          >{f.label}</a>
+        ))}
+      </div>
+    </div>
+  )}
+
+  {shown.length > 0 && (
+    <section class="bg-cream-50 py-16 md:py-20">
+      <div class="container-default px-5">
+        <span aria-hidden="true" class="block h-px w-full bg-gold-500/45"></span>
+        <ul class={`mt-10 grid gap-10 ${sparse ? "md:grid-cols-2 md:divide-x md:divide-warm-200" : "md:grid-cols-2 lg:grid-cols-3"}`}>
+          {shown.map((t, i) => (
+            <li class={`${sparse && i > 0 ? "md:pl-10" : ""} ${!sparse && t.featured ? "lg:col-span-2" : ""}`}>
+              <span aria-hidden="true" class="block font-serif text-[42px] leading-none text-gold-500">“</span>
+              <p class={`mt-4 font-serif italic leading-relaxed text-warm-900 ${i === 0 && sparse ? "text-[26px] md:text-[34px]" : "text-quote"}`}>
+                {t.body}
+              </p>
+              <div class="mt-7 flex items-center gap-3.5">
+                <span aria-hidden="true" class="flex size-11 shrink-0 items-center justify-center rounded-full border border-warm-200 bg-cream-100 font-display text-body font-bold text-teal-600">
+                  {t.name.trim().charAt(0)}
+                </span>
+                <span>
+                  <span class="block text-small font-bold text-ink-900">{t.name}</span>
+                  <span class="block text-small text-warm-500">{t.profession}{t.service ? ` · ${t.service}` : ""}</span>
+                </span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  {shown.length === 0 && rows.length > 0 && (
+    <section class="bg-cream-50 py-16">
+      <div class="container-default px-5">
+        <p class="text-body-lg text-warm-700">No reviews in that category yet.
+          <a href="/testimonials" class="ml-1 font-bold text-teal-600 underline underline-offset-4">Show all</a>
+        </p>
+      </div>
+    </section>
+  )}
+
+  <section class="bg-cream-100 py-16 md:py-20">
+    <div class="container-default grid gap-8 px-5 lg:grid-cols-[1.4fr_1fr] lg:items-center">
+      <div>
+        <h2 class="max-w-[22ch] font-display text-h2 font-extrabold text-teal-600">
+          Worked with me? I'd be grateful if you'd share your experience.
+        </h2>
+        <p class="mt-4 text-body-lg leading-relaxed text-warm-700">
+          Two minutes, and it helps the next person decide whether to call.
+        </p>
+      </div>
+      <div class="lg:justify-self-end">
+        <a href="/testimonials/share" class="flex min-h-15 items-center justify-center rounded-full bg-teal-600 px-9 text-h4 font-bold text-cream-50 hover:bg-teal-500">
+          Share your experience
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <Footer slot="footer" settings={settings} />
+  <StickyBar slot="footer" settings={settings} message="Hello Thushara, I'd like to ask about insurance." />
+</Layout>

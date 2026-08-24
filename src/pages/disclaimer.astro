@@ -1,0 +1,46 @@
+---
+export const prerender = false;
+import { env } from "cloudflare:workers";
+import LegalLayout from "../layouts/LegalLayout.astro";
+import { getSiteSettings, EDGE_CACHE } from "../lib/settings";
+import { site } from "../lib/site";
+
+const bindings = env as unknown as Record<string, any>;
+const settings = await getSiteSettings(bindings.DB);
+Astro.response.headers.set("cache-control", EDGE_CACHE);
+---
+
+<LegalLayout title="Insurance disclaimer" heading="Insurance disclaimer" settings={settings}>
+  <p>
+    This website provides general information about insurance products available from
+    {site.employer}. It does not constitute personalised financial advice, and nothing on it
+    should be relied upon as a recommendation for your particular circumstances.
+  </p>
+  <p>
+    All cover is subject to the terms, conditions, limits and exclusions of the policy issued by
+    Sri Lanka Insurance Corporation Limited. Where this site describes what a policy covers, the
+    policy document prevails.
+  </p>
+
+  <h2>Regulation</h2>
+  <p>
+    Insurance in Sri Lanka is a regulated activity supervised by the Insurance Regulatory
+    Commission of Sri Lanka (IRCSL).
+  </p>
+  <p>
+    {site.name} is a {site.title} at {site.employer}. This website is his personal professional
+    profile and is not an official publication of {site.employer}.
+  </p>
+
+  <h2>Figures and examples</h2>
+  <p>
+    Any figures, calculators or examples shown are indicative guidance only and never a quotation.
+    Actual premiums and cover levels depend on your circumstances and are confirmed by the insurer.
+  </p>
+
+  <h2>Claims</h2>
+  <p>
+    Claims are assessed and paid by Sri Lanka Insurance Corporation. {site.name} provides support
+    in preparing and following up a claim, but does not assess claims, decide outcomes, or pay them.
+  </p>
+</LegalLayout>

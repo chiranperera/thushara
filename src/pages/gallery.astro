@@ -1,0 +1,116 @@
+---
+/**
+ * /gallery — "Awards and moments".
+ * Replaces "Portfolio/Work" from the original brief: an insurance
+ * consultant has no portfolio, but awards and event photography are
+ * the real social proof in this market.
+ */
+export const prerender = false;
+
+import { env } from "cloudflare:workers";
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/site/Header.astro";
+import Footer from "../components/site/Footer.astro";
+import StickyBar from "../components/site/StickyBar.astro";
+import { getSiteSettings, EDGE_CACHE } from "../lib/settings";
+
+const bindings = env as unknown as Record<string, any>;
+const db = bindings.DB;
+const settings = await getSiteSettings(db);
+Astro.response.headers.set("cache-control", EDGE_CACHE);
+
+const CATS = [
+  { id: "all", label: "All" },
+  { id: "mdrt_awards", label: "MDRT & Awards" },
+  { id: "client_events", label: "Client events" },
+  { id: "milestones", label: "Professional milestones" },
+  { id: "community", label: "Community" },
+];
+const filter = Astro.url.searchParams.get("c") ?? "all";
+
+let items: any[] = [];
+try {
+  if (db) {
+    const res = await db.prepare(
+      `SELECT image_key, thumb_key, caption, alt_text, category FROM gallery_items
+       WHERE visible = 1 ORDER BY sort_order, created_at DESC`).all();
+    items = res.results ?? [];
+  }
+} catch (e) { console.error("[gallery] query failed", e); }
+
+const shown = filter === "all" ? items : items.filter((i) => i.category === filter);
+// Launch state: nothing uploaded yet. Slots are shown so the shape is
+// legible and Thushara can see what to upload — never fake photographs.
+const placeholders = ["IMG-GAL-01 · MDRT & Awards", "IMG-GAL-02", "IMG-GAL-03", "IMG-GAL-04", "IMG-GAL-05", "IMG-GAL-06"];
+---
+
+<Layout title="Awards and moments" description="MDRT recognition, client events, and the milestones along the way.">
+  <Header slot="header" settings={settings} />
+
+  <section class="bg-ink-900 py-14 md:py-20">
+    <div class="container-default px-5">
+      <p class="overline text-gold-400">Gallery</p>
+      <h1 class="mt-4 font-display text-display font-extrabold leading-[1.04] tracking-[-0.03em] text-cream-50">
+        Awards and moments
+      </h1>
+      <p class="mt-5 text-body-lg leading-relaxed text-cream-50/72">
+        MDRT recognition, client events, and the milestones along the way.
+      </p>
+    </div>
+  </section>
+
+  {items.length > 0 && (
+    <div class="border-b border-warm-200 bg-cream-50">
+      <div class="container-default -mx-1 flex gap-2 overflow-x-auto px-5 py-5">
+        {CATS.map((c) => (
+          <a href={c.id === "all" ? "/gallery" : `/gallery?c=${c.id}`}
+             class={`shrink-0 rounded-full px-5 py-2.5 text-small ${filter === c.id ? "bg-teal-600 font-bold text-cream-50" : "border border-warm-200 text-warm-700"}`}>
+            {c.label}
+          </a>
+        ))}
+      </div>
+    </div>
+  )}
+
+  <section class="bg-cream-50 py-16 md:py-20">
+    <div class="container-default px-5">
+      {shown.length > 0 ? (
+        <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {shown.map((g) => (
+            <li class="overflow-hidden rounded-xl border border-warm-200 bg-white">
+              <img src={`/media/${g.thumb_key ?? g.image_key}`} alt={g.alt_text}
+                   loading="lazy" decoding="async" class="aspect-4/3 w-full object-cover" />
+              {g.caption && <p class="p-5 text-body leading-relaxed text-warm-700">{g.caption}</p>}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <>
+          <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {placeholders.map((slot, i) => (
+              <li class="flex aspect-4/3 items-center justify-center rounded-xl border border-mint-200 bg-mint-100 p-6 text-center">
+                <span>
+                  {i === 0 && <span aria-hidden="true" class="mx-auto mb-2 block size-3.5 rotate-45 bg-mint-400"></span>}
+                  <span class="block font-mono text-caption font-bold tracking-wider text-mint-600">{slot}</span>
+                  {i === 0 && (
+                    <span class="mt-2 block max-w-[30ch] font-mono text-caption leading-relaxed text-mint-500">
+                      Caption required for every image — the caption is what makes an award photo
+                      meaningful to someone who does not know the organisation.
+                    </span>
+                  )}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p class="mt-7 max-w-[62ch] text-body leading-relaxed text-warm-500">
+            Photographs are being collected. Thushara uploads these himself from
+            <span class="font-mono text-caption"> /admin/gallery</span> — no developer needed.
+          </p>
+        </>
+      )}
+    </div>
+  </section>
+
+  <Footer slot="footer" settings={settings} />
+  <StickyBar slot="footer" settings={settings} message="Hello Thushara, I'd like to ask about insurance." />
+</Layout>
