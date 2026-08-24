@@ -1,13 +1,14 @@
 ---
 /**
- * / — the front door.
+ * / — the front door. Built against "03 Home.dc.html".
  *
- * Fifteen seconds to convince a 30-year-old professional that this is
- * a serious, experienced consultant worth ten minutes of their time.
+ * Section order follows the design: dark hero → why people stay →
+ * life stage → milestone line → services → for your profession →
+ * sixteen years → testimonials → guides → CTA.
  *
- * The design specified a background video in the hero. The client has
- * since confirmed there is no video, so this uses a static portrait —
- * which also protects the LCP budget on Sri Lankan mobile data.
+ * The design's hero carries a background video behind the copy. The
+ * client has confirmed there is no video, so the panel holds the
+ * gradient alone — which also protects the LCP budget on mobile data.
  */
 export const prerender = false;
 
@@ -25,8 +26,6 @@ const bindings = env as unknown as Record<string, any>;
 const db = bindings.DB;
 const settings = await getSiteSettings(db);
 
-// Published reviews only. The section degrades to an invitation when
-// there are none — the realistic launch state.
 let testimonials: any[] = [];
 try {
   if (db) {
@@ -39,21 +38,23 @@ try {
 
 Astro.response.headers.set("cache-control", EDGE_CACHE);
 
+const stageIcons: Record<string, string> = {
+  "starting-out": "motor",
+  "building-family": "house",
+  "planning-ahead": "pension",
+};
+
 const nodes = [
-  { age: 28, milestone: "First car & licence", links: [{ label: "Motor Insurance", href: "/services/motor-insurance" }] },
+  { age: 28, milestone: "First car & licence", linkLabel: "Motor Insurance", href: "/services/motor-insurance" },
   {
     age: 32, milestone: "Qualify & practise",
     note: "The moment you can be held personally liable for professional judgement. This is the cover most newly qualified professionals don't know they need.",
-    links: [{ label: "Professional Indemnity", href: "/services/professional-indemnity" }],
+    linkLabel: "Professional Indemnity", href: "/services/professional-indemnity",
   },
-  { age: 36, milestone: "Marriage & first child", links: [
-    { label: "Life & Income Protection", href: "/services/life-income-protection" },
-    { label: "Health", href: "/services/health-insurance" }] },
-  { age: 42, milestone: "Children's education", links: [{ label: "Children's Education Fund", href: "/services/children-education" }] },
-  { age: 50, milestone: "Peak earnings & assets", links: [
-    { label: "House & Property", href: "/services/house-property" },
-    { label: "Life", href: "/services/life-income-protection" }] },
-  { age: 58, milestone: "Retire with an income", links: [{ label: "Retirement Plan", href: "/services/retirement-plan" }] },
+  { age: 36, milestone: "Marriage & first child", linkLabel: "Life & Income Protection · Health", href: "/services/life-income-protection" },
+  { age: 42, milestone: "Children's education", linkLabel: "Children's Education", href: "/services/children-education" },
+  { age: 50, milestone: "Peak earnings & assets", linkLabel: "House & Property · Life", href: "/services/house-property" },
+  { age: 58, milestone: "Retire with an income", linkLabel: "Retirement Plan", href: "/services/retirement-plan" },
 ];
 
 const differentiators = [
@@ -63,7 +64,15 @@ const differentiators = [
   { lead: "Available when you need me", body: "Island-wide, and reachable — not a call centre." },
 ];
 
-const waHero = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask about insurance.");
+const professions = ["Doctors", "Engineers", "Lawyers", "Architects", "Accountants", "Consultants"];
+
+const guides = [
+  { title: "Insurance for Newly Qualified Doctors", body: "What you actually need — and what you can skip for now.", slot: "PDF-001" },
+  { title: "Your First Motor Insurance Policy", body: "A plain-English guide to what you're signing.", slot: "PDF-002" },
+  { title: "How Much Life Cover Does Your Family Need?", body: "Work out your number in about ten minutes.", slot: "PDF-003" },
+];
+
+const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask about insurance.");
 ---
 
 <Layout
@@ -73,78 +82,148 @@ const waHero = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask 
   <Header slot="header" settings={settings} />
 
   <!-- ============ HERO ============ -->
-  <section class="border-b border-warm-200 bg-cream-50">
-    <div class="container-default grid gap-10 px-5 py-14 md:py-20 lg:grid-cols-[1.15fr_1fr] lg:items-center lg:gap-16">
-      <div>
-        <p class="overline text-teal-400">{site.title} · Sri Lanka</p>
-        <h1 class="mt-4 max-w-[16ch] font-display text-display-xl font-extrabold leading-[1.04] tracking-[-0.02em] text-ink-900">
-          From your first car to your retirement.
-        </h1>
-        <p class="mt-6 max-w-[54ch] text-body-lg leading-relaxed text-warm-700">
-          {settings.yearsExperience} years advising Sri Lankan professionals, {settings.mdrtYears} of them at MDRT level.
-          I explain what you need, what you don't, and what it costs — then you decide.
-        </p>
+  <section
+    class="relative flex min-h-[640px] flex-col overflow-hidden lg:min-h-[calc(100vh-80px)] lg:max-h-[960px] lg:flex-row"
+    style="background:radial-gradient(120% 110% at 5% 12%,#0B3A33 0%,#062521 42%,#03130F 100%)"
+  >
+    <span
+      aria-hidden="true" class="pointer-events-none absolute inset-0 z-[1]"
+      style="background:linear-gradient(180deg,rgba(3,19,15,0.6) 0%,rgba(3,19,15,0.22) 46%,rgba(3,19,15,0.7) 100%)"
+    ></span>
 
-        <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-          <a href="/book" class="flex min-h-14 items-center justify-center rounded-full bg-teal-600 px-9 text-h4 font-bold text-cream-50 transition-colors hover:bg-teal-500">
-            Book a consultation
+    <!-- copy -->
+    <div class="relative z-[2] flex flex-1 flex-col justify-center px-5 pb-8 pt-12 lg:max-w-[60%] lg:flex-none lg:basis-[60%] lg:px-18 lg:pb-0 lg:pt-14">
+      <p class="inline-flex items-center gap-2.5 self-start rounded-full border border-cyan-300/28 bg-ink-900/60 py-1.5 pl-2.5 pr-3.5 lg:hidden">
+        <span aria-hidden="true" class="size-[7px] rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(140,247,222,0.9)]"></span>
+        <span class="overline text-cyan-300">{site.title} · Sri Lanka</span>
+      </p>
+
+      <h1 class="mt-7 max-w-[16ch] font-display text-display-xl font-extrabold leading-[1.02] tracking-[-0.035em] text-cream-50 lg:mt-0">
+        From your first car to your <span class="font-serif font-normal italic tracking-[-0.01em] text-gold-400">retirement.</span>
+      </h1>
+
+      <p class="mt-7 max-w-[46ch] text-body-lg leading-relaxed text-cream-50/78 lg:text-[21px]">
+        {settings.yearsExperience} years advising Sri Lankan professionals, {settings.mdrtYears} of them at MDRT level.
+        I explain what you need, what you don't.
+      </p>
+
+      <div class="mt-9 flex flex-wrap items-center gap-4 lg:mt-14">
+        <a href="/book" class="flex min-h-14 items-center rounded-full bg-gold-500 px-8 text-h4 font-bold text-ink-900 transition-colors hover:bg-gold-400 lg:min-h-15">
+          Book a consultation
+        </a>
+        {wa && (
+          <a href={wa} class="flex min-h-14 items-center gap-2.5 rounded-full border border-cream-50/35 px-7 text-h4 font-bold text-cream-50 transition-colors hover:border-cream-50 lg:min-h-15">
+            <span aria-hidden="true" class="size-2.5 rounded-full bg-whatsapp"></span>WhatsApp
           </a>
-          {waHero && (
-            <a href={waHero} class="flex min-h-14 items-center justify-center gap-2.5 rounded-full border-[1.5px] border-teal-600 px-8 text-h4 font-bold text-teal-600 transition-colors hover:bg-teal-50">
-              Message on WhatsApp
-            </a>
-          )}
-        </div>
-        <p class="mt-4 text-small text-warm-500">Free consultation. No obligation.</p>
+        )}
+        <span class="text-body text-cream-50/55">Free. No obligation.</span>
       </div>
 
-      <!-- IMG-HERO-01 · pending. Exact dimensions reserved so nothing
-           reflows when the real photograph arrives. -->
-      <div class="flex aspect-4/5 items-center justify-center rounded-xl border border-warm-200 bg-warm-100 lg:aspect-3/4" data-slot="IMG-HERO-01">
-        <span class="max-w-[24ch] px-6 text-center text-caption leading-relaxed text-warm-500">
-          <strong class="block text-small text-warm-700">IMG-HERO-01</strong>
-          Environmental portrait · 4:5 mobile, 3:4 desktop<br />
-          Thushara in his office, natural light, direct eye contact
-        </span>
-      </div>
+      <!-- Service icon band. Static rather than the design's auto-shifting
+           carousel: 2s motion costs JavaScript and attention for no gain
+           in comprehension, and the brief rules out decorative motion. -->
+      <ul class="mt-12 hidden grid-cols-6 items-end gap-4 lg:grid" aria-hidden="true">
+        {["indemnity", "motor", "life", "health", "education", "pension"].map((icon, i) => {
+          // Centre pair sits largest and brightest, falling away toward
+          // the edges — the design's depth cue, without the animation.
+          const dist = Math.abs(2.5 - i);
+          const size = Math.round(78 - dist * 9);
+          return (
+            <li class="flex justify-center">
+              <img
+                src={`/icons/cut-${icon}.png`} alt="" width={size} height={size} loading="lazy" decoding="async"
+                class="object-contain"
+                style={`width:${size}px;height:${size}px;opacity:${(0.85 - dist * 0.16).toFixed(2)};filter:drop-shadow(0 0 22px rgba(46,214,196,${(0.45 - dist * 0.1).toFixed(2)}))`}
+              />
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+
+    <!-- portrait -->
+    <div class="relative z-[2] min-h-[340px] flex-1 overflow-hidden lg:max-w-[40%] lg:flex-none lg:basis-[40%]">
+      <picture>
+        <source media="(max-width: 767px)" srcset="/img/hero-portrait-cut@0.5x.webp" />
+        <img
+          src="/img/hero-portrait-cut.webp"
+          alt={`${site.name}, ${site.title}`}
+          width="1045" height="1399" fetchpriority="high" decoding="async"
+          class="absolute bottom-0 left-1/2 h-full w-full -translate-x-1/2 object-contain object-bottom"
+        />
+      </picture>
     </div>
   </section>
 
-  <!-- ============ CREDENTIALS ============ -->
-  <section class="bg-ink-900 py-14 md:py-16">
-    <div class="container-default px-5">
-      <dl class="grid grid-cols-2 gap-x-6 gap-y-9 md:grid-cols-4 md:divide-x md:divide-cream-50/12">
-        {[
-          { figure: String(settings.yearsExperience), label: "Years of experience" },
-          { figure: `${settings.mdrtYears}×`, label: `MDRT — ${settings.mdrtStatus}` },
-          { figure: "Top", label: "Regional performer, Life & General" },
-          // A word, not a figure — at 68px "Island-wide" breaks mid-word.
-          { figure: "Island-wide", label: settings.serviceArea.replace("Island-wide · ", ""), word: true },
-        ].map((s, i) => (
-          <div class={i > 0 ? "md:pl-6" : ""}>
-            <dt class="sr-only">{s.label}</dt>
-            <dd>
-              <span class={`block font-display font-extrabold leading-none tabular text-cream-50 ${s.word ? "text-h1 [text-wrap:balance]" : "text-stat"}`}>{s.figure}</span>
-              <span class="mt-3 block max-w-[22ch] text-small leading-snug text-teal-300">{s.label}</span>
-            </dd>
-          </div>
-        ))}
-      </dl>
+  <!-- ============ WHY PEOPLE STAY ============ -->
+  <section class="bg-mint-50 py-16 md:py-24">
+    <div class="container-default grid gap-12 px-5 lg:grid-cols-[0.86fr_1fr] lg:items-center lg:gap-20">
+      <div class="relative">
+        <div class="flex aspect-4/5 flex-col items-center justify-center gap-2 rounded-xl border border-mint-200 bg-mint-100 p-9 text-center" data-slot="IMG-ABOUT-01">
+          <span aria-hidden="true" class="size-3.5 rotate-45 bg-mint-400"></span>
+          <span class="font-mono text-caption font-bold tracking-wider text-mint-600">IMG-ABOUT-01 · 4:5</span>
+          <span class="max-w-[30ch] font-mono text-caption leading-relaxed text-mint-500">
+            Thushara with a client, or at his desk mid-conversation. Warm, candid, not posed.
+          </span>
+        </div>
 
-      <!-- A 29-year-old doctor has never heard of MDRT. Without this
-           the site's strongest credential means nothing to her. -->
-      <p class="mt-11 max-w-[72ch] border-t border-cream-50/12 pt-7 text-small leading-relaxed text-cream-50/55">
-        MDRT — the Million Dollar Round Table — is a global standard of excellence in financial
-        services. Fewer than 1% of advisors qualify. Thushara has qualified {settings.mdrtYears} times,
-        across both life and general insurance.
-      </p>
+        <!-- floating MDRT card -->
+        <div class="absolute -left-4 top-14 w-[214px] rounded-lg border border-warm-200 bg-white p-5 shadow-[0_18px_40px_rgba(6,35,31,0.14)] sm:-left-8">
+          <p class="overline text-warm-500">MDRT qualification</p>
+          <div class="mt-3 flex items-end gap-1" aria-hidden="true">
+            {Array.from({ length: 8 }, (_, i) => (
+              <span
+                class="flex-1 rounded-sm"
+                style={`height:${14 + i * 3}px;background:${i < 3 ? "#C9EBE1" : i < 6 ? "#4FB89C" : "#12544A"}`}
+              ></span>
+            ))}
+          </div>
+          <p class="mt-3">
+            <span class="font-display text-h3 font-extrabold tabular text-ink-900">{settings.mdrtYears}</span>
+            <span class="ml-1.5 text-small font-bold text-teal-600">consecutive years</span>
+          </p>
+          <p class="text-small text-warm-500">{settings.mdrtStatus}</p>
+        </div>
+      </div>
+
+      <div>
+        <p class="overline text-teal-600">Why people stay</p>
+        <h2 class="mt-4 max-w-[18ch] font-display text-h2 font-extrabold text-teal-600">
+          {settings.yearsExperience} years of the same straight answer.
+        </h2>
+        <p class="mt-5 max-w-[58ch] text-body-lg leading-relaxed text-warm-700">
+          MDRT — the Million Dollar Round Table — is a global standard of excellence in financial
+          services. Fewer than 1% of advisors qualify. Thushara has qualified {settings.mdrtYears} times,
+          across both life and general insurance.
+        </p>
+        <a href="/about" class="mt-7 inline-flex min-h-14 items-center rounded-full bg-teal-600 px-8 text-h4 font-bold text-cream-50 hover:bg-teal-500">
+          More about Thushara
+        </a>
+
+        <dl class="mt-10 grid grid-cols-2 gap-x-4 gap-y-7 border-t border-mint-200 pt-8 sm:grid-cols-4 sm:divide-x sm:divide-mint-200">
+          {[
+            { figure: String(settings.yearsExperience), label: "Years of experience" },
+            { figure: `${settings.mdrtYears}×`, label: `MDRT — ${settings.mdrtStatus}` },
+            { figure: "Top", label: "Regional performer" },
+            { figure: String(services.length), label: "Covers, Colombo & island-wide" },
+          ].map((s, i) => (
+            <div class={i > 0 ? "sm:pl-4" : ""}>
+              <dt class="sr-only">{s.label}</dt>
+              <dd>
+                <span class="block font-display text-[44px] font-extrabold leading-none tabular text-teal-600">{s.figure}</span>
+                <span class="mt-2.5 block text-small leading-snug text-warm-700">{s.label}</span>
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </div>
     </div>
   </section>
 
   <!-- ============ LIFE STAGE + SERVICES ============ -->
   <LifeStageServices
     client:visible
-    stages={lifeStages.map(({ id, label, ageRange, description }) => ({ id, label, ageRange, description }))}
+    stages={lifeStages.map(({ id, label, ageRange, description }) => ({ id, label, ageRange, description, icon: stageIcons[id] }))}
     services={services.map(({ slug, title, short, lifeStage, icon }) => ({ slug, title, short, lifeStage, icon }))}
   />
 
@@ -152,15 +231,14 @@ const waHero = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask 
   <section class="bg-ink-900 py-16 md:py-24">
     <div class="container-default px-5">
       <p class="overline text-gold-400">The long view</p>
-      <h2 class="mt-3 max-w-[24ch] font-display text-h2 font-extrabold text-cream-50">
+      <h2 class="mt-4 max-w-[26ch] font-display text-h2 font-bold leading-snug text-cream-50">
         Insurance isn't one decision. It's six, across thirty years.
       </h2>
-      <p class="mt-4 max-w-[62ch] text-body leading-relaxed text-cream-50/70">
+      <p class="mt-5 max-w-[62ch] text-body-lg leading-relaxed text-cream-50/70">
         I've walked this line with hundreds of Sri Lankan professionals over {settings.yearsExperience} years.
         Here's where the decisions actually fall.
       </p>
-
-      <div class="mt-12">
+      <div class="mt-16">
         <MilestoneLine client:visible nodes={nodes} initialActive={1} />
       </div>
     </div>
@@ -168,129 +246,188 @@ const waHero = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask 
 
   <!-- ============ FOR YOUR PROFESSION ============ -->
   <section class="bg-cream-100 py-16 md:py-24">
-    <div class="container-default grid gap-10 px-5 lg:grid-cols-[1fr_1fr] lg:items-center lg:gap-16">
+    <div class="container-default grid gap-12 px-5 lg:grid-cols-2 lg:items-center lg:gap-20">
       <div>
-        <p class="overline text-teal-400">For your profession</p>
-        <h2 class="mt-3 font-display text-h2 font-extrabold text-ink-900">Built around how you actually earn.</h2>
-        <p class="mt-4 max-w-[56ch] text-body leading-relaxed text-warm-700">
+        <p class="overline text-teal-600">For your profession</p>
+        <h2 class="mt-4 max-w-[14ch] font-display text-h2 font-extrabold text-teal-600">
+          Built around how you actually earn.
+        </h2>
+        <p class="mt-5 max-w-[58ch] text-body-lg leading-relaxed text-warm-700">
           Most of my clients are doctors and engineers, so the guides start there. The advice
           underneath is the same for any professional carrying indemnity risk, a vehicle, and
           people who depend on the income.
         </p>
 
-        <div class="mt-7 flex flex-col gap-3 sm:flex-row">
-          <a href="/for/doctors" class="flex min-h-14 items-center justify-center rounded-full bg-teal-600 px-7 text-body font-bold text-cream-50 hover:bg-teal-500">
+        <ul class="mt-7 flex flex-wrap gap-2.5">
+          {professions.map((p, i) => (
+            <li>
+              <span class={`flex min-h-11 items-center rounded-full px-5 text-small font-bold ${
+                i < 2 ? "bg-teal-600 text-cream-50" : "border border-warm-300 text-warm-700"
+              }`}>{p}</span>
+            </li>
+          ))}
+          <li>
+            <span class="flex min-h-11 items-center rounded-full border border-dashed border-warm-300 px-5 text-small text-warm-500">
+              Something else
+            </span>
+          </li>
+        </ul>
+
+        <div class="mt-8 flex flex-wrap items-center gap-5">
+          <a href="/for/doctors" class="flex min-h-14 items-center rounded-full bg-teal-600 px-8 text-h4 font-bold text-cream-50 hover:bg-teal-500">
             Read the doctors' guide
           </a>
-          <a href="/for/engineers" class="flex min-h-14 items-center justify-center rounded-full border-[1.5px] border-teal-600 px-7 text-body font-bold text-teal-600 hover:bg-teal-50">
+          <a href="/for/engineers" class="text-h4 font-bold text-teal-600 hover:text-teal-400">
             Read the engineers' guide →
           </a>
         </div>
         <p class="mt-4 text-small text-warm-500">Not on the list? The consultation works the same way.</p>
       </div>
 
-      <div class="flex aspect-4/3 items-center justify-center rounded-xl border border-warm-200 bg-warm-100" data-slot="IMG-PROF-01">
-        <span class="max-w-[26ch] px-6 text-center text-caption leading-relaxed text-warm-500">
-          <strong class="block text-small text-warm-700">IMG-PROF-01 · 4:3</strong>
-          Any Sri Lankan professional at work. Not scrubs, not a hard hat.
-        </span>
+      <div class="relative">
+        <div class="flex aspect-4/5 flex-col items-center justify-center gap-2 rounded-xl border border-mint-200 bg-mint-100 p-9 text-center" data-slot="IMG-PROF-01">
+          <span aria-hidden="true" class="size-3.5 rotate-45 bg-mint-400"></span>
+          <span class="font-mono text-caption font-bold tracking-wider text-mint-600">IMG-PROF-01 · 4:5</span>
+          <span class="max-w-[32ch] font-mono text-caption leading-relaxed text-mint-500">
+            One image that reads as any Sri Lankan professional at work — desk, laptop, plans or
+            notes. Not scrubs, not a hard hat. Must be locally shot.
+          </span>
+        </div>
+        <div class="absolute -left-4 bottom-10 rounded-lg bg-ink-900 px-6 py-5 sm:-left-8">
+          <span class="block font-display text-h2 font-extrabold tabular text-gold-400">2</span>
+          <span class="mt-1 block max-w-[18ch] text-small leading-snug text-cream-50/70">
+            profession guides live, more on request
+          </span>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- ============ WHY WORK WITH ME ============ -->
+  <!-- ============ SIXTEEN YEARS ============ -->
   <section class="bg-cream-50 py-16 md:py-24">
-    <div class="container-default grid gap-10 px-5 lg:grid-cols-[1fr_1.15fr] lg:items-center lg:gap-16">
-      <div class="order-2 flex aspect-4/5 items-center justify-center rounded-xl border border-warm-200 bg-warm-100 lg:order-1" data-slot="IMG-WHY-01">
-        <span class="max-w-[24ch] px-6 text-center text-caption leading-relaxed text-warm-500">
-          <strong class="block text-small text-warm-700">IMG-WHY-01 · 4:5</strong>
+    <div class="container-default grid gap-12 px-5 lg:grid-cols-[0.8fr_1fr] lg:items-center lg:gap-16">
+      <div class="order-2 flex aspect-4/5 flex-col items-center justify-center gap-2 rounded-xl border border-warm-200 bg-warm-100 p-9 text-center lg:order-1" data-slot="IMG-WHY-01">
+        <span aria-hidden="true" class="size-3.5 rotate-45 bg-warm-300"></span>
+        <span class="font-mono text-caption font-bold tracking-wider text-warm-700">IMG-WHY-01 · 4:5</span>
+        <span class="max-w-[28ch] font-mono text-caption leading-relaxed text-warm-500">
           Mid-conversation with a client. Candid, not posed.
         </span>
       </div>
 
       <div class="order-1 lg:order-2">
-        <h2 class="font-display text-h2 font-extrabold text-ink-900">{settings.yearsExperience} years of doing this properly</h2>
+        <h2 class="font-display text-h2 font-extrabold text-teal-600">
+          {settings.yearsExperience} years of doing this properly
+        </h2>
         <ul class="mt-8 flex flex-col gap-6">
           {differentiators.map((d) => (
-            <li class="border-l-2 border-gold-500 pl-5">
-              <p class="text-h4 font-bold text-ink-900">{d.lead}</p>
-              <p class="mt-1.5 text-body leading-relaxed text-warm-700">{d.body}</p>
+            <li class="flex gap-4">
+              <span aria-hidden="true" class="flex size-11 shrink-0 items-center justify-center rounded-[10px] bg-cream-100">
+                <span class="size-3 rotate-45 bg-warm-300"></span>
+              </span>
+              <span>
+                <span class="block text-h4 font-bold text-ink-900">{d.lead}</span>
+                <span class="mt-1 block text-body leading-relaxed text-warm-700">{d.body}</span>
+              </span>
             </li>
           ))}
         </ul>
 
-        <blockquote class="mt-9 border-l-2 border-teal-400 pl-5">
-          <p class="font-serif text-quote italic leading-relaxed text-warm-900">
+        <blockquote class="mt-9 border-l-2 border-gold-500 pl-6">
+          <p class="font-serif text-quote italic leading-relaxed text-ink-900">
             "Insurance is more than a policy — it is a promise of security and peace of mind."
           </p>
-          <footer class="mt-2.5 text-small text-warm-500">Thushara Rathnayake</footer>
         </blockquote>
       </div>
     </div>
   </section>
 
   <!-- ============ TESTIMONIALS ============ -->
-  <section class="bg-cream-100 py-16 md:py-24">
+  <section class="bg-ink-900 py-16 md:py-24">
     <div class="container-default px-5">
-      <p class="overline text-teal-400">In their words</p>
-      <h2 class="mt-3 font-display text-h2 font-extrabold text-ink-900">What clients say</h2>
+      <div class="flex items-baseline justify-between gap-6">
+        <p class="overline text-gold-400">In their words</p>
+        {testimonials.length > 0 && (
+          <a href="/testimonials" class="text-body font-bold text-cream-50 hover:text-gold-400">Read all testimonials →</a>
+        )}
+      </div>
 
-      {testimonials.length > 0 ? (
-        <ul class="mt-9 grid gap-4 md:grid-cols-2">
-          {testimonials.map((t) => (
-            <li class="rounded-xl border border-warm-200 bg-cream-50 p-8">
-              <p class="font-serif text-quote italic leading-relaxed text-warm-900">"{t.body}"</p>
-              <p class="mt-5 text-small font-bold text-ink-900">{t.name}</p>
-              <p class="text-small text-warm-500">{t.profession}</p>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <div class="mt-9 rounded-xl border border-dashed border-warm-300 bg-cream-50 p-10 text-center">
-          <p class="text-h4 font-bold text-ink-900">Reviews are being collected.</p>
-          <p class="mx-auto mt-2 max-w-[52ch] text-body leading-relaxed text-warm-700">
-            Real client words only — nothing invented. If you've worked with Thushara, yours
-            would be the first.
+      <div class="mt-8 border-t border-cream-50/20 pt-10">
+        {testimonials.length > 0 ? (
+          <ul class="grid gap-10 md:grid-cols-2 md:divide-x md:divide-cream-50/12">
+            {testimonials.map((t, i) => (
+              <li class={i > 0 ? "md:pl-10" : ""}>
+                <span aria-hidden="true" class="block font-serif text-[42px] leading-none text-gold-400">“</span>
+                <p class={`mt-4 font-serif italic leading-relaxed text-cream-50 ${i === 0 ? "text-[26px] md:text-[34px]" : "text-quote"}`}>
+                  {t.body}
+                </p>
+                <p class="mt-7 text-small font-bold text-cream-50">{t.name}</p>
+                <p class="text-small text-cream-50/60">{t.profession}</p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p class="max-w-[56ch] font-serif text-quote italic leading-relaxed text-cream-50/70">
+            Reviews are being collected. Real client words only — nothing invented.
           </p>
-          <a href="/testimonials/share" class="mt-6 inline-flex min-h-13 items-center rounded-full border-[1.5px] border-teal-600 px-7 text-body font-bold text-teal-600 hover:bg-teal-50">
-            Share your experience
-          </a>
-        </div>
-      )}
+        )}
+      </div>
 
-      {testimonials.length > 0 && (
-        <div class="mt-7 flex flex-wrap gap-x-7 gap-y-2">
-          <a href="/testimonials" class="text-body font-bold text-teal-600 underline underline-offset-4">Read all testimonials →</a>
-          <a href="/testimonials/share" class="text-body text-warm-500 underline underline-offset-4 hover:text-teal-600">Worked with me? Share your experience →</a>
-        </div>
-      )}
+      <div class="mt-10 border-t border-cream-50/20 pt-7">
+        <a href="/testimonials/share" class="text-body text-cream-50/70 hover:text-gold-400">
+          Worked with me? Share your experience →
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ GUIDES ============ -->
+  <section class="bg-cream-50 py-16 md:py-24">
+    <div class="container-default px-5">
+      <h2 class="font-display text-h2 font-extrabold text-teal-600">Free guides, no jargon</h2>
+
+      <ul class="mt-10 grid gap-4 md:grid-cols-3">
+        {guides.map((g) => (
+          <li class="flex flex-col rounded-[20px] border border-warm-200 bg-white p-7">
+            <span aria-hidden="true" class="flex h-12 w-9 items-center justify-center rounded-sm bg-cream-100"></span>
+            <span class="mt-5 font-display text-h4 font-bold leading-snug text-ink-900">{g.title}</span>
+            <span class="mt-2.5 flex-1 text-body leading-relaxed text-warm-700">{g.body}</span>
+            <span class="mt-4 font-mono text-caption text-warm-400">{g.slot} · file pending</span>
+            <span class="mt-5 flex min-h-13 items-center justify-center rounded-full border-[1.5px] border-teal-600 text-body font-bold text-teal-600">
+              Download
+            </span>
+          </li>
+        ))}
+      </ul>
+      <p class="mt-5 text-small text-warm-500">
+        Download asks for a name and WhatsApp number only, and tags the lead with which guide was taken.
+      </p>
     </div>
   </section>
 
   <!-- ============ FINAL CTA ============ -->
-  <section class="bg-ink-900 py-16 md:py-24">
+  <section class="bg-ink-900 py-20 md:py-28">
     <div class="container-default px-5 text-center">
-      <h2 class="mx-auto max-w-[18ch] font-display text-h1 font-extrabold text-cream-50">
+      <h2 class="mx-auto max-w-[20ch] font-display text-h1 font-extrabold text-cream-50">
         Let's talk about where you are.
       </h2>
-      <p class="mx-auto mt-5 max-w-[58ch] text-body-lg leading-relaxed text-cream-50/72">
+      <p class="mx-auto mt-5 max-w-[56ch] text-body-lg leading-relaxed text-cream-50/72">
         A free consultation, no obligation. Tell me your situation and I'll tell you honestly
         what you need — and what you don't.
       </p>
 
-      <div class="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
-        <a href="/book" class="flex min-h-14 items-center justify-center rounded-full bg-gold-500 px-9 text-h4 font-bold text-ink-900 hover:bg-gold-400">
+      <div class="mt-9 flex flex-col justify-center gap-4 sm:flex-row">
+        <a href="/book" class="flex min-h-15 items-center justify-center rounded-lg bg-gold-500 px-9 text-h4 font-bold text-ink-900 hover:bg-gold-400">
           Book a consultation
         </a>
-        {waHero && (
-          <a href={waHero} class="flex min-h-14 items-center justify-center rounded-full border-[1.5px] border-cream-50/30 px-8 text-h4 font-bold text-cream-50 hover:border-cream-50">
+        {wa && (
+          <a href={wa} class="flex min-h-15 items-center justify-center rounded-lg border border-cream-50/40 px-8 text-h4 font-bold text-cream-50 hover:border-cream-50">
             Message on WhatsApp
           </a>
         )}
       </div>
 
       {settings.phoneHref && (
-        <a href={settings.phoneHref} class="mt-7 inline-block font-display text-h3 font-extrabold text-cream-50 hover:text-gold-400">
+        <a href={settings.phoneHref} class="mt-8 inline-block font-display text-h4 font-bold text-teal-300 hover:text-gold-400">
           {settings.phone}
         </a>
       )}

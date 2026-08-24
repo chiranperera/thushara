@@ -1,13 +1,13 @@
 /**
- * Life-stage selector + the services grid it filters.
+ * Life-stage selector + the services grid it orders.
  *
- * One site cannot shout at three audiences at once. This resolves the
- * 60/30/10 weighting: the default visual language is calibrated to
- * newly qualified professionals, but every visitor gets a site that
- * feels made for them within one tap.
+ * Per "03 Home.dc.html": the stage cards are DARK, each carrying its
+ * service icon as a large glowing watermark in the top-right. The
+ * services grid below is light, with the icon in a rounded tile and the
+ * life-stage as a pill at the foot of the card.
  *
- * Non-matching services are de-emphasised rather than removed —
- * nothing should feel hidden.
+ * Non-matching services are de-emphasised, never removed — nothing
+ * should feel hidden.
  */
 
 import { useEffect, useState } from "react";
@@ -25,21 +25,22 @@ export interface Stage {
   label: string;
   ageRange: string;
   description: string;
+  /** Icon used as the card watermark. */
+  icon: string;
 }
 
 interface Props {
   stages: Stage[];
   services: ServiceCard[];
-  iconBase?: string;
 }
 
 const STORAGE_KEY = "tr_life_stage";
 
-export default function LifeStageServices({ stages, services, iconBase = "/icons" }: Props) {
+export default function LifeStageServices({ stages, services }: Props) {
   const [stage, setStage] = useState<string | null>(null);
 
-  // Remember the choice for the session — the site should not forget
-  // who someone said they were when they move between pages.
+  // Remember the choice for the session — the site shouldn't forget who
+  // someone said they were when they move between pages.
   useEffect(() => {
     try {
       const saved = sessionStorage.getItem(STORAGE_KEY);
@@ -56,23 +57,31 @@ export default function LifeStageServices({ stages, services, iconBase = "/icons
   };
 
   const activeStage = stages.find((s) => s.id === stage);
+  const stageLabel = (id: string) => stages.find((s) => s.id === id)?.label ?? "All stages";
 
-  // Matching services first, but everything stays on the page.
   const ordered = stage
     ? [...services].sort((a, b) => Number(b.lifeStage === stage) - Number(a.lifeStage === stage))
     : services;
 
   return (
     <>
-      {/* ---------- selector ---------- */}
+      {/* ---------------- stage selector ---------------- */}
       <section className="bg-cream-100 py-16 md:py-24" id="where-are-you">
         <div className="container-default px-5">
-          <p className="overline text-teal-400">Where are you right now?</p>
-          <h2 className="mt-3 max-w-[20ch] font-display text-h2 font-extrabold text-ink-900">
-            Everyone needs something different. Let's start with you.
-          </h2>
+          <div className="grid gap-6 lg:grid-cols-[1.3fr_1fr] lg:items-end">
+            <div>
+              <p className="overline text-teal-600">Where are you right now?</p>
+              <h2 className="mt-4 max-w-[20ch] font-display text-h2 font-extrabold text-teal-600">
+                Everyone needs something different. Let's start with you.
+              </h2>
+            </div>
+            <p className="text-body leading-relaxed text-warm-700 lg:pb-2">
+              Three stages, three sets of decisions. Pick the one closest to your life and we'll
+              work from there.
+            </p>
+          </div>
 
-          <ul className="mt-9 grid gap-4 md:grid-cols-3">
+          <ul className="mt-10 grid gap-4 md:grid-cols-3">
             {stages.map((s) => {
               const on = stage === s.id;
               return (
@@ -81,17 +90,40 @@ export default function LifeStageServices({ stages, services, iconBase = "/icons
                     type="button"
                     onClick={() => choose(s.id)}
                     aria-pressed={on}
-                    className={`flex h-full w-full flex-col items-start rounded-xl border-[1.5px] p-7 text-left transition-colors ${
-                      on
-                        ? "border-teal-400 bg-teal-100"
-                        : "border-warm-200 bg-cream-50 hover:border-teal-300"
+                    className={`relative flex h-full w-full flex-col overflow-hidden rounded-[20px] border px-8 pb-8 pt-9 text-left transition-shadow ${
+                      on ? "border-gold-400/50 shadow-[0_0_0_1px_rgba(224,180,87,0.35)]" : "border-cyan-300/14"
                     }`}
+                    style={{ background: "linear-gradient(165deg,#0A3630 0%,#06231F 70%,#041915 100%)" }}
                   >
-                    <span className="font-display text-h4 font-extrabold tabular text-gold-600">{s.ageRange}</span>
-                    <span className="mt-2 font-display text-h3 font-extrabold text-ink-900">{s.label}</span>
-                    <span className="mt-2 text-body leading-relaxed text-warm-700">{s.description}</span>
-                    <span className={`mt-5 text-body font-bold ${on ? "text-teal-600" : "text-teal-600"}`}>
-                      {on ? "Showing these first ✓" : "Start here →"}
+                    {/* icon watermark, glowing */}
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute -right-[26px] -top-[26px] size-[170px] bg-contain bg-center bg-no-repeat"
+                      style={{
+                        backgroundImage: `url(/icons/cut-${s.icon}.png)`,
+                        opacity: on ? 0.4 : 0.28,
+                        filter: "drop-shadow(0 0 26px rgba(46,214,196,0.45))",
+                      }}
+                    />
+                    <span
+                      className={`relative font-display text-small font-extrabold tabular tracking-wide ${
+                        on ? "text-gold-400" : "text-cyan-300/85"
+                      }`}
+                    >
+                      {s.ageRange}
+                    </span>
+                    <span className="relative mt-[76px] font-display text-h3 font-extrabold leading-tight text-cream-50">
+                      {s.label}
+                    </span>
+                    <span className="relative mt-3.5 max-w-[26ch] text-body leading-relaxed text-cream-50/68">
+                      {s.description}
+                    </span>
+                    <span
+                      className={`relative mt-6 flex items-center gap-2.5 text-small font-bold ${
+                        on ? "text-gold-400" : "text-cream-50/60"
+                      }`}
+                    >
+                      {on ? "Showing these first" : "Start here"} <span aria-hidden="true" className="text-body">→</span>
                     </span>
                   </button>
                 </li>
@@ -101,13 +133,13 @@ export default function LifeStageServices({ stages, services, iconBase = "/icons
         </div>
       </section>
 
-      {/* ---------- services ---------- */}
+      {/* ---------------- services ---------------- */}
       <section className="bg-cream-50 py-16 md:py-24" id="services">
         <div className="container-default px-5">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="overline text-teal-400">What I help with</p>
-              <h2 className="mt-3 font-display text-h2 font-extrabold text-ink-900">
+              <p className="overline text-teal-600">What I help with</p>
+              <h2 className="mt-4 font-display text-h2 font-extrabold text-teal-600">
                 Eight ways to protect what you're building
               </h2>
             </div>
@@ -121,27 +153,33 @@ export default function LifeStageServices({ stages, services, iconBase = "/icons
             )}
           </div>
 
-          <ul className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {ordered.map((s) => {
               const dim = stage !== null && s.lifeStage !== stage;
               return (
                 <li key={s.slug}>
                   <a
                     href={`/services/${s.slug}`}
-                    className={`group flex h-full flex-col rounded-xl border border-warm-200 bg-white p-6 transition-all hover:-translate-y-0.5 hover:border-teal-400 ${
-                      dim ? "opacity-55 hover:opacity-100" : ""
+                    className={`group flex h-full flex-col rounded-[20px] border bg-white p-7 transition-all hover:-translate-y-0.5 hover:border-teal-400 ${
+                      dim ? "border-warm-200 opacity-55 hover:opacity-100" : "border-warm-200"
                     }`}
                   >
-                    <img
-                      src={`${iconBase}/cut-${s.icon}.png`}
-                      alt=""
-                      width="40" height="40" loading="lazy" decoding="async"
-                      className="size-10 object-contain"
-                    />
-                    <span className="mt-4 font-display text-h4 font-bold text-ink-900">{s.title}</span>
-                    <span className="mt-2 flex-1 text-small leading-relaxed text-warm-700">{s.short}</span>
-                    <span className="mt-4 text-caption font-bold uppercase tracking-wider text-warm-500">
-                      {stages.find((x) => x.id === s.lifeStage)?.label ?? "All stages"}
+                    <span className="flex size-11 items-center justify-center rounded-[10px] bg-cream-100">
+                      <img
+                        src={`/icons/cut-${s.icon}.png`}
+                        alt="" width="28" height="28" loading="lazy" decoding="async"
+                        className="size-7 object-contain"
+                      />
+                    </span>
+                    <span className="mt-5 font-display text-h4 font-bold leading-snug text-ink-900">{s.title}</span>
+                    <span className="mt-2.5 flex-1 text-small leading-relaxed text-warm-700">{s.short}</span>
+                    <span className="mt-6 flex items-center justify-between gap-3">
+                      <span className="rounded-md bg-teal-50 px-3 py-1.5 text-caption font-bold text-teal-600">
+                        {stageLabel(s.lifeStage)}
+                      </span>
+                      <span aria-hidden="true" className="text-h4 text-warm-500 transition-transform group-hover:translate-x-0.5 group-hover:text-teal-600">
+                        →
+                      </span>
                     </span>
                   </a>
                 </li>

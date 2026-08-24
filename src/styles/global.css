@@ -44,6 +44,31 @@
   --color-warm-200: #DCDFDC;
   --color-warm-100: #ECEEEC;
 
+
+  /* ---------- Deep hero greens ----------
+     The hero uses a radial gradient through these three. They sit
+     below ink-900 and exist only for that treatment. */
+  --color-ink-950: #041915;
+  --color-ink-975: #03130F;
+  --color-hero-1: #0B3A33;
+  --color-hero-2: #062521;
+  --color-hero-3: #03130F;
+  --color-ink-850: #0A3630;
+
+  /* ---------- Mint surfaces ----------
+     The "why people stay" section sits on mint, not cream. */
+  --color-mint-50: #EAF6F1;
+  --color-mint-100: #DCE9E3;
+  --color-mint-200: #C4D8D0;
+  --color-mint-600: #4F6B62;
+  --color-mint-500: #7E948B;
+  --color-mint-400: #8FAFA4;
+
+  /* ---------- Bright accents on dark ----------
+     Used for the hero pill, hairline borders and the icon glow. */
+  --color-cyan-300: #8CF7DE;
+  --color-cyan-500: #28C8BE;
+
   /* ---------- Semantic ---------- */
   --color-success: #157F5C;
   --color-danger: #B33A2B;
