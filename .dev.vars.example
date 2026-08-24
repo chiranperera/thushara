@@ -1,0 +1,11 @@
+# Copy to .dev.vars for local development. Never commit .dev.vars.
+# In production set these with: npx wrangler secret put <NAME>
+
+RESEND_API_KEY=re_xxxxxxxxxxxx
+AUTH_SECRET=generate-a-long-random-string
+
+# These are plain vars (also in wrangler.jsonc) — PENDING until the
+# client confirms. See design-brief/11-open-questions.md item A5.
+SITE_URL=http://localhost:4321
+ADMIN_EMAIL=PENDING
+FROM_EMAIL=PENDING

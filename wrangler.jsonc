@@ -1,0 +1,45 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"compatibility_date": "2026-08-24",
+	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+	"name": "thushara-rathnayake",
+	"main": "@astrojs/cloudflare/entrypoints/server",
+	"assets": {
+		"directory": "./dist",
+		"binding": "ASSETS"
+	},
+	"observability": {
+		"enabled": true
+	},
+
+	// Leads, testimonials, gallery, resources, FAQ, settings.
+	// Create with: npx wrangler d1 create thushara-db
+	// then paste the returned database_id below.
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "thushara-db",
+			"database_id": "PLACEHOLDER_RUN_WRANGLER_D1_CREATE",
+			"migrations_dir": "migrations"
+		}
+	],
+
+	// Gallery images and PDF guides. Zero egress fees.
+	// Create with: npx wrangler r2 bucket create thushara-media
+	"r2_buckets": [
+		{
+			"binding": "MEDIA",
+			"bucket_name": "thushara-media"
+		}
+	],
+
+	"vars": {
+		"SITE_URL": "https://example.com",
+		"ADMIN_EMAIL": "PENDING",
+		"FROM_EMAIL": "PENDING"
+	}
+
+	// Secrets — set with `npx wrangler secret put <NAME>`, never committed:
+	//   RESEND_API_KEY   transactional email
+	//   AUTH_SECRET      signs admin magic-link + session tokens
+}

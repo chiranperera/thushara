@@ -1,0 +1,267 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Thushara Rathnayake — Design tokens
+   Source: design-brief/03-brand-identity-direction.md + 04-design-system.md
+   Palette: "Deep Teal & Gold". Do not invent values outside this scale.
+   ============================================================ */
+
+@theme {
+  /* ---------- Colour: core, deep teal-green ---------- */
+  --color-ink-900: #06231F;
+  --color-ink-800: #0A322D;
+  --color-ink-700: #0E4038;
+  --color-teal-600: #12544A;
+  --color-teal-500: #16705F;
+  --color-teal-400: #1E8F78;
+  --color-teal-300: #4FB89C;
+  --color-teal-200: #8FD6C4;
+  --color-teal-100: #C9EBE1;
+  --color-teal-50: #EBF7F3;
+
+  /* ---------- Colour: accent, antique gold ----------
+     Gold means CREDENTIAL. MDRT figures, award markers, active
+     milestone nodes, section rules. Never a primary button on
+     light. Never body text on light — gold-500 on cream fails AA. */
+  --color-gold-600: #A87C24;
+  --color-gold-500: #C9962F;
+  --color-gold-400: #E0B457;
+  --color-gold-300: #EFCF8B;
+  --color-gold-100: #F8EDD3;
+
+  /* ---------- Surfaces ---------- */
+  --color-cream-50: #FBFAF6;
+  --color-cream-100: #F4F1E9;
+  --color-canvas: #E7E5DE;
+
+  /* ---------- Neutrals, cooled to sit with teal ---------- */
+  --color-warm-900: #161A19;
+  --color-warm-800: #2A302E;
+  --color-warm-700: #464E4B;
+  --color-warm-500: #737C79;
+  --color-warm-400: #98A09D;
+  --color-warm-300: #BCC2BF;
+  --color-warm-200: #DCDFDC;
+  --color-warm-100: #ECEEEC;
+
+  /* ---------- Semantic ---------- */
+  --color-success: #157F5C;
+  --color-danger: #B33A2B;
+  --color-warning: #C07C14;
+  --color-info: #2A6494;
+
+  /* ---------- WhatsApp: the one permitted brand-external colour ---------- */
+  --color-whatsapp: #25D366;
+
+  /* ---------- Typography ---------- */
+  --font-display: "Cabinet Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Satoshi", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Newsreader", ui-serif, Georgia, serif;
+
+  /* Fluid scale — mobile → desktop, per 03. Body floor is 17px:
+     Segment C (46–55+) needs it and it costs Segment A nothing. */
+  --text-display-xl: clamp(2.5rem, 1.36rem + 5.7vw, 4.75rem);   /* 40 → 76 */
+  --text-display:    clamp(2.125rem, 1.43rem + 3.48vw, 3.5rem); /* 34 → 56 */
+  --text-h1:         clamp(1.875rem, 1.43rem + 2.23vw, 2.75rem);/* 30 → 44 */
+  --text-h2:         clamp(1.5625rem, 1.28rem + 1.41vw, 2.125rem);/* 25 → 34 */
+  --text-h3:         clamp(1.3125rem, 1.19rem + 0.63vw, 1.625rem);/* 21 → 26 */
+  --text-h4:         clamp(1.125rem, 1.07rem + 0.28vw, 1.25rem);/* 18 → 20 */
+  --text-body-lg:    clamp(1.125rem, 1.1rem + 0.13vw, 1.1875rem);/* 18 → 19 */
+  --text-body:       1.0625rem;  /* 17 — minimum, never 16 */
+  --text-small:      0.9375rem;  /* 15 */
+  --text-caption:    0.8125rem;  /* 13 */
+  --text-overline:   0.75rem;    /* 12 */
+  --text-quote:      clamp(1.25rem, 1.07rem + 0.9vw, 1.625rem); /* 20 → 26 */
+  --text-stat:       clamp(2.75rem, 1.54rem + 6.04vw, 4.25rem); /* 44 → 68 */
+
+  /* ---------- Radius ---------- */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  /* ---------- Elevation: warm-tinted, soft, minimal ----------
+     Prefer borders and background changes. Shadow only for
+     genuinely floating elements. */
+  --shadow-sm: 0 1px 2px rgba(22, 26, 25, 0.05);
+  --shadow-md: 0 4px 16px rgba(22, 26, 25, 0.07);
+  --shadow-lg: 0 12px 32px rgba(22, 26, 25, 0.10);
+  --shadow-xl: 0 24px 56px rgba(22, 26, 25, 0.14);
+
+  /* ---------- Containers ---------- */
+  --container-wide: 1360px;
+  --container-default: 1200px;
+  --container-narrow: 880px;
+  --container-prose: 680px;
+
+  /* ---------- Motion: nothing exceeds 600ms, never elastic ---------- */
+  --ease-out-brand: cubic-bezier(0.2, 0, 0, 1);
+  --ease-reveal: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ============================================================
+   Self-hosted fonts — WOFF2, subset, font-display:swap.
+   Never load from a CDN: same-origin delivery is measurably
+   faster on Sri Lankan mobile data and removes a third-party
+   dependency. See 04 — performance budget.
+   ============================================================ */
+
+@font-face {
+  font-family: "Cabinet Grotesk";
+  src: url("/fonts/cabinet-grotesk-bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Cabinet Grotesk";
+  src: url("/fonts/cabinet-grotesk-extrabold.woff2") format("woff2");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/satoshi-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/satoshi-medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/satoshi-bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Newsreader";
+  src: url("/fonts/newsreader-italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ============================================================
+   Base
+   ============================================================ */
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: var(--color-cream-50);
+    color: var(--color-warm-900);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    color: var(--color-ink-900);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+  h4, h5, h6 {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    color: var(--color-ink-900);
+    line-height: 1.35;
+  }
+
+  /* Numbers are a design element — always tabular. */
+  .tabular, table, .stat {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Focus is never removed. 2px teal ring, 2px offset. */
+  :focus-visible {
+    outline: 2px solid var(--color-teal-400);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background: var(--color-teal-100);
+    color: var(--color-ink-900);
+  }
+
+  /* Respect the safe area on notched devices — the sticky
+     bottom action bar depends on this. */
+  body {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+}
+
+/* ============================================================
+   Reduced motion — required, not optional.
+   Colour and opacity feedback is RETAINED: it is feedback,
+   not decoration, and removing it harms usability.
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Keep colour transitions — they are interface feedback. */
+  a, button, [role="button"], input, select, textarea {
+    transition-property: color, background-color, border-color, opacity !important;
+    transition-duration: 120ms !important;
+  }
+}
+
+/* ============================================================
+   Utilities
+   ============================================================ */
+
+@utility container-wide { max-width: var(--container-wide); margin-inline: auto; }
+@utility container-default { max-width: var(--container-default); margin-inline: auto; }
+@utility container-narrow { max-width: var(--container-narrow); margin-inline: auto; }
+@utility container-prose { max-width: var(--container-prose); margin-inline: auto; }
+
+/* Section label: small, uppercase, wide-tracked. */
+@utility overline {
+  font-size: var(--text-overline);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+
+/* Skip-to-content link — visible only on focus. */
+@utility skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  &:focus {
+    left: 0;
+    padding: 12px 20px;
+    background: var(--color-ink-900);
+    color: var(--color-cream-50);
+    font-weight: 700;
+  }
+}
