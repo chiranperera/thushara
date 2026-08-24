@@ -29,6 +29,8 @@ interface Props {
   phoneHref: string | null;
   /** Pre-selects a service when arriving from a service page. */
   initialService?: string;
+  /** Pre-selects the profession when arriving from a persona page. */
+  initialProfession?: string;
   initialLifeStage?: string;
   referringPage?: string;
 }
@@ -45,15 +47,21 @@ export default function BookingForm({
   phoneDisplay,
   phoneHref,
   initialService,
+  initialProfession,
   initialLifeStage,
   referringPage,
 }: Props) {
   // Expand once; labels and periods are derived, not transferred.
   const days = useMemo(() => fromCompact(compactDays), [compactDays]);
 
-  const [step, setStep] = useState(0);
+  // Arriving from /for/doctors etc. we already know the profession, but
+  // doctors and engineers still need their role, so only "other_professional"
+  // can genuinely skip ahead.
+  const [step, setStep] = useState(
+    initialProfession === "other_professional" ? 1 : 0,
+  );
   const [values, setValues] = useState<Values>(() => ({
-    profession_category: "",
+    profession_category: initialProfession && initialProfession in professions ? initialProfession : "",
     services: initialService ? [initialService] : [],
     meeting_method: "",
     preferred_date: "",

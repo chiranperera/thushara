@@ -84,6 +84,9 @@ const phoneHref = phone ? `tel:${phone.replace(/\s/g, "")}` : null;
 
 // Arriving from a service page pre-selects that service.
 const initialService = Astro.url.searchParams.get("service") ?? undefined;
+// Persona pages deep-link with the profession already known, so step 1
+// can be skipped — two taps saved on the page that measures taps.
+const initialProfession = Astro.url.searchParams.get("profession") ?? undefined;
 const initialLifeStage = Astro.url.searchParams.get("stage") ?? undefined;
 const referringPage = Astro.request.headers.get("referer") ?? undefined;
 ---
@@ -125,6 +128,7 @@ const referringPage = Astro.request.headers.get("referer") ?? undefined;
           phoneDisplay={phoneDisplay}
           phoneHref={phoneHref}
           initialService={initialService}
+          initialProfession={initialProfession}
           initialLifeStage={initialLifeStage}
           referringPage={referringPage}
         />

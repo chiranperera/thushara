@@ -1,0 +1,290 @@
+---
+/**
+ * /for/[slug] — persona landing pages. Built against
+ * "06 Persona Pages.dc.html".
+ *
+ * These are the links Thushara sends when a colleague refers someone,
+ * so the OG image and the first three seconds matter more here than
+ * anywhere except /book.
+ */
+export const prerender = false;
+
+import { env } from "cloudflare:workers";
+import Layout from "../../layouts/Layout.astro";
+import Header from "../../components/site/Header.astro";
+import Footer from "../../components/site/Footer.astro";
+import StickyBar from "../../components/site/StickyBar.astro";
+import { getSiteSettings, EDGE_CACHE, whatsappHref } from "../../lib/settings";
+import { site, getService } from "../../lib/site";
+import { personas } from "../../lib/persona-content";
+
+const { slug } = Astro.params;
+const p = personas[slug ?? ""];
+if (!p) return Astro.redirect("/services");
+
+const bindings = env as unknown as Record<string, any>;
+const db = bindings.DB;
+const settings = await getSiteSettings(db);
+Astro.response.headers.set("cache-control", EDGE_CACHE);
+
+const noun = p.slug === "doctors" ? "doctor" : "engineer";
+
+// Filtered by reviewer profession. The section is hidden entirely when
+// none is approved — never a placeholder quote in production.
+let testimonials: any[] = [];
+try {
+  if (db) {
+    const res = await db
+      .prepare(
+        `SELECT name, profession, body FROM testimonials
+         WHERE status='published' AND lower(profession) LIKE ?
+         ORDER BY featured DESC, sort_order LIMIT 2`,
+      )
+      .bind(`%${noun}%`)
+      .all();
+    testimonials = res.results ?? [];
+  }
+} catch (e) { console.error("[persona] testimonials query failed", e); }
+
+const wa = whatsappHref(
+  settings.whatsapp,
+  `Hi Thushara, I'm a ${noun} and I'd like to ask about cover.`,
+);
+const bookHref = `/book?profession=${p.bookingProfession}`;
+---
+
+<Layout
+  title={p.eyebrow}
+  description={p.intro}
+>
+  <Header slot="header" settings={settings} />
+
+  <!-- ============ HERO ============ -->
+  <section
+    class="relative flex min-h-[560px] flex-col overflow-hidden lg:flex-row"
+    style="background:radial-gradient(120% 110% at 5% 12%,#0B3A33 0%,#062521 42%,#03130F 100%)"
+  >
+    <div class="relative z-[2] flex flex-1 flex-col justify-center px-5 py-14 lg:max-w-[60%] lg:flex-none lg:basis-[60%] lg:px-18">
+      <p class="inline-flex items-center gap-2.5 self-start rounded-full border border-cyan-300/28 bg-ink-900/60 py-1.5 pl-2.5 pr-3.5">
+        <span aria-hidden="true" class="size-[7px] rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(140,247,222,0.9)]"></span>
+        <span class="overline text-cyan-300">{p.eyebrow}</span>
+      </p>
+
+      <h1 class="mt-7 max-w-[15ch] font-display text-display font-extrabold leading-[1.04] tracking-[-0.03em] text-cream-50">
+        {p.title}
+      </h1>
+      <p class="mt-6 max-w-[52ch] text-body-lg leading-relaxed text-cream-50/78">{p.intro}</p>
+
+      <div class="mt-9 flex flex-wrap items-center gap-4">
+        <a href={bookHref} class="flex min-h-14 items-center rounded-full bg-gold-500 px-8 text-h4 font-bold text-ink-900 hover:bg-gold-400">
+          Book a consultation
+        </a>
+        {wa && (
+          <a href={wa} class="flex min-h-14 items-center gap-2.5 rounded-full border border-cream-50/35 px-7 text-h4 font-bold text-cream-50 hover:border-cream-50">
+            <span aria-hidden="true" class="size-2.5 rounded-full bg-whatsapp"></span>WhatsApp
+          </a>
+        )}
+      </div>
+    </div>
+
+    <!-- Locally shot, never stock — a visitor should recognise the room. -->
+    <div
+      class="relative z-[2] flex min-h-[260px] flex-1 items-center justify-center border-t border-cyan-300/12 p-9 lg:min-h-0 lg:max-w-[40%] lg:flex-none lg:basis-[40%] lg:border-l lg:border-t-0"
+      data-slot={p.imageSlot.id}
+    >
+      <span class="max-w-[30ch] text-center">
+        <span aria-hidden="true" class="mx-auto mb-3 block size-3.5 rotate-45 bg-teal-300/60"></span>
+        <span class="block font-mono text-caption font-bold tracking-wider text-teal-300">{p.imageSlot.id} · full bleed</span>
+        <span class="mt-2 block font-mono text-caption leading-relaxed text-cream-50/45">{p.imageSlot.note}</span>
+      </span>
+    </div>
+  </section>
+
+  <!-- ============ CREDENTIALS STRIP ============ -->
+  <section class="bg-ink-900">
+    <div class="container-default flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-5 text-small">
+      <span class="font-bold text-cream-50">{settings.yearsExperience} years</span>
+      <span aria-hidden="true" class="text-gold-500">●</span>
+      <span class="font-bold text-cream-50">{settings.mdrtYears}× MDRT {settings.mdrtStatus}</span>
+      <span aria-hidden="true" class="text-gold-500">●</span>
+      <span class="font-bold text-cream-50">{settings.recognition}</span>
+      <span aria-hidden="true" class="text-gold-500">●</span>
+      <span class="text-cream-50/55">{site.employer}</span>
+    </div>
+  </section>
+
+  <!-- ============ CAREER LINE ============ -->
+  <section class="bg-cream-100 py-16 md:py-20">
+    <div class="container-default px-5">
+      <p class="overline text-teal-600">{p.careerLineLabel}</p>
+      <h2 class="mt-4 max-w-[20ch] font-display text-h2 font-extrabold text-teal-600">{p.careerLineHeading}</h2>
+
+      {/* Both literals are written out so Tailwind actually generates
+          them — a computed class name would be scanned as a string. */}
+      <ul class={`mt-11 grid gap-x-6 gap-y-9 sm:grid-cols-2 ${p.stages.length === 5 ? "lg:grid-cols-5" : "lg:grid-cols-4"}`}>
+        {p.stages.map((s) => (
+          <li class={`border-t-2 pt-5 ${s.primary ? "border-gold-500" : "border-warm-200"}`}>
+            <span class="block font-display text-h3 font-extrabold tabular text-teal-600">{s.ages}</span>
+            <span class="mt-1 block text-body font-bold text-warm-900">{s.role}</span>
+            <span class="mt-3 block text-body leading-relaxed text-warm-500">
+              {s.primary
+                ? <><strong class="font-bold text-teal-600">{s.products.split(" · ")[0]}</strong>{s.products.includes(" · ") ? ` · ${s.products.split(" · ").slice(1).join(" · ")}` : ""}</>
+                : s.products}
+            </span>
+            {s.primary && (
+              <span class="mt-4 inline-flex items-center rounded-full bg-gold-500 px-4 py-1.5 text-caption font-bold text-ink-900">
+                Most start here
+              </span>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ THE ANCHOR ============
+       Tone rule from the design: factual and calm, never fear-based.
+       This audience detects exaggeration instantly and disengages. -->
+  <section class="bg-cream-50 py-16 md:py-20">
+    <div class="container-default grid gap-10 px-5 lg:grid-cols-[0.8fr_1fr] lg:gap-16">
+      <div>
+        <p class="overline text-teal-600">The anchor</p>
+        <h2 class="mt-4 max-w-[12ch] font-display text-h2 font-extrabold text-teal-600">{p.anchorHeading}</h2>
+      </div>
+
+      <div class="flex flex-col gap-8">
+        {p.anchor.map((a) => (
+          <div>
+            <h3 class="text-h4 font-bold text-ink-900">{a.lead}</h3>
+            <p class="mt-2 max-w-[62ch] text-body-lg leading-relaxed text-warm-700">{a.body}</p>
+          </div>
+        ))}
+        <p class="font-mono text-caption leading-relaxed text-warm-400">
+          Copy pending client approval. No figures used until Thushara supplies verifiable ones.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ THE PRACTICAL PART ============
+       The empathy proof — it shows he actually knows this audience. -->
+  <section class="bg-ink-900 py-16 md:py-20">
+    <div class="container-default px-5">
+      <p class="overline text-gold-400">{p.practicalLabel}</p>
+      <h2 class="mt-4 font-display text-h2 font-extrabold text-cream-50">{p.practicalHeading}</h2>
+
+      <ul class="mt-11 grid gap-x-6 gap-y-9 sm:grid-cols-2 lg:grid-cols-4">
+        {p.practical.map((item) => (
+          <li class="border-t border-cream-50/25 pt-5">
+            <span class="block text-h4 font-bold text-cream-50">{item.lead}</span>
+            <span class="mt-2 block text-body leading-relaxed text-cream-50/70">{item.body}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ PRODUCTS ============ -->
+  <section class="bg-cream-50 py-16 md:py-20">
+    <div class="container-default px-5">
+      <h2 class="font-display text-h2 font-extrabold text-teal-600">What this usually means, in products</h2>
+
+      <ul class="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {p.products.map(({ slug: s, note }) => {
+          const svc = getService(s)!;
+          return (
+            <li>
+              <a
+                href={`/services/${svc.slug}`}
+                class="relative flex h-full flex-col justify-end overflow-hidden rounded-[20px] border border-cyan-300/14 px-7 pb-7 pt-24 transition-shadow hover:shadow-[0_0_0_1px_rgba(224,180,87,0.35)]"
+                style="background:linear-gradient(165deg,#0A3630 0%,#06231F 70%,#041915 100%)"
+              >
+                <span
+                  aria-hidden="true"
+                  class="pointer-events-none absolute -right-5 -top-5 size-[120px] bg-contain bg-center bg-no-repeat opacity-30"
+                  style={`background-image:url(/icons/cut-${svc.icon}.png);filter:drop-shadow(0 0 24px rgba(46,214,196,0.45))`}
+                ></span>
+                <span class="relative font-display text-h4 font-bold leading-snug text-cream-50">{svc.title}</span>
+                <span class="relative mt-2 text-body text-cream-50/68">{note}</span>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ TESTIMONIALS ============
+       Hidden entirely when none is approved. Never a placeholder quote. -->
+  {testimonials.length > 0 && (
+    <section class="bg-cream-100 py-16 md:py-20">
+      <div class="container-default px-5">
+        <h2 class="font-display text-h2 font-extrabold text-teal-600">{p.testimonialsHeading}</h2>
+        <ul class="mt-9 grid gap-4 md:grid-cols-2">
+          {testimonials.map((t) => (
+            <li class="rounded-[20px] border border-warm-200 bg-white p-8">
+              <p class="font-serif text-quote italic leading-relaxed text-warm-900">"{t.body}"</p>
+              <p class="mt-5 text-small font-bold text-ink-900">{t.name}</p>
+              <p class="text-small text-warm-500">{t.profession}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  <!-- ============ FAQ ============ -->
+  <section class="bg-cream-50 py-16 md:py-20">
+    <div class="container-default px-5">
+      <h2 class="font-display text-h2 font-extrabold text-teal-600">{p.faqHeading}</h2>
+
+      <div class="mt-9 max-w-[860px]">
+        {p.faqs.map((f, i) => (
+          <details class="faq group border-t border-warm-200 last:border-b" open={i === 0}>
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-6 py-6 text-h4 font-bold text-ink-900 [&::-webkit-details-marker]:hidden">
+              {f.q}
+              <span aria-hidden="true" class="relative size-5 shrink-0">
+                <span class="absolute left-0 top-1/2 h-0.5 w-5 -translate-y-1/2 bg-ink-900"></span>
+                <span class="absolute left-1/2 top-0 h-5 w-0.5 -translate-x-1/2 bg-ink-900 transition-opacity group-open:opacity-0"></span>
+              </span>
+            </summary>
+            <p class="max-w-[68ch] pb-6 text-body leading-relaxed text-warm-700">{f.a}</p>
+          </details>
+        ))}
+      </div>
+
+      <a href="/faq" class="mt-7 inline-block text-body font-bold text-teal-600 hover:text-teal-400">
+        All frequently asked questions →
+      </a>
+    </div>
+  </section>
+
+  <!-- ============ CTA ============ -->
+  <section class="bg-ink-950 py-16 md:py-24">
+    <div class="container-default grid gap-10 px-5 lg:grid-cols-[1.4fr_1fr] lg:items-center">
+      <div>
+        <h2 class="max-w-[16ch] font-display text-h1 font-extrabold leading-tight text-cream-50">
+          {p.ctaHeading}
+        </h2>
+        <p class="mt-5 text-body-lg leading-relaxed text-cream-50/70">{p.ctaBody}</p>
+      </div>
+
+      <div class="flex flex-col gap-3.5">
+        <a href={bookHref} class="flex min-h-15 items-center justify-center rounded-full bg-gold-500 px-8 text-h4 font-bold text-ink-900 hover:bg-gold-400">
+          Book a consultation
+        </a>
+        {wa && (
+          <a href={wa} class="flex min-h-15 items-center justify-center gap-2.5 rounded-full border border-cream-50/35 px-8 text-h4 font-bold text-cream-50 hover:border-cream-50">
+            <span aria-hidden="true" class="size-2.5 rounded-full bg-whatsapp"></span>WhatsApp
+          </a>
+        )}
+        <p class="text-center font-mono text-caption text-cream-50/40">
+          Profession pre-set to {p.bookingProfession === "doctor" ? "Doctor" : "Engineer"}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <Footer slot="footer" settings={settings} />
+  <StickyBar slot="footer" settings={settings} message={`Hi Thushara, I'm a ${noun} and I'd like to ask about cover.`} />
+</Layout>
