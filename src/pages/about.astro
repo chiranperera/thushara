@@ -1,0 +1,353 @@
+---
+/**
+ * /about — Built against "05 About.dc.html".
+ *
+ * The second-most-visited page on any personal-brand site, and the one
+ * Segment C judges him on. Copy is his own, from
+ * design-brief/content/00-about-me.md — restructured, not rewritten.
+ */
+export const prerender = false;
+
+import { env } from "cloudflare:workers";
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/site/Header.astro";
+import Footer from "../components/site/Footer.astro";
+import StickyBar from "../components/site/StickyBar.astro";
+import { getSiteSettings, EDGE_CACHE, whatsappHref } from "../lib/settings";
+import { site, services } from "../lib/site";
+
+const bindings = env as unknown as Record<string, any>;
+const settings = await getSiteSettings(bindings.DB);
+Astro.response.headers.set("cache-control", EDGE_CACHE);
+
+const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask about insurance.");
+
+/**
+ * His own career line. Years are indicative until Thushara confirms
+ * them — flagged on the page rather than presented as fact.
+ */
+const career = [
+  { year: "2009", label: "Joined Sri Lanka Insurance", mdrt: false },
+  { year: "2011", label: "First MDRT qualification", mdrt: true },
+  { year: "2015", label: "Regional top performer", mdrt: true },
+  { year: "2019", label: "Senior Financial Consultant", mdrt: true },
+  { year: "2023", label: "MDRT Lifetime Member", mdrt: true, current: true },
+  { year: "Today", label: "Life & General, island-wide", mdrt: false },
+];
+
+/** From his copy. His phrasing, kept as written. */
+const whatIDo = [
+  { label: "Motor and Property Insurance Solutions", href: "/services/motor-insurance" },
+  { label: "Life Insurance Planning", href: "/services/life-income-protection" },
+  { label: "Retirement Planning", href: "/services/retirement-plan" },
+  { label: "Children's Education Planning", href: "/services/children-education" },
+  { label: "Travel Insurance Solutions", href: "/services/travel-insurance" },
+  { label: "Family Financial Protection", href: "/services/life-income-protection" },
+  { label: "Business Risk Protection", href: "/services/professional-indemnity" },
+  { label: "Personalized Insurance Consultation", href: "/book" },
+];
+
+const qualifications = [
+  { title: "National Diploma in Sales Management", sub: "SLIM — Sri Lanka Institute of Marketing" },
+  { title: "Diploma in Human Resource Management", sub: "HRM" },
+  {
+    title: "Basic Certificate in Psychology",
+    // Framing turns a thin credential into a real differentiator.
+    note: "The reason the first meeting is mostly questions. Understanding what someone is actually worried about is a different skill from knowing the products.",
+  },
+];
+
+const mdrtBars = Array.from({ length: settings.mdrtYears }, (_, i) => i);
+---
+
+<Layout
+  title="About Thushara"
+  description={`${settings.yearsExperience} years in insurance, ${settings.mdrtYears}× MDRT ${settings.mdrtStatus}. Honest advice, personalised protection, and long-term support.`}
+>
+  <Header slot="header" settings={settings} />
+
+  <!-- ============ HERO ============ -->
+  <section
+    class="relative flex min-h-[560px] flex-col overflow-hidden lg:min-h-[620px] lg:flex-row"
+    style="background:radial-gradient(120% 110% at 5% 12%,#0B3A33 0%,#062521 42%,#03130F 100%)"
+  >
+    <span aria-hidden="true" class="pointer-events-none absolute inset-0 z-[1]"
+      style="background:linear-gradient(180deg,rgba(3,19,15,0.55) 0%,rgba(3,19,15,0.2) 46%,rgba(3,19,15,0.65) 100%)"></span>
+
+    <div class="relative z-[2] flex flex-1 flex-col justify-center px-5 pb-10 pt-12 lg:max-w-[62%] lg:flex-none lg:basis-[62%] lg:px-18 lg:pb-0">
+      <p class="overline text-cyan-300">{site.title} · {site.employer}</p>
+      <h1 class="mt-5 font-display text-display font-extrabold leading-[1.04] tracking-[-0.03em] text-cream-50">
+        {site.name}
+      </h1>
+      <p class="mt-4 font-serif text-h2 italic text-gold-400">Welcome to my website.</p>
+      <p class="mt-6 max-w-[46ch] text-body-lg leading-relaxed text-cream-50/78">
+        {settings.yearsExperience} years in the insurance industry, helping individuals, families,
+        and businesses protect their financial future.
+      </p>
+
+      <div class="mt-9 flex flex-wrap items-center gap-4">
+        <a href="/book" class="flex min-h-14 items-center rounded-full bg-gold-500 px-8 text-h4 font-bold text-ink-900 hover:bg-gold-400">
+          Book a consultation
+        </a>
+        {wa && (
+          <a href={wa} class="flex min-h-14 items-center gap-2.5 rounded-full border border-cream-50/35 px-7 text-h4 font-bold text-cream-50 hover:border-cream-50">
+            <span aria-hidden="true" class="size-2.5 rounded-full bg-whatsapp"></span>WhatsApp
+          </a>
+        )}
+      </div>
+    </div>
+
+    <div class="relative z-[2] min-h-[300px] flex-1 overflow-hidden lg:max-w-[38%] lg:flex-none lg:basis-[38%]">
+      <picture>
+        <source media="(max-width: 767px)" srcset="/img/hero-portrait-cut@0.5x.webp" />
+        <img
+          src="/img/hero-portrait-cut.webp" alt={`${site.name}, ${site.title}`}
+          width="1045" height="1399" fetchpriority="high" decoding="async"
+          class="absolute bottom-0 left-1/2 h-full w-full -translate-x-1/2 object-contain object-bottom"
+        />
+      </picture>
+    </div>
+  </section>
+
+  <!-- ============ HIS STORY ============ -->
+  <section class="bg-cream-50 py-16 md:py-24">
+    <div class="container-prose px-5">
+      <p class="text-body-lg leading-relaxed text-warm-800">
+        I am {site.name}, a {site.title} at {site.employer} with {settings.yearsExperience} years of
+        professional experience in the insurance industry. Throughout my career, I have been
+        committed to helping individuals, families, and businesses protect their financial future
+        through trusted life and general insurance solutions.
+      </p>
+
+      <blockquote class="my-10 border-l-2 border-gold-500 pl-6">
+        <p class="font-serif text-h3 italic leading-snug text-teal-600">
+          Insurance is more than a policy — it is a promise of security and peace of mind.
+        </p>
+      </blockquote>
+
+      <p class="text-body-lg leading-relaxed text-warm-800">
+        My mission is to provide honest advice, personalized financial protection plans, and
+        long-term support to every client.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ CREDENTIALS + WHAT MDRT MEANS ============ -->
+  <section class="bg-ink-900 py-16 md:py-20">
+    <div class="container-default px-5">
+      <dl class="grid grid-cols-2 gap-x-6 gap-y-9 md:grid-cols-4">
+        {[
+          { figure: String(settings.yearsExperience), label: "Years of professional service" },
+          { figure: `${settings.mdrtYears}×`, label: `MDRT member, ${settings.mdrtStatus} status` },
+          { figure: "Top", label: "Performer, Life & General, Region" },
+          { figure: "Island-wide", label: "Colombo, suburbs and beyond", word: true },
+        ].map((s) => (
+          <div>
+            <dt class="sr-only">{s.label}</dt>
+            <dd>
+              <span class={`block font-display font-extrabold leading-none tabular text-cream-50 ${s.word ? "text-h1" : "text-stat"}`}>
+                {s.figure}
+              </span>
+              <span class="mt-3 block max-w-[24ch] text-small leading-snug text-teal-300">{s.label}</span>
+            </dd>
+          </div>
+        ))}
+      </dl>
+
+      <div class="mt-14 grid gap-10 border-t border-cream-50/20 pt-12 lg:grid-cols-2 lg:gap-16">
+        <div>
+          <p class="overline text-gold-400">The credential that matters</p>
+          <h2 class="mt-4 max-w-[14ch] font-display text-h2 font-extrabold text-cream-50">
+            What MDRT actually means
+          </h2>
+        </div>
+
+        <div>
+          <p class="text-body-lg leading-relaxed text-cream-50/78">
+            The Million Dollar Round Table is a global association of financial professionals,
+            founded in 1927. Membership is earned annually, and it is earned on production, ethics,
+            and professional conduct — not paid for. Fewer than one percent of the world's advisors
+            qualify in any given year.
+          </p>
+          <p class="mt-5 text-body-lg leading-relaxed text-cream-50/78">
+            Thushara has qualified {settings.mdrtYears} times. Lifetime Membership is granted only
+            after a sustained run of qualifying years, which means the standard was met repeatedly,
+            across changing markets, rather than once in a good year.
+          </p>
+
+          <!-- Qualifying years, indicative shape only -->
+          <div class="mt-9 flex items-end gap-1.5" aria-hidden="true">
+            {mdrtBars.map((i) => {
+              const pct = i / Math.max(1, mdrtBars.length - 1);
+              const h = 26 + Math.round(pct * 42);
+              const colour = pct < 0.35 ? "#12544A" : pct < 0.72 ? "#4FB89C" : "#C9962F";
+              return <span class="flex-1 rounded-sm" style={`height:${h}px;background:${colour}`}></span>;
+            })}
+          </div>
+          <p class="mt-3 font-mono text-caption leading-relaxed text-cream-50/40">
+            Qualifying years, indicative shape only — exact year list to be confirmed by Thushara.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ QUALIFICATIONS ============ -->
+  <section class="bg-cream-50 py-16 md:py-20">
+    <div class="container-default px-5">
+      <p class="overline text-teal-600">Academic & professional</p>
+      <h2 class="mt-4 font-display text-h2 font-extrabold text-teal-600">Qualifications</h2>
+
+      <ul class="mt-9 grid gap-4 md:grid-cols-3">
+        {qualifications.map((q) => (
+          <li class={`flex flex-col rounded-[20px] border p-7 ${q.note ? "border-ink-800 bg-ink-900" : "border-warm-200 bg-white"}`}>
+            <span aria-hidden="true" class={`flex size-10 items-center justify-center rounded-[10px] ${q.note ? "bg-cream-50/8" : "bg-cream-100"}`}>
+              <span class={`size-3 rotate-45 ${q.note ? "bg-cyan-300" : "bg-warm-300"}`}></span>
+            </span>
+            <span class={`mt-6 text-h4 font-bold leading-snug ${q.note ? "text-cream-50" : "text-ink-900"}`}>{q.title}</span>
+            {q.sub && <span class="mt-3 text-body text-warm-500">{q.sub}</span>}
+            {q.note && <span class="mt-3 text-body leading-relaxed text-cream-50/70">{q.note}</span>}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ HIS OWN MILESTONE LINE ============ -->
+  <section class="bg-cream-100 py-16 md:py-20">
+    <div class="container-default px-5">
+      <p class="overline text-teal-600">{settings.yearsExperience} years</p>
+      <h2 class="mt-4 max-w-[18ch] font-display text-h2 font-extrabold text-teal-600">
+        The same line, run along my own career.
+      </h2>
+
+      <!-- desktop -->
+      <div class="mt-14 hidden md:block">
+        <div class="grid grid-cols-6 items-end gap-4">
+          {career.map((c) => (
+            <div>
+              <span class="block font-display text-h3 font-extrabold tabular text-teal-600">{c.year}</span>
+              <span class="mt-1 block text-body font-bold leading-snug text-warm-800">{c.label}</span>
+            </div>
+          ))}
+        </div>
+        <div class="relative mt-6 h-6">
+          <span aria-hidden="true" class="absolute inset-x-0 top-[11px] h-0.5 bg-gold-500/45"></span>
+          <div aria-hidden="true" class="absolute inset-0 grid grid-cols-6 items-center gap-4">
+            {career.map((c) => (
+              <span class="block">
+                {c.current
+                  ? <span class="block size-6 rounded-full bg-gold-500 shadow-[0_0_0_6px_rgba(201,150,47,0.18)]"></span>
+                  : c.mdrt
+                    ? <span class="block size-4 rounded-full bg-gold-500"></span>
+                    : <span class="block size-4 rounded-full bg-teal-600"></span>}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <!-- mobile spine -->
+      <ul class="relative mt-10 md:hidden">
+        <span aria-hidden="true" class="absolute bottom-2 left-[7px] top-2 w-0.5 bg-gold-500/45"></span>
+        {career.map((c) => (
+          <li class="relative pb-7 pl-8 last:pb-0">
+            <span aria-hidden="true" class={`absolute left-0 top-1.5 block size-4 rounded-full ${c.mdrt ? "bg-gold-500" : "bg-teal-600"}`}></span>
+            <span class="font-display text-h4 font-extrabold tabular text-teal-600">{c.year}</span>
+            <p class="mt-0.5 text-body font-bold text-warm-800">{c.label}</p>
+          </li>
+        ))}
+      </ul>
+
+      <p class="mt-7 font-mono text-caption leading-relaxed text-warm-400">
+        Years shown are indicative — Thushara to confirm the real dates before launch. Gold nodes
+        mark MDRT years.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ WHAT I DO ============ -->
+  <section class="bg-cream-50 py-16 md:py-20">
+    <div class="container-default px-5">
+      <h2 class="font-display text-h2 font-extrabold text-teal-600">What I do</h2>
+
+      <ul class="mt-9 grid overflow-hidden rounded-xl border border-warm-200 sm:grid-cols-2 lg:grid-cols-4">
+        {whatIDo.map((w, i) => (
+          <li class={`border-warm-200 ${i % 4 !== 3 ? "lg:border-r" : ""} ${i % 2 === 0 ? "sm:border-r lg:border-r" : ""} ${i < whatIDo.length - (whatIDo.length % 4 || 4) ? "border-b" : ""} ${i < 4 ? "lg:border-b" : ""}`}>
+            <a href={w.href} class="flex h-full min-h-[132px] flex-col justify-end bg-white p-6 transition-colors hover:bg-cream-100">
+              <span class="text-h4 font-bold leading-snug text-teal-600">{w.label}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <p class="mt-4 font-mono text-caption text-warm-400">
+        His own phrasing, kept as written. Each item links to the nearest matching service page.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ MY COMMITMENT ============ -->
+  <section class="bg-cream-100 py-16 md:py-24">
+    <div class="container-prose px-5">
+      <p class="overline text-teal-600">My commitment</p>
+      <p class="mt-6 text-body-lg leading-relaxed text-warm-800">
+        Every client has unique financial goals and responsibilities. I take the time to understand
+        your needs and recommend solutions that provide confidence, security, and long-term value.
+        My commitment is built on professionalism, integrity, and continuous service.
+      </p>
+      <p class="mt-5 text-body-lg leading-relaxed text-warm-800">
+        I look forward to helping you and your family build a secure future. Thank you for visiting
+        my website, and I hope to be your trusted financial consultant for many years to come.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ AWARDS AND EVENTS ============ -->
+  <section class="bg-cream-50 py-16 md:py-20">
+    <div class="container-default px-5">
+      <div class="flex flex-wrap items-baseline justify-between gap-4">
+        <h2 class="font-display text-h2 font-extrabold text-teal-600">Awards and events</h2>
+        <a href="/gallery" class="text-body font-bold text-teal-600 hover:text-teal-400">See the gallery →</a>
+      </div>
+
+      <ul class="mt-9 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {["IMG-GAL-01", "IMG-GAL-02", "IMG-GAL-03", "IMG-GAL-04"].map((slot) => (
+          <li
+            class="flex aspect-square items-center justify-center rounded-xl border border-mint-200 bg-mint-100"
+            data-slot={slot}
+          >
+            <span class="font-mono text-caption text-mint-600">{slot}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ CTA ============ -->
+  <section class="bg-ink-950 py-16 md:py-24">
+    <div class="container-default grid gap-10 px-5 lg:grid-cols-[1.4fr_1fr] lg:items-center">
+      <h2 class="max-w-[14ch] font-display text-h1 font-extrabold leading-tight text-cream-50">
+        Let's start with a conversation.
+      </h2>
+
+      <div class="flex flex-col gap-3.5">
+        <a href="/book" class="flex min-h-15 items-center justify-center rounded-full bg-gold-500 px-8 text-h4 font-bold text-ink-900 hover:bg-gold-400">
+          Book a consultation
+        </a>
+        {wa && (
+          <a href={wa} class="flex min-h-15 items-center justify-center gap-2.5 rounded-full border border-cream-50/35 px-8 text-h4 font-bold text-cream-50 hover:border-cream-50">
+            <span aria-hidden="true" class="size-2.5 rounded-full bg-whatsapp"></span>WhatsApp
+          </a>
+        )}
+        {settings.phoneHref && (
+          <a href={settings.phoneHref} class="text-center font-display text-h4 font-bold text-cream-50 hover:text-gold-400">
+            {settings.phone}
+          </a>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <Footer slot="footer" settings={settings} />
+  <StickyBar slot="footer" settings={settings} message="Hello Thushara, I'd like to ask about insurance." />
+</Layout>
