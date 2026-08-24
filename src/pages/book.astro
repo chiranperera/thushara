@@ -1,0 +1,171 @@
+---
+/**
+ * /book — the conversion page. Everything else exists to deliver
+ * someone here.
+ *
+ * Server-rendered rather than prerendered so the slot picker shows
+ * Thushara's REAL availability. Correctness beats a few milliseconds
+ * on the one page where being wrong costs a booking.
+ *
+ * Chrome is deliberately stripped back: logo, phone, exit. No full
+ * navigation — remove the escape routes.
+ */
+export const prerender = false;
+
+import { env } from "cloudflare:workers";
+import Layout from "../layouts/Layout.astro";
+import BookingForm from "../components/booking/BookingForm.tsx";
+import { buildAvailability, toCompact, type AvailabilityWindow } from "../lib/availability";
+import { site } from "../lib/site";
+
+const bindings = env as unknown as Record<string, any>;
+const db = bindings.DB;
+
+// ---- settings, with safe fallbacks if the database is unreachable
+let settings = new Map<string, string>();
+let windows: AvailabilityWindow[] = [];
+let blockedDates = new Map<string, string>();
+let booked = new Map<string, Set<string>>();
+
+if (db) {
+  try {
+    const [s, a, b, l] = await db.batch([
+      db.prepare("SELECT key, value FROM settings"),
+      db.prepare("SELECT day_of_week, start_time, end_time, active FROM availability WHERE active = 1"),
+      db.prepare("SELECT date, reason FROM blocked_dates"),
+      db.prepare(
+        `SELECT preferred_date, preferred_time FROM leads
+         WHERE status IN ('confirmed','met') AND preferred_date >= date('now')`,
+      ),
+    ]);
+
+    settings = new Map((s.results ?? []).map((r: any) => [r.key, r.value]));
+    windows = (a.results ?? []) as AvailabilityWindow[];
+    blockedDates = new Map((b.results ?? []).map((r: any) => [r.date, r.reason ?? "Unavailable"]));
+
+    for (const row of (l.results ?? []) as any[]) {
+      if (!row.preferred_date || !row.preferred_time) continue;
+      const set = booked.get(row.preferred_date) ?? new Set<string>();
+      set.add(row.preferred_time);
+      booked.set(row.preferred_date, set);
+    }
+  } catch (err) {
+    console.error("[book] availability read failed", err);
+  }
+}
+
+const num = (key: string, fallback: number) => Number(settings.get(key)) || fallback;
+const val = (key: string) => {
+  const v = settings.get(key);
+  return !v || v === "PENDING" ? null : v;
+};
+
+const bookingsPaused = settings.get("bookings_paused") === "1";
+
+const allDays = buildAvailability({
+  windows,
+  blockedDates,
+  booked,
+  config: {
+    appointmentMinutes: num("appointment_minutes", 30),
+    bufferMinutes: num("buffer_minutes", 15),
+    maxPerDay: num("max_per_day", 4),
+    bookingsPaused,
+  },
+});
+
+// Only available slot times cross the wire.
+const days = toCompact(allDays);
+
+const whatsapp = val("whatsapp");
+const phone = val("phone");
+const phoneDisplay = phone ?? site.contact.phoneDisplay;
+const phoneHref = phone ? `tel:${phone.replace(/\s/g, "")}` : null;
+
+// Arriving from a service page pre-selects that service.
+const initialService = Astro.url.searchParams.get("service") ?? undefined;
+const initialLifeStage = Astro.url.searchParams.get("stage") ?? undefined;
+const referringPage = Astro.request.headers.get("referer") ?? undefined;
+---
+
+<Layout
+  title="Book a consultation"
+  description="Book a free, no-obligation consultation with Thushara Rathnayake. Takes about 90 seconds."
+  bareChrome
+  noindex
+>
+  <header slot="header" class="sticky top-0 z-40 border-b border-warm-200 bg-cream-50/95 backdrop-blur">
+    <div class="container-narrow flex h-16 items-center justify-between px-5">
+      <a href="/" class="flex items-center gap-2.5">
+        <svg width="26" height="24" viewBox="0 0 26 24" fill="none" aria-hidden="true">
+          <path d="M1 7h24" stroke="#12544A" stroke-width="2" stroke-linecap="round" />
+          <path d="M12 7v16" stroke="#12544A" stroke-width="2" stroke-linecap="round" />
+          <circle cx="20" cy="7" r="4" fill="#C9962F" />
+        </svg>
+        <span class="font-display text-[15px] font-bold text-ink-900">{site.name}</span>
+      </a>
+
+      <div class="flex items-center gap-4">
+        {phoneHref && (
+          <a href={phoneHref} class="hidden text-small font-bold text-teal-600 sm:block">{phoneDisplay}</a>
+        )}
+        <a href="/" class="min-h-11 text-small font-bold text-warm-500 hover:text-warm-900 flex items-center">Exit</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="container-narrow px-5 py-10 md:py-16">
+    <div class="md:grid md:grid-cols-[minmax(0,1fr)_300px] md:gap-16 md:items-start">
+      <div>
+        <BookingForm
+          client:load
+          days={days}
+          bookingsPaused={bookingsPaused}
+          whatsappNumber={whatsapp}
+          phoneDisplay={phoneDisplay}
+          phoneHref={phoneHref}
+          initialService={initialService}
+          initialLifeStage={initialLifeStage}
+          referringPage={referringPage}
+        />
+      </div>
+
+      {/* Reassurance rail — desktop only. You should see who you're
+          about to meet before you hand over your number. */}
+      <aside class="mt-14 hidden md:mt-0 md:block">
+        <div class="rounded-xl border border-warm-200 bg-cream-100 p-6">
+          <div
+            class="mb-4 flex aspect-[3/4] items-center justify-center rounded-lg border border-warm-200 bg-warm-100 text-center"
+            data-slot="IMG-HERO-01"
+          >
+            <span class="px-4 text-caption text-warm-500">
+              IMG-HERO-01<br />Portrait · 3:4<br />pending
+            </span>
+          </div>
+          <p class="font-display text-h4 font-bold text-ink-900">{site.name}</p>
+          <p class="mt-0.5 text-small text-warm-500">{site.title}</p>
+
+          <dl class="mt-5 space-y-3 border-t border-warm-200 pt-5">
+            <div class="flex items-baseline justify-between gap-3">
+              <dt class="text-small text-warm-700">Experience</dt>
+              <dd class="font-display text-h4 font-extrabold tabular text-teal-600">
+                {num("years_experience", site.credentials.yearsExperience)} yrs
+              </dd>
+            </div>
+            <div class="flex items-baseline justify-between gap-3">
+              <dt class="text-small text-warm-700">MDRT</dt>
+              <dd class="font-display text-h4 font-extrabold tabular text-teal-600">
+                {num("mdrt_years", site.credentials.mdrtYears)}×
+              </dd>
+            </div>
+          </dl>
+
+          <p class="mt-5 border-t border-warm-200 pt-5 text-small leading-relaxed text-warm-700">
+            There's nothing to prepare, and nothing to decide on the call. I'll ask about your
+            situation and tell you honestly what you need — and what you don't.
+          </p>
+        </div>
+      </aside>
+    </div>
+  </div>
+</Layout>

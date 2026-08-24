@@ -1,0 +1,71 @@
+---
+/**
+ * Base layout.
+ *
+ * Fonts are preloaded and self-hosted — same-origin delivery is
+ * measurably faster on Sri Lankan mobile data, and this site's job is
+ * to load instantly inside the WhatsApp in-app browser.
+ */
+import "../styles/global.css";
+import { site } from "../lib/site";
+
+interface Props {
+  title: string;
+  description?: string;
+  /** Suppress the sticky mobile action bar — /book competes with it. */
+  bareChrome?: boolean;
+  ogImage?: string;
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description = "Senior Financial Consultant in Sri Lanka. 16 years, 14× MDRT Lifetime Member. Insurance and financial planning explained in plain language.",
+  bareChrome = false,
+  ogImage,
+  noindex = false,
+} = Astro.props;
+
+const fullTitle = title === site.name ? `${site.name} — ${site.title}` : `${title} — ${site.name}`;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
+---
+
+<!doctype html>
+<html lang={site.lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+
+    {/* The WhatsApp preview card is often the real first impression. */}
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={site.locale} />
+    {ogImage && <meta property="og:image" content={new URL(ogImage, Astro.site ?? site.url).toString()} />}
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <meta name="theme-color" content="#06231F" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    {/* Only the two faces used above the fold are preloaded. */}
+    <link rel="preload" href="/fonts/satoshi-regular.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/cabinet-grotesk-extrabold.woff2" as="font" type="font/woff2" crossorigin />
+  </head>
+
+  <body class="bg-cream-50 text-warm-900 antialiased">
+    <a href="#main" class="skip-link">Skip to content</a>
+
+    <slot name="header" />
+
+    <main id="main" class={bareChrome ? "" : "pb-20 md:pb-0"}>
+      <slot />
+    </main>
+
+    <slot name="footer" />
+  </body>
+</html>
