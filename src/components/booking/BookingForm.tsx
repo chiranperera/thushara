@@ -868,7 +868,7 @@ function Confirmed({
   whatsappNumber: string | null;
   phoneDisplay: string;
   phoneHref: string | null;
-  topRef: React.RefObject<HTMLDivElement | null>;
+  topRef: { current: HTMLDivElement | null };
 }) {
   const first = (values.name ?? "").split(" ")[0];
   const when = values.preferred_date ? formatLongDayLabel(values.preferred_date) : "";
@@ -965,7 +965,7 @@ const inputClass = (error?: string) =>
     error ? "border-[1.5px] border-danger" : "border-warm-200 focus:border-teal-400"
   }`;
 
-function Label({ children }: { children: React.ReactNode }) {
+function Label({ children }: { children: any }) {
   return <p className="mb-2 text-small font-bold text-warm-800">{children}</p>;
 }
 
@@ -980,7 +980,7 @@ function Field({
   error?: string;
   valid?: boolean;
   optional?: boolean;
-  children: React.ReactNode;
+  children: any;
 }) {
   return (
     <div>
@@ -1016,7 +1016,7 @@ function Reveal({
 }: {
   label: string;
   error?: string;
-  children: React.ReactNode;
+  children: any;
 }) {
   return (
     <div className="mt-6 animate-[reveal_260ms_cubic-bezier(0.2,0,0,1)]">

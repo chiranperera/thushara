@@ -1,7 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 
-import react from '@astrojs/react';
+import preact from '@astrojs/preact';
 import tailwindcss from '@tailwindcss/vite';
 import cloudflare from '@astrojs/cloudflare';
 
@@ -9,7 +9,10 @@ import cloudflare from '@astrojs/cloudflare';
 export default defineConfig({
   site: 'https://example.com', // PENDING — domain not yet registered
 
-  integrations: [react()],
+  // Preact with compat: identical API for the five hooks this site
+  // uses, ~40KB less JavaScript over the wire. On Sri Lankan mobile
+  // data that is a real difference, not a micro-optimisation.
+  integrations: [preact({ compat: true })],
 
   vite: {
     plugins: [tailwindcss()],

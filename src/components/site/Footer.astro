@@ -1,0 +1,89 @@
+---
+import { services, site } from "../../lib/site";
+import type { SiteSettings } from "../../lib/settings";
+
+interface Props { settings: SiteSettings }
+const { settings } = Astro.props;
+const year = new Date().getFullYear();
+const more = [["/about","About"],["/process","Process"],["/testimonials","Testimonials"],["/gallery","Gallery"],["/resources","Resources"],["/faq","FAQ"],["/contact","Contact"]];
+---
+
+<footer class="bg-ink-900 text-cream-50/78">
+  <div class="container-default px-5 py-14 md:py-16">
+    <div class="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr_1.1fr]">
+      <div>
+        <div class="flex items-center gap-2.5">
+          <svg width="26" height="24" viewBox="0 0 26 24" fill="none" aria-hidden="true">
+            <path d="M1 7h24" stroke="#FBFAF6" stroke-width="2" stroke-linecap="round" />
+            <path d="M12 7v16" stroke="#FBFAF6" stroke-width="2" stroke-linecap="round" />
+            <circle cx="20" cy="7" r="4" fill="#C9962F" />
+          </svg>
+          <span class="font-display text-h4 font-bold text-cream-50">{site.name}</span>
+        </div>
+        <p class="mt-4 max-w-[38ch] text-small leading-relaxed">
+          {site.title}, {site.employer}. {settings.yearsExperience} years advising Sri Lankan professionals and their families.
+        </p>
+      </div>
+
+      <div>
+        <p class="overline mb-4 text-gold-400">Services</p>
+        <ul class="flex flex-col gap-2.5">
+          {services.map((s) => (
+            <li><a href={`/services/${s.slug}`} class="text-small hover:text-cream-50">{s.title}</a></li>
+          ))}
+        </ul>
+      </div>
+
+      <div>
+        <p class="overline mb-4 text-gold-400">More</p>
+        <ul class="flex flex-col gap-2.5">
+          {more.map(([href,label]) => (
+            <li><a href={href} class="text-small hover:text-cream-50">{label}</a></li>
+          ))}
+        </ul>
+      </div>
+
+      <div>
+        <p class="overline mb-4 text-gold-400">Get in touch</p>
+        <ul class="flex flex-col gap-2.5 text-small">
+          {settings.phoneHref
+            ? <li><a href={settings.phoneHref} class="font-bold text-cream-50 hover:text-teal-300">{settings.phone}</a></li>
+            : <li class="text-cream-50/40">Phone — pending</li>}
+          {settings.whatsappHref
+            ? <li><a href={settings.whatsappHref} class="hover:text-cream-50">WhatsApp · {settings.whatsapp}</a></li>
+            : <li class="text-cream-50/40">WhatsApp — pending</li>}
+          {settings.emailHref
+            ? <li><a href={settings.emailHref} class="hover:text-cream-50">{settings.email}</a></li>
+            : <li class="text-cream-50/40">Email — pending</li>}
+          <li class="pt-1 text-cream-50/60">{settings.serviceArea}</li>
+        </ul>
+      </div>
+    </div>
+
+    {/* Credentials must be present on every page. */}
+    <div class="mt-12 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-cream-50/12 pt-7 font-display text-small font-bold text-cream-50">
+      <span>{settings.yearsExperience} Years</span>
+      <span aria-hidden="true" class="text-gold-500">·</span>
+      <span>{settings.mdrtYears}× MDRT {settings.mdrtStatus}</span>
+      <span aria-hidden="true" class="text-gold-500">·</span>
+      <span>{settings.recognition}</span>
+    </div>
+
+    {/* Employer named in text only — no SLIC logo, no SLIC colours.
+        Exact regulatory wording still to be confirmed: see
+        design-brief/11, items A1–A3. */}
+    <p class="mt-6 max-w-[80ch] text-caption leading-relaxed text-cream-50/50">
+      {site.name} is a {site.title} at {site.employer}. All policies are underwritten by
+      Sri Lanka Insurance Corporation Limited. This website is his personal professional profile.
+      Information here is general and is not personalised financial advice; cover is subject to the
+      terms of the policy issued.
+    </p>
+
+    <div class="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-cream-50/12 pt-6 text-caption text-cream-50/50">
+      <a href="/privacy" class="hover:text-cream-50">Privacy</a>
+      <a href="/terms" class="hover:text-cream-50">Terms</a>
+      <a href="/disclaimer" class="hover:text-cream-50">Disclaimer</a>
+      <span class="ml-auto">© {year} {site.name}</span>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,30 @@
+---
+/**
+ * Sticky mobile action bar — the single highest-impact conversion
+ * element on the site. Suppressed on /book, where it competes with
+ * the form itself.
+ */
+import type { SiteSettings } from "../../lib/settings";
+interface Props { settings: SiteSettings; message?: string }
+const { settings, message } = Astro.props;
+const wa = settings.whatsapp
+  ? `https://wa.me/${settings.whatsapp.replace(/\D/g, "")}${message ? `?text=${encodeURIComponent(message)}` : ""}`
+  : null;
+---
+
+<div class="fixed inset-x-0 bottom-0 z-50 bg-ink-900 pb-[env(safe-area-inset-bottom,0)] lg:hidden">
+  <div class={`grid gap-2 p-2.5 ${wa ? "grid-cols-2" : "grid-cols-1"}`}>
+    {wa && (
+      <a href={wa} class="flex min-h-13 items-center justify-center gap-2 rounded-full bg-whatsapp text-small font-bold text-white">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M17.5 14.4c-.3-.2-1.7-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.7 1-.9 1.2-.2.2-.3.2-.6.1-1.7-.9-2.9-1.6-4-3.5-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5s-.7-1.6-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5 1.9.8 2.6.9 3.5.7.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3z"/>
+          <path d="M12 2a10 10 0 00-8.6 15L2 22l5.2-1.4A10 10 0 1012 2zm0 18.2c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-3.1.8.8-3-.2-.3A8.2 8.2 0 1112 20.2z"/>
+        </svg>
+        WhatsApp
+      </a>
+    )}
+    <a href="/book" class="flex min-h-13 items-center justify-center rounded-full bg-gold-500 text-small font-bold text-ink-900">
+      Book a consultation
+    </a>
+  </div>
+</div>

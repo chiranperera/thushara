@@ -137,25 +137,3 @@ export type LeadData = z.output<typeof leadSchema>;
 
 export const stepSchemas = [step1Schema, step2Schema, step3Schema, step4Schema] as const;
 export const TOTAL_STEPS = 4;
-
-// ---------------------------------------------------------------- resolver
-
-/**
- * Minimal Zod resolver for react-hook-form.
- * Written by hand because @hookform/resolvers pins Zod 3 while Astro 7
- * ships Zod 4 — one fewer dependency and no version conflict.
- */
-export function zodResolver<T extends z.ZodTypeAny>(schema: T) {
-  return async (values: unknown) => {
-    const result = await schema.safeParseAsync(values);
-    if (result.success) return { values: result.data, errors: {} };
-
-    const errors: Record<string, { type: string; message: string }> = {};
-    for (const issue of result.error.issues) {
-      const path = issue.path.join(".") || "root";
-      // Keep the first error per field — showing five at once is noise.
-      if (!errors[path]) errors[path] = { type: issue.code, message: issue.message };
-    }
-    return { values: {}, errors };
-  };
-}
