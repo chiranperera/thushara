@@ -19,6 +19,7 @@ import Footer from "../components/site/Footer.astro";
 import StickyBar from "../components/site/StickyBar.astro";
 import MilestoneLine from "../components/site/MilestoneLine.tsx";
 import LifeStageServices from "../components/site/LifeStageServices.tsx";
+import IconCarousel from "../components/site/IconCarousel.tsx";
 import { getSiteSettings, EDGE_CACHE, whatsappHref } from "../lib/settings";
 import { services, lifeStages, site } from "../lib/site";
 
@@ -72,6 +73,18 @@ const guides = [
   { title: "How Much Life Cover Does Your Family Need?", body: "Work out your number in about ten minutes.", slot: "PDF-003" },
 ];
 
+// Order and labels taken from the design's carousel component.
+const carouselIcons = [
+  { icon: "motor", label: "Motor" },
+  { icon: "health", label: "Health" },
+  { icon: "life", label: "Life & income protection" },
+  { icon: "pension", label: "Pension / retirement" },
+  { icon: "travel", label: "Travel" },
+  { icon: "education", label: "Children\u2019s education" },
+  { icon: "house", label: "House & property" },
+  { icon: "indemnity", label: "Professional indemnity" },
+];
+
 const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask about insurance.");
 ---
 
@@ -119,26 +132,11 @@ const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask abou
         <span class="text-body text-cream-50/55">Free. No obligation.</span>
       </div>
 
-      <!-- Service icon band. Static rather than the design's auto-shifting
-           carousel: 2s motion costs JavaScript and attention for no gain
-           in comprehension, and the brief rules out decorative motion. -->
-      <ul class="mt-12 hidden grid-cols-6 items-end gap-4 lg:grid" aria-hidden="true">
-        {["indemnity", "motor", "life", "health", "education", "pension"].map((icon, i) => {
-          // Centre pair sits largest and brightest, falling away toward
-          // the edges — the design's depth cue, without the animation.
-          const dist = Math.abs(2.5 - i);
-          const size = Math.round(78 - dist * 9);
-          return (
-            <li class="flex justify-center">
-              <img
-                src={`/icons/cut-${icon}.png`} alt="" width={size} height={size} loading="lazy" decoding="async"
-                class="object-contain"
-                style={`width:${size}px;height:${size}px;opacity:${(0.85 - dist * 0.16).toFixed(2)};filter:drop-shadow(0 0 22px rgba(46,214,196,${(0.45 - dist * 0.1).toFixed(2)}))`}
-              />
-            </li>
-          );
-        })}
-      </ul>
+      <!-- Icon carousel — eight services orbiting a centre slot,
+           advancing every 2s. Ported from the design component. -->
+      <div class="mt-10 hidden lg:block">
+        <IconCarousel client:visible icons={carouselIcons} />
+      </div>
     </div>
 
     <!-- portrait -->
