@@ -150,7 +150,11 @@ const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask abou
           src="/img/hero-portrait-cut.webp"
           alt={`${site.name}, ${site.title}`}
           width="1045" height="1399" fetchpriority="high" decoding="async"
-          class="absolute bottom-0 left-1/2 h-full w-full -translate-x-1/2 object-contain object-bottom"
+          {/* On desktop the portrait sits at 70% height, anchored left,
+              which leaves clear space above, below and to its right.
+              Mobile keeps the full-bleed bottom-anchored crop — there
+              is no room to inset it on a phone. */}
+          class="absolute bottom-0 left-1/2 h-full w-full -translate-x-1/2 object-contain object-bottom lg:bottom-[7%] lg:left-0 lg:h-[70%] lg:translate-x-0 lg:[object-position:left_bottom]"
         />
       </picture>
     </div>

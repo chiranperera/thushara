@@ -160,9 +160,24 @@ export default function IconCarousel({
 
   const sz = compact ? size * 0.62 : size;
 
+  /**
+   * Headroom for the glow. The row has to keep `overflow: hidden` so an
+   * icon fading in at the far edge doesn't drift across the hero — CSS
+   * can't clip one axis and not the other. So instead the box grows by
+   * GLOW on all four sides and pulls the same amount back in as
+   * negative margin: the glow gets room to fall off naturally, and the
+   * surrounding layout sits exactly where it did before.
+   */
+  const GLOW = 44;
+  // The whole block is pointer-events-none: the taller box reaches up
+  // behind the CTA button above it, and this row is decorative.
+
   return (
-    <div ref={wrap} aria-hidden="true" className="select-none">
-      <div className="relative overflow-hidden" style={{ height: sz + 10 }}>
+    <div ref={wrap} aria-hidden="true" className="pointer-events-none select-none">
+      <div
+        className="relative overflow-hidden"
+        style={{ height: sz + 10 + GLOW * 2, marginTop: -GLOW, marginBottom: -GLOW }}
+      >
         {icons.map((item, i) => (
           <img
             key={item.icon}
