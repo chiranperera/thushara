@@ -1,0 +1,84 @@
+---
+/**
+ * Plain-English gloss on an insurance term.
+ *
+ * Built from a span + button rather than <details>: Chrome forces a
+ * line break around <details> even at display:inline, which broke
+ * sentences mid-phrase. A button is genuinely inline, keyboard
+ * reachable, and opens on :focus-within — which is what makes it work
+ * on touch, where :hover does not exist.
+ */
+import { gloss } from "../../lib/glossary";
+
+interface Props { term: string; label?: string }
+const { term, label } = Astro.props;
+const text = gloss(term);
+const shown = label ?? term;
+---
+
+{text ? (
+  <span class="gloss">
+    <button type="button" class="gloss-term" aria-describedby={`g-${term.replace(/\W+/g, "-")}`}>
+      {shown}
+    </button>
+    <span role="tooltip" id={`g-${term.replace(/\W+/g, "-")}`} class="gloss-panel">{text}</span>
+  </span>
+) : (
+  <span>{shown}</span>
+)}
+
+<style>
+  .gloss {
+    display: inline;
+    position: relative;
+  }
+
+  .gloss-term {
+    display: inline;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    text-align: inherit;
+    cursor: help;
+    /* The dotted underline is the affordance. */
+    border-bottom: 1px dotted currentColor;
+  }
+
+  .gloss-panel {
+    position: absolute;
+    left: 0;
+    top: calc(100% + 10px);
+    z-index: 30;
+    display: none;
+    width: max-content;
+    max-width: min(30ch, 76vw);
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--color-warm-200);
+    background: var(--color-cream-50);
+    box-shadow: 0 12px 32px rgba(22, 26, 25, 0.12);
+    font-family: var(--font-sans);
+    font-size: var(--text-small);
+    font-weight: 400;
+    font-style: normal;
+    line-height: 1.55;
+    letter-spacing: normal;
+    color: var(--color-warm-700);
+    text-align: left;
+    white-space: normal;
+  }
+
+  /* Hover on pointer devices; focus-within covers keyboard AND touch,
+     since tapping the button focuses it. */
+  .gloss:hover > .gloss-panel,
+  .gloss:focus-within > .gloss-panel {
+    display: block;
+  }
+
+  /* Near the right edge the panel would overflow — flip it. */
+  @media (max-width: 640px) {
+    .gloss-panel { left: auto; right: 0; }
+  }
+</style>

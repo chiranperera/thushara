@@ -1,0 +1,33 @@
+---
+/**
+ * Renders a string, wrapping any known glossary term in <Gloss>.
+ * Longest terms match first so "third-party liability" wins over
+ * "third-party". Each term is glossed once per block — repeating the
+ * dotted underline five times in a paragraph is noise.
+ */
+import Gloss from "./Gloss.astro";
+import { glossary } from "../../lib/glossary";
+
+interface Props { text: string }
+const { text } = Astro.props;
+
+const terms = Object.keys(glossary).sort((a, b) => b.length - a.length);
+const pattern = new RegExp(`\\b(${terms.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b`, "gi");
+
+type Piece = { type: "text" | "term"; value: string };
+const pieces: Piece[] = [];
+const used = new Set<string>();
+let last = 0;
+
+for (const m of text.matchAll(pattern)) {
+  const key = m[0].toLowerCase();
+  if (used.has(key)) continue;
+  used.add(key);
+  if (m.index! > last) pieces.push({ type: "text", value: text.slice(last, m.index) });
+  pieces.push({ type: "term", value: m[0] });
+  last = m.index! + m[0].length;
+}
+if (last < text.length) pieces.push({ type: "text", value: text.slice(last) });
+---
+
+{pieces.map((p) => (p.type === "term" ? <Gloss term={p.value} label={p.value} /> : <Fragment set:html={p.value} />))}

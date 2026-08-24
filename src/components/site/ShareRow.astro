@@ -1,0 +1,49 @@
+---
+/**
+ * "Know someone who needs this?" — the growth mechanism.
+ * This site spreads by being forwarded, so sharing is a designed
+ * element, not an afterthought.
+ */
+interface Props { url: string; title: string; whatsapp: string | null }
+const { url, title } = Astro.props;
+const waShare = `https://wa.me/?text=${encodeURIComponent(`${title} — ${url}`)}`;
+const mailto = `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(`Thought this might be useful:\n\n${url}`)}`;
+---
+
+<section class="border-y border-warm-200 bg-cream-100">
+  <div class="container-default flex flex-wrap items-center justify-between gap-6 px-5 py-8">
+    <p class="font-serif text-h3 italic text-teal-600">Know someone who needs this?</p>
+
+    <div class="flex flex-wrap gap-3">
+      <a href={waShare} target="_blank" rel="noopener"
+         class="flex min-h-12 items-center gap-2.5 rounded-full border-[1.5px] border-warm-300 px-6 text-body font-bold text-ink-900 hover:border-teal-600">
+        <span aria-hidden="true" class="size-2.5 rounded-full bg-whatsapp"></span>WhatsApp
+      </a>
+      <button type="button" data-copy={url}
+              class="flex min-h-12 items-center rounded-full border-[1.5px] border-warm-300 px-6 text-body font-bold text-ink-900 hover:border-teal-600">
+        <span data-copy-label>Copy link</span>
+      </button>
+      <a href={mailto}
+         class="flex min-h-12 items-center rounded-full border-[1.5px] border-warm-300 px-6 text-body font-bold text-ink-900 hover:border-teal-600">
+        Email
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+  for (const btn of document.querySelectorAll<HTMLButtonElement>("[data-copy]")) {
+    btn.addEventListener("click", async () => {
+      const label = btn.querySelector("[data-copy-label]")!;
+      try {
+        await navigator.clipboard.writeText(btn.dataset.copy!);
+        label.textContent = "Copied ✓";
+      } catch {
+        // Clipboard is blocked on insecure origins and some in-app
+        // browsers — say so rather than silently doing nothing.
+        label.textContent = "Press ⌘/Ctrl+C";
+      }
+      setTimeout(() => { label.textContent = "Copy link"; }, 2200);
+    });
+  }
+</script>

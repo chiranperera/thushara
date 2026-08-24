@@ -1,0 +1,432 @@
+---
+/**
+ * /services/[slug] — the service page template.
+ * Built against "04 Service Pages.dc.html".
+ *
+ * This page is frequently someone's FIRST and ONLY impression,
+ * arriving as a WhatsApp link. It has to establish credibility, explain
+ * the product in plain English, and produce a booking, without the
+ * visitor ever seeing the homepage. Hence the credentials strip, the
+ * standalone CTA, and the share row.
+ */
+export const prerender = false;
+
+import { env } from "cloudflare:workers";
+import Layout from "../../layouts/Layout.astro";
+import Header from "../../components/site/Header.astro";
+import Footer from "../../components/site/Footer.astro";
+import StickyBar from "../../components/site/StickyBar.astro";
+import GlossedText from "../../components/site/GlossedText.astro";
+import Gloss from "../../components/site/Gloss.astro";
+import ShareRow from "../../components/site/ShareRow.astro";
+import { getSiteSettings, EDGE_CACHE, whatsappHref } from "../../lib/settings";
+import { services, site, getService } from "../../lib/site";
+import { serviceContent, CLAIM_STEPS } from "../../lib/service-content";
+
+const { slug } = Astro.params;
+const meta = getService(slug ?? "");
+const content = serviceContent[slug ?? ""];
+if (!meta || !content) return Astro.redirect("/services");
+
+const bindings = env as unknown as Record<string, any>;
+const settings = await getSiteSettings(bindings.DB);
+Astro.response.headers.set("cache-control", EDGE_CACHE);
+
+const wa = whatsappHref(
+  settings.whatsapp,
+  `Hi Thushara, I'm reading about ${content.title} and would like to know more.`,
+);
+
+const related = meta.related.map((s) => getService(s)!).filter(Boolean);
+
+// The compact milestone strip — six fixed points, this product's highlighted.
+const MILESTONES = [
+  { age: 28, label: "First car" },
+  { age: 32, label: "Qualify & practise" },
+  { age: 36, label: "Marriage & first child" },
+  { age: 42, label: "Children's education" },
+  { age: 50, label: "Peak earnings" },
+  { age: 58, label: "Retire with an income" },
+];
+const activeIdx = Math.max(0, MILESTONES.findIndex((m) => m.age === content.milestoneAge));
+const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
+---
+
+<Layout
+  title={content.title}
+  description={`${content.promise} ${content.intro.slice(0, 110)}…`}
+>
+  <Header slot="header" settings={settings} />
+
+  <!-- ============ HERO ============ -->
+  <section class="relative overflow-hidden bg-cream-100">
+    <img
+      src={`/icons/cut-${meta.icon}.png`} alt="" aria-hidden="true"
+      width="280" height="280" loading="eager" decoding="async"
+      class="pointer-events-none absolute -right-10 top-6 hidden w-[300px] opacity-[0.07] lg:block xl:right-16 xl:w-[340px]"
+    />
+    <div class="container-default relative px-5 py-12 md:py-16">
+      <nav aria-label="Breadcrumb" class="text-small text-warm-500">
+        <a href="/" class="hover:text-teal-600">Home</a>
+        <span aria-hidden="true" class="mx-2">/</span>
+        <a href="/services" class="hover:text-teal-600">Services</a>
+        <span aria-hidden="true" class="mx-2">/</span>
+        <span class="text-warm-900">{content.title}</span>
+      </nav>
+
+      <p class="overline mt-7 text-teal-600">{content.overline}</p>
+      <h1 class="mt-4 max-w-[17ch] font-display text-display font-extrabold leading-[1.04] tracking-[-0.03em] text-ink-900">
+        {content.title}
+      </h1>
+      <p class="mt-5 max-w-[24ch] font-serif text-h2 italic leading-tight text-teal-600">
+        {content.promise}
+      </p>
+      <p class="mt-7 max-w-[62ch] text-body-lg leading-relaxed text-warm-700">{content.intro}</p>
+
+      <div class="mt-9 flex flex-wrap items-center gap-4">
+        <a href={`/book?service=${meta.slug}`} class="flex min-h-14 items-center rounded-full bg-gold-500 px-8 text-h4 font-bold text-ink-900 transition-colors hover:bg-gold-400">
+          Book a consultation
+        </a>
+        {wa && (
+          <a href={wa} class="flex min-h-14 items-center gap-2.5 rounded-full border-[1.5px] border-warm-300 px-7 text-h4 font-bold text-ink-900 transition-colors hover:border-teal-600">
+            <span aria-hidden="true" class="size-2.5 rounded-full bg-whatsapp"></span>WhatsApp about this
+          </a>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CREDENTIALS STRIP ============
+       This page must carry authority on its own — most visitors
+       arrive here without ever seeing the homepage. -->
+  <section class="bg-ink-900">
+    <div class="container-default flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-5 text-small">
+      <span class="font-bold text-cream-50">{settings.yearsExperience} years</span>
+      <span aria-hidden="true" class="text-gold-500">●</span>
+      <span class="font-bold text-cream-50">{settings.mdrtYears}× MDRT {settings.mdrtStatus}</span>
+      <span aria-hidden="true" class="text-gold-500">●</span>
+      <span class="font-bold text-cream-50">{settings.recognition}</span>
+      <span aria-hidden="true" class="text-gold-500">●</span>
+      <span class="text-cream-50/55">{site.employer}</span>
+    </div>
+  </section>
+
+  <!-- ============ IS THIS FOR YOU ============ -->
+  <section class="bg-cream-50 py-16 md:py-20">
+    <div class="container-default px-5">
+      <h2 class="font-display text-h2 font-extrabold text-teal-600">Is this for you?</h2>
+
+      <ul class="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {content.audiences.map((a, i) => {
+          // The first two are the priority audiences for this page.
+          const lead = i < 2;
+          return (
+            <li class={`flex flex-col rounded-[20px] border p-7 ${lead ? "border-ink-800 bg-ink-900" : "border-warm-200 bg-white"}`}>
+              <span aria-hidden="true" class={`flex size-10 items-center justify-center rounded-[10px] ${lead ? "bg-cream-50/8" : "bg-cream-100"}`}>
+                <span class={`size-3 rotate-45 ${lead ? "bg-cyan-300" : "bg-warm-300"}`}></span>
+              </span>
+              <span class={`mt-14 text-h4 font-bold leading-snug ${lead ? "text-cream-50" : "text-ink-900"}`}>{a}</span>
+            </li>
+          );
+        })}
+        {content.audienceNote && (
+          <li class="hidden rounded-[20px] border border-dashed border-warm-300 p-7 lg:flex">
+            <span class="self-center font-mono text-caption leading-relaxed text-warm-400">{content.audienceNote}</span>
+          </li>
+        )}
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ WHAT IT ACTUALLY COVERS ============ -->
+  <section class="bg-cream-100 py-16 md:py-20">
+    <div class="container-default px-5">
+      <div class="flex flex-wrap items-start justify-between gap-6">
+        <h2 class="font-display text-h2 font-extrabold text-teal-600">What it actually covers</h2>
+        <p class="max-w-[34ch] text-small leading-relaxed text-warm-500">
+          Dotted terms carry a plain-English gloss on hover and on tap.
+        </p>
+      </div>
+
+      <dl class="mt-10 grid gap-x-16 gap-y-9 md:grid-cols-2">
+        {content.covers.map((b) => (
+          <div>
+            <dt class="text-h4 font-bold text-ink-900">
+              <GlossedText text={b.lead} />
+            </dt>
+            <dd class="mt-2 text-body leading-relaxed text-warm-700">
+              <GlossedText text={b.body} />
+              {b.caption && <span class="mt-1.5 block text-small text-warm-500">{b.caption}</span>}
+            </dd>
+          </div>
+        ))}
+      </dl>
+
+      {content.keyTerm && (
+        <div class="mt-11 flex max-w-[70ch] gap-4 rounded-xl border border-warm-200 bg-white p-6">
+          <span aria-hidden="true" class="flex size-6 shrink-0 items-center justify-center rounded-full border-[1.5px] border-gold-600 text-small font-bold text-gold-600">i</span>
+          <p class="text-body leading-relaxed text-warm-700">
+            <strong class="font-bold text-ink-900">{content.keyTerm.term}</strong> {content.keyTerm.body}
+          </p>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- ============ INDICATIVE TABLE ============ -->
+  {content.table && (
+    <section class="bg-cream-50 py-16 md:py-20">
+      <div class="container-default px-5">
+        <p class="overline text-teal-600">{content.table.caption}</p>
+        <h2 class="mt-4 max-w-[20ch] font-display text-h2 font-extrabold text-teal-600">{content.table.heading}</h2>
+
+        <div class="mt-9 overflow-x-auto">
+          <table class="w-full min-w-[640px] overflow-hidden rounded-xl border border-warm-200 bg-white text-left">
+            <thead class="bg-cream-100">
+              <tr>
+                <th scope="col" class="px-6 py-4 text-caption font-bold uppercase tracking-[.06em] text-warm-500">Profession</th>
+                {content.table.columns.map((c) => (
+                  <th scope="col" class="px-6 py-4 text-caption font-bold uppercase tracking-[.06em] text-warm-500">{c}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {content.table.rows.map((r, i) => (
+                <tr class={i < content.table!.rows.length - 1 ? "border-b border-warm-100" : ""}>
+                  <th scope="row" class="px-6 py-5 text-h4 font-bold text-ink-900">{r}</th>
+                  {content.table!.columns.map(() => (
+                    <td class="px-6 py-5 font-mono text-caption text-warm-400">figure pending</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mt-6 flex flex-wrap items-end justify-between gap-5">
+          <p class="max-w-[58ch] text-small leading-relaxed text-warm-500">
+            Indicative guidance only, never a quotation. Actual cover levels depend on your
+            profession, contracts, and claims history. Figures to be supplied by Thushara before launch.
+          </p>
+          <a href={`/book?service=${meta.slug}`} class="flex min-h-13 items-center rounded-full bg-teal-600 px-7 text-body font-bold text-cream-50 hover:bg-teal-500">
+            Discuss this with me
+          </a>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- ============ WHERE THIS SITS ============ -->
+  <section class="bg-ink-900 py-16 md:py-20">
+    <div class="container-default px-5">
+      <p class="overline text-gold-400">Where this sits</p>
+      <h2 class="mt-4 max-w-[26ch] font-display text-h2 font-bold leading-snug text-cream-50">
+        Most people come to me for this at around {content.milestoneAge}.
+      </h2>
+
+      <!-- ages -->
+      <div class="mt-14 hidden grid-cols-6 items-end gap-4 md:grid">
+        {MILESTONES.map((m, i) => (
+          <div>
+            <span class={`block font-display text-h3 font-extrabold tabular ${i === activeIdx ? "text-gold-400" : "text-cream-50/55"}`}>{m.age}</span>
+            <span class={`mt-1 block text-body font-bold ${i === activeIdx ? "text-cream-50" : "text-cream-50/70"}`}>{m.label}</span>
+            {i === activeIdx && <span class="mt-0.5 block text-small text-gold-400">You are here</span>}
+          </div>
+        ))}
+      </div>
+
+      <!-- rule -->
+      <div class="relative mt-6 hidden h-6 md:block">
+        <span aria-hidden="true" class="absolute inset-x-0 top-[11px] h-0.5 bg-teal-500/40"></span>
+        <span
+          aria-hidden="true" class="absolute left-0 top-[11px] h-0.5 bg-gold-500"
+          style={`width:calc((100% - 80px)/6 * ${activeIdx} + ${activeIdx * 16 + 12}px)`}
+        ></span>
+        <div aria-hidden="true" class="absolute inset-0 grid grid-cols-6 items-center gap-4">
+          {MILESTONES.map((_, i) => (
+            <span class="block">
+              {i === activeIdx
+                ? <span class="block size-6 rounded-full bg-gold-500 shadow-[0_0_0_6px_rgba(201,150,47,0.18)]"></span>
+                : i < activeIdx
+                  ? <span class="block size-4 rounded-full bg-gold-500"></span>
+                  : <span class="block size-4 rounded-full border-2 border-teal-500 bg-ink-900"></span>}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <!-- honest cross-sell: what usually comes before and after -->
+      <div class="mt-10 flex flex-wrap gap-x-16 gap-y-6">
+        {content.before && (
+          <div>
+            <p class="overline text-cream-50/50">Usually before this</p>
+            <a href={content.before.href} class="mt-2 block text-h4 font-bold text-cream-50 hover:text-gold-400">
+              {content.before.label} →
+            </a>
+          </div>
+        )}
+        {content.after && (
+          <div>
+            <p class="overline text-cream-50/50">Usually after this</p>
+            <a href={content.after.href} class="mt-2 block text-h4 font-bold text-cream-50 hover:text-gold-400">
+              {content.after.label} →
+            </a>
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ WHY WORK WITH ME ============ -->
+  <section class="bg-cream-50 py-16 md:py-20">
+    <div class="container-default grid gap-12 px-5 lg:grid-cols-[0.75fr_1fr] lg:items-center lg:gap-16">
+      <div class="relative">
+        <div class="flex aspect-4/5 flex-col items-center justify-center gap-2 rounded-xl border border-mint-200 bg-mint-100 p-9 text-center" data-slot="IMG-ABOUT-01">
+          <span aria-hidden="true" class="size-3.5 rotate-45 bg-mint-400"></span>
+          <span class="font-mono text-caption font-bold tracking-wider text-mint-600">IMG-ABOUT-01 · 4:5</span>
+          <span class="max-w-[26ch] font-mono text-caption leading-relaxed text-mint-500">
+            Reused across service pages. Warm, candid, mid-conversation.
+          </span>
+        </div>
+        <div class="absolute -left-4 bottom-12 rounded-lg bg-ink-900 px-6 py-5 sm:-left-8">
+          <span class="block font-display text-h2 font-extrabold tabular text-gold-400">{settings.mdrtYears}×</span>
+          <span class="mt-1 block text-small text-cream-50/70">MDRT {settings.mdrtStatus}</span>
+        </div>
+      </div>
+
+      <div>
+        <p class="overline text-teal-600">Why work with me</p>
+        <h2 class="mt-4 max-w-[18ch] font-display text-h2 font-extrabold text-teal-600">
+          {settings.yearsExperience} years of the same straight answer.
+        </h2>
+        <ul class="mt-8 flex flex-col gap-4">
+          {content.whyMe.map((w) => (
+            <li class="flex gap-3.5">
+              <span aria-hidden="true" class="mt-2.5 size-2 shrink-0 rounded-full bg-gold-500"></span>
+              <span class="text-body-lg leading-relaxed text-warm-800">{w}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CLAIMS ============
+       Thushara is a consultant, not the insurer. This describes his
+       advocacy role accurately and never implies he decides or pays. -->
+  <section class="bg-cream-100 py-16 md:py-20">
+    <div class="container-default px-5">
+      <div class="flex flex-wrap items-start justify-between gap-6">
+        <h2 class="max-w-[16ch] font-display text-h2 font-extrabold text-teal-600">
+          What happens when you need to claim
+        </h2>
+        <p class="max-w-[42ch] text-body leading-relaxed text-warm-700">
+          Claims are assessed and paid by {site.employer}. My role is to make sure yours is
+          presented properly and moves.
+        </p>
+      </div>
+
+      <ol class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {CLAIM_STEPS.map((s) => (
+          <li class="rounded-[20px] border border-warm-200 bg-white p-7">
+            <span class="block font-display text-h2 font-extrabold tabular text-gold-500">{s.n}</span>
+            <span class="mt-4 block text-h4 font-bold leading-snug text-ink-900">{s.lead}</span>
+            <span class="mt-2 block text-body leading-relaxed text-warm-700">{s.body}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section class="bg-cream-50 py-16 md:py-20">
+    <div class="container-default px-5">
+      <h2 class="font-display text-h2 font-extrabold text-teal-600">Questions people actually ask</h2>
+
+      <div class="mt-9 max-w-[860px]">
+        {content.faqs.map((f, i) => (
+          <details class="faq group border-t border-warm-200 last:border-b" open={i === 0}>
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-6 py-6 text-h4 font-bold text-ink-900 [&::-webkit-details-marker]:hidden">
+              {f.q}
+              <span aria-hidden="true" class="relative size-5 shrink-0">
+                <span class="absolute left-0 top-1/2 h-0.5 w-5 -translate-y-1/2 bg-ink-900"></span>
+                <span class="absolute left-1/2 top-0 h-5 w-0.5 -translate-x-1/2 bg-ink-900 transition-opacity group-open:opacity-0"></span>
+              </span>
+            </summary>
+            <p class="max-w-[68ch] pb-6 text-body leading-relaxed text-warm-700">{f.a}</p>
+          </details>
+        ))}
+      </div>
+
+      <a href="/faq" class="mt-7 inline-block text-body font-bold text-teal-600 hover:text-teal-400">
+        All frequently asked questions →
+      </a>
+    </div>
+  </section>
+
+  <!-- ============ SHARE ============
+       This site's growth mechanism is forwarding, so this is a
+       designed element rather than an afterthought. -->
+  <ShareRow url={pageUrl} title={content.title} whatsapp={settings.whatsapp} />
+
+  <!-- ============ RELATED ============ -->
+  <section class="bg-cream-50 py-16 md:py-20">
+    <div class="container-default px-5">
+      <h2 class="font-display text-h2 font-extrabold text-teal-600">What usually goes with this</h2>
+
+      <ul class="mt-9 grid gap-4 md:grid-cols-3">
+        {related.map((r) => (
+          <li>
+            <a
+              href={`/services/${r.slug}`}
+              class="relative flex h-full flex-col overflow-hidden rounded-[20px] border border-cyan-300/14 px-8 pb-7 pt-9 transition-shadow hover:shadow-[0_0_0_1px_rgba(224,180,87,0.35)]"
+              style="background:linear-gradient(165deg,#0A3630 0%,#06231F 70%,#041915 100%)"
+            >
+              <span
+                aria-hidden="true"
+                class="pointer-events-none absolute -right-6 -top-6 size-[150px] bg-contain bg-center bg-no-repeat opacity-30"
+                style={`background-image:url(/icons/cut-${r.icon}.png);filter:drop-shadow(0 0 26px rgba(46,214,196,0.45))`}
+              ></span>
+              <span class="relative mt-12 font-display text-h4 font-bold text-cream-50">{r.title}</span>
+              <span class="relative mt-2.5 flex-1 text-body leading-relaxed text-cream-50/68">{r.short}</span>
+              <span class="relative mt-6 text-body font-bold text-gold-400">Read this →</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ CTA ============ -->
+  <section class="bg-ink-950 py-16 md:py-24">
+    <div class="container-default grid gap-10 px-5 lg:grid-cols-[1.4fr_1fr] lg:items-center">
+      <div>
+        <h2 class="max-w-[20ch] font-display text-h1 font-extrabold leading-tight text-cream-50">
+          {content.closing}
+        </h2>
+        <p class="mt-5 max-w-[52ch] text-body-lg leading-relaxed text-cream-50/70">
+          Contact me today for a free consultation and a personalised {content.title.toLowerCase()} plan.
+        </p>
+      </div>
+
+      <div class="flex flex-col gap-3.5">
+        <a href={`/book?service=${meta.slug}`} class="flex min-h-15 items-center justify-center rounded-lg bg-gold-500 px-8 text-h4 font-bold text-ink-900 hover:bg-gold-400">
+          Book a consultation
+        </a>
+        {wa && (
+          <a href={wa} class="flex min-h-15 items-center justify-center gap-2.5 rounded-lg border border-cream-50/35 px-8 text-h4 font-bold text-cream-50 hover:border-cream-50">
+            <span aria-hidden="true" class="size-2.5 rounded-full bg-whatsapp"></span>WhatsApp
+          </a>
+        )}
+        {settings.phoneHref && (
+          <a href={settings.phoneHref} class="text-center font-display text-h4 font-bold text-cream-50 hover:text-gold-400">
+            {settings.phone}
+          </a>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <Footer slot="footer" settings={settings} />
+  <StickyBar slot="footer" settings={settings} message={`Hi Thushara, I'm reading about ${content.title} and would like to know more.`} />
+</Layout>
