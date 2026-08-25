@@ -1,0 +1,115 @@
+---
+/**
+ * /resources/<slug> — the download page for one guide.
+ *
+ * Gated guides ask for a name and WhatsApp number and nothing else.
+ * Every extra field costs downloads, and the number is the only thing
+ * Thushara actually needs to follow up.
+ */
+export const prerender = false;
+
+import { env } from "cloudflare:workers";
+import Layout from "../../layouts/Layout.astro";
+import Header from "../../components/site/Header.astro";
+import Footer from "../../components/site/Footer.astro";
+import { getSiteSettings, EDGE_CACHE } from "../../lib/settings";
+import { humanSize } from "../../lib/media";
+
+const bindings = env as unknown as Record<string, any>;
+const db = bindings.DB;
+const settings = await getSiteSettings(db);
+
+const { slug } = Astro.params;
+let guide: any = null;
+try {
+  if (db) {
+    guide = await db
+      .prepare(
+        `SELECT id, slug, title, description, file_key, page_count, file_size, gated
+         FROM resources WHERE slug = ? AND published = 1`,
+      )
+      .bind(slug)
+      .first();
+  }
+} catch (e) { console.error("[resource] query failed", e); }
+
+if (!guide) return Astro.redirect("/resources", 302);
+
+// An ungated guide has nothing to ask for, so it goes straight there.
+if (!guide.gated) return Astro.redirect(`/media/${guide.file_key}`, 302);
+
+Astro.response.headers.set("cache-control", EDGE_CACHE);
+const failed = Astro.url.searchParams.get("error");
+---
+
+<Layout title={guide.title} description={guide.description ?? "A free guide."} noindex={true}>
+  <Header slot="header" settings={settings} />
+
+  <section class="bg-cream-100 py-14 md:py-20">
+    <div class="container-prose px-5">
+      <p class="overline text-teal-600">Free guide</p>
+      <h1 class="mt-4 font-display text-h1 font-extrabold leading-tight tracking-[-0.02em] text-ink-900">
+        {guide.title}
+      </h1>
+      {guide.description && (
+        <p class="mt-5 text-body-lg leading-relaxed text-warm-700">{guide.description}</p>
+      )}
+      <p class="mt-4 font-mono text-caption text-warm-500">
+        PDF{guide.page_count ? ` · ${guide.page_count} pages` : ""} · {humanSize(guide.file_size)}
+      </p>
+    </div>
+  </section>
+
+  <section class="bg-cream-50 py-14 md:py-16">
+    <div class="container-prose px-5">
+      {failed && (
+        <p class="mb-6 rounded-lg border border-error/30 bg-error/8 px-4 py-3 text-body text-error" role="alert">
+          Please check the name and number and try once more.
+        </p>
+      )}
+
+      <form method="POST" action="/api/resource-download" class="max-w-[520px]">
+        <input type="hidden" name="slug" value={guide.slug} />
+        {/* Bots fill this in; people never see it. */}
+        <input type="text" name="company" tabindex="-1" autocomplete="off" class="sr-only" aria-hidden="true" />
+
+        <div class="flex flex-col gap-5">
+          <div>
+            <label for="name" class="text-small font-bold text-warm-800">Your name</label>
+            <input id="name" name="name" required autocomplete="name"
+              class="mt-2 h-14 w-full rounded-md border border-warm-200 bg-white px-4 text-body-lg text-ink-900 focus:border-teal-400" />
+          </div>
+          <div>
+            <label for="phone_whatsapp" class="text-small font-bold text-warm-800">WhatsApp number</label>
+            <input id="phone_whatsapp" name="phone_whatsapp" required type="tel" inputmode="tel" autocomplete="tel"
+              placeholder="07X XXX XXXX"
+              class="mt-2 h-14 w-full rounded-md border border-warm-200 bg-white px-4 text-body-lg text-ink-900 focus:border-teal-400" />
+          </div>
+          <div>
+            <label for="email" class="text-small font-bold text-warm-800">
+              Email <span class="font-normal text-warm-500">— optional</span>
+            </label>
+            <input id="email" name="email" type="email" autocomplete="email"
+              class="mt-2 h-14 w-full rounded-md border border-warm-200 bg-white px-4 text-body-lg text-ink-900 focus:border-teal-400" />
+          </div>
+        </div>
+
+        <button type="submit"
+          class="mt-7 flex min-h-15 w-full items-center justify-center rounded-full bg-teal-600 text-h4 font-bold text-cream-50 hover:bg-teal-500 sm:w-auto sm:px-12">
+          Download the guide
+        </button>
+
+        <p class="mt-5 max-w-[46ch] text-small leading-relaxed text-warm-600">
+          I'll use this to send you the guide and nothing else. No list, no forwarding to anyone,
+          and you can ask me to delete it at any time.
+        </p>
+      </form>
+
+      <p class="mt-10 border-t border-warm-200 pt-6 text-body text-warm-600">
+        <a href="/resources" class="font-bold text-teal-600 underline">← All guides</a>
+      </p>
+    </div>
+  </section>
+
+  <Footer slot="footer" settings={settings} />
+</Layout>

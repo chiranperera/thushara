@@ -70,6 +70,18 @@ const qualifications = [
 ];
 
 const mdrtBars = Array.from({ length: settings.mdrtYears }, (_, i) => i);
+
+/** The four most recent photos, once he has uploaded any. */
+let awards: any[] = [];
+try {
+  if (bindings.DB) {
+    const res = await bindings.DB.prepare(
+      `SELECT image_key, thumb_key, alt_text FROM gallery_items
+       WHERE visible = 1 ORDER BY sort_order, created_at DESC LIMIT 4`,
+    ).all();
+    awards = res.results ?? [];
+  }
+} catch (e) { console.error("[about] gallery query failed", e); }
 ---
 
 <Layout
@@ -329,14 +341,27 @@ const mdrtBars = Array.from({ length: settings.mdrtYears }, (_, i) => i);
       </div>
 
       <ul class="mt-9 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {["IMG-GAL-01", "IMG-GAL-02", "IMG-GAL-03", "IMG-GAL-04"].map((slot) => (
-          <li
-            class="flex aspect-square items-center justify-center rounded-xl border border-mint-200 bg-mint-100"
-            data-slot={slot}
-          >
-            <span class="font-mono text-caption text-mint-600">{slot}</span>
-          </li>
-        ))}
+        {awards.length > 0
+          ? awards.map((g: any) => (
+              <li class="overflow-hidden rounded-xl border border-warm-200 bg-cream-100">
+                <a href="/gallery" class="block">
+                  <img
+                    src={`/media/${g.thumb_key ?? g.image_key}`}
+                    alt={g.alt_text}
+                    width="400" height="400" loading="lazy" decoding="async"
+                    class="aspect-square w-full object-cover"
+                  />
+                </a>
+              </li>
+            ))
+          : ["IMG-GAL-01", "IMG-GAL-02", "IMG-GAL-03", "IMG-GAL-04"].map((slot) => (
+              <li
+                class="flex aspect-square items-center justify-center rounded-xl border border-mint-200 bg-mint-100"
+                data-slot={slot}
+              >
+                <span class="font-mono text-caption text-mint-600">{slot}</span>
+              </li>
+            ))}
       </ul>
     </div>
   </section>

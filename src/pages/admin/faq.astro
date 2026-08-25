@@ -1,27 +1,212 @@
 ---
+/**
+ * /admin/faq — Questions.
+ *
+ * The screen leads with the answers still missing, because that is the
+ * actual state of the site: the questions were written from his copy,
+ * the answers have to come from him. A list of empty slots he can fill
+ * one at a time beats a blank page with an "Add" button.
+ */
 export const prerender = false;
+
 import { env } from "cloudflare:workers";
 import AdminLayout from "../../layouts/AdminLayout.astro";
 import { requireAdmin } from "../../lib/auth";
-import { getCounts } from "../../lib/admin-data";
+import { getCounts, SERVICE_LABEL } from "../../lib/admin-data";
+import { faqs as fileFaqs, faqCategories } from "../../lib/faq-content";
 
 const bindings = env as unknown as Record<string, any>;
+const db = bindings.DB;
 const admin = await requireAdmin(Astro.request, bindings.AUTH_SECRET ?? "");
 if (!admin) return Astro.redirect("/admin/login");
-const counts = await getCounts(bindings.DB);
+
+const counts = await getCounts(db);
+const saved = Astro.url.searchParams.get("saved");
+const deleted = Astro.url.searchParams.get("deleted");
+const error = Astro.url.searchParams.get("error");
+
+let rows: any[] = [];
+if (db) {
+  try {
+    const res = await db
+      .prepare(`SELECT id, question, answer, category, service, published, sort_order FROM faqs ORDER BY sort_order, id`)
+      .all();
+    rows = res.results ?? [];
+  } catch (e) {
+    console.error("[admin] faq query failed", e);
+  }
+}
+
+/**
+ * The questions written into the site that still have no real answer.
+ * Matching on the question text means one he has already answered here
+ * drops off this list by itself.
+ */
+const answered = new Set(rows.map((r) => r.question.trim().toLowerCase()));
+const awaiting = fileFaqs
+  .filter((f) => !f.ready && !answered.has(f.q.trim().toLowerCase()))
+  .map((f) => ({ q: f.q, category: f.category }));
+
+const field = "w-full rounded-md border border-warm-200 bg-white px-3.5 py-3 text-body text-ink-900 focus:border-teal-400";
+const services = Object.entries(SERVICE_LABEL).filter(([k]) => !["not-sure", "reviewing-cover"].includes(k));
 ---
 
 <AdminLayout title="Questions" newLeads={counts.newLeads} pendingReviews={counts.pendingReviews}>
   <div class="px-5 py-8 md:px-11 md:py-9">
     <h1 class="font-display text-h1 font-extrabold text-ink-900">Questions</h1>
-    <p class="mt-1.5 text-body text-warm-500">Add and edit the questions people ask you most.</p>
+    <p class="mt-1.5 max-w-[64ch] text-body leading-relaxed text-warm-600">
+      These appear on your <a href="/faq" class="font-bold text-teal-600 underline">Questions page</a>.
+      Anything you tie to a service also shows on that service's own page.
+    </p>
 
-    <div class="mt-8 max-w-[620px] rounded-xl border border-dashed border-warm-300 bg-cream-100 p-9 text-center">
-      <p class="text-h4 font-bold text-ink-900">Not built yet</p>
-      <p class="mx-auto mt-2 max-w-[44ch] text-body leading-relaxed text-warm-700">
-        This screen is specified and coming next. Nothing is lost by it being empty —
-        there is no content waiting for it yet.
+    {saved && <p class="mt-5 rounded-lg border border-teal-200 bg-teal-50 px-4 py-3 text-body text-teal-600">Saved.</p>}
+    {deleted && <p class="mt-5 rounded-lg border border-warm-200 bg-cream-100 px-4 py-3 text-body text-warm-700">Question removed.</p>}
+    {error && <p class="mt-5 rounded-lg border border-error/30 bg-error/8 px-4 py-3 text-body text-error">A question and an answer are both needed.</p>}
+
+    {awaiting.length > 0 && (
+      <div class="mt-8 max-w-[860px] rounded-[18px] border-l-[3px] border-gold-500 bg-gold-100/50 p-6">
+        <p class="text-h4 font-bold text-ink-900">
+          {awaiting.length} questions are on the site with no answer yet
+        </p>
+        <p class="mt-2 max-w-[60ch] text-body leading-relaxed text-warm-800">
+          These were written from your own copy but need your words, not mine — most are about
+          policy terms I shouldn't guess at. Tap one to answer it. Until then the site says the
+          answer is coming rather than inventing one.
+        </p>
+        <ul class="mt-5 flex flex-wrap gap-2">
+          {awaiting.slice(0, 12).map((a) => (
+            <li>
+              <button type="button" data-question={a.q} data-category={a.category}
+                class="js-prefill rounded-full border border-warm-300 bg-white px-4 py-2.5 text-left text-small text-warm-800 hover:border-teal-500 hover:text-teal-600">
+                {a.q}
+              </button>
+            </li>
+          ))}
+        </ul>
+        {awaiting.length > 12 && (
+          <p class="mt-3 text-small text-warm-600">…and {awaiting.length - 12} more, which appear as you work through these.</p>
+        )}
+      </div>
+    )}
+
+    <!-- ============ ADD ============ -->
+    <form method="POST" action="/api/admin/content" id="add-faq" class="mt-8 max-w-[860px] rounded-[18px] border border-warm-200 bg-white p-6 md:p-7">
+      <input type="hidden" name="_kind" value="faq" />
+      <input type="hidden" name="_action" value="create" />
+
+      <h2 class="font-display text-h3 font-extrabold text-ink-900">Add a question</h2>
+
+      <div class="mt-5 flex flex-col gap-4">
+        <div>
+          <label for="question" class="text-small font-bold text-warm-800">The question, as someone would ask it</label>
+          <input id="question" name="question" required class={`${field} mt-2 h-13`}
+            placeholder="What happens if my claim is rejected?" />
+        </div>
+        <div>
+          <label for="answer" class="text-small font-bold text-warm-800">Your answer</label>
+          <textarea id="answer" name="answer" required rows="5" class={`${field} mt-2 leading-relaxed`}
+            placeholder="Say it the way you would on the phone. Plain, honest, and short."></textarea>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label for="category" class="text-small font-bold text-warm-800">Group it under</label>
+            <select id="category" name="category" class={`${field} mt-2 h-13`}>
+              {faqCategories.map((c) => <option value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div>
+            <label for="service" class="text-small font-bold text-warm-800">
+              Also show on <span class="font-normal text-warm-500">— optional</span>
+            </label>
+            <select id="service" name="service" class={`${field} mt-2 h-13`}>
+              <option value="">No particular service page</option>
+              {services.map(([slug, label]) => <option value={slug}>{label}</option>)}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="mt-6 flex min-h-14 items-center justify-center rounded-full bg-teal-600 px-10 text-h4 font-bold text-cream-50 hover:bg-teal-500">
+        Add this question
+      </button>
+    </form>
+
+    <!-- ============ EXISTING ============ -->
+    <h2 class="mt-12 font-display text-h2 font-extrabold text-ink-900">
+      On the site <span class="tabular text-warm-400">{rows.length}</span>
+    </h2>
+
+    {rows.length === 0 ? (
+      <p class="mt-4 max-w-[60ch] text-body leading-relaxed text-warm-600">
+        Nothing added here yet. The Questions page is currently showing the eight answers written
+        from your copy.
       </p>
-    </div>
+    ) : (
+      <ul class="mt-6 flex max-w-[980px] flex-col gap-4">
+        {rows.map((r, i) => (
+          <li class={`rounded-[18px] border border-warm-200 bg-white p-5 ${r.published ? "" : "bg-cream-100 opacity-70"}`}>
+            <form method="POST" action="/api/admin/content" class="flex flex-col gap-3">
+              <input type="hidden" name="_kind" value="faq" />
+              <input type="hidden" name="id" value={r.id} />
+              <input type="hidden" name="dir" value="down" />
+
+              <input name="question" value={r.question} required class={`${field} h-13 font-bold`} />
+              <textarea name="answer" required rows="4" class={`${field} leading-relaxed`}>{r.answer}</textarea>
+
+              <div class="grid gap-3 sm:grid-cols-2">
+                <select name="category" class={`${field} h-12`}>
+                  <option value="">No group</option>
+                  {faqCategories.map((c) => <option value={c} selected={c === r.category}>{c}</option>)}
+                </select>
+                <select name="service" class={`${field} h-12`}>
+                  <option value="">No particular service page</option>
+                  {services.map(([slug, label]) => <option value={slug} selected={slug === r.service}>{label}</option>)}
+                </select>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-2">
+                <button type="submit" name="_action" value="save"
+                  class="flex min-h-12 items-center rounded-full bg-teal-600 px-6 text-body font-bold text-cream-50 hover:bg-teal-500">Save</button>
+                <button type="submit" name="_action" value="toggle" formnovalidate
+                  class="flex min-h-12 items-center rounded-full border-[1.5px] border-warm-300 px-5 text-body font-bold text-warm-700 hover:border-teal-400">
+                  {r.published ? "Hide" : "Show"}
+                </button>
+                {i > 0 && (
+                  <button type="submit" name="_action" value="move" formnovalidate aria-label="Move up" onclick="this.form.dir.value='up'"
+                    class="flex size-12 items-center justify-center rounded-full border-[1.5px] border-warm-300 text-h4 text-warm-700 hover:border-teal-400">↑</button>
+                )}
+                {i < rows.length - 1 && (
+                  <button type="submit" name="_action" value="move" formnovalidate aria-label="Move down" onclick="this.form.dir.value='down'"
+                    class="flex size-12 items-center justify-center rounded-full border-[1.5px] border-warm-300 text-h4 text-warm-700 hover:border-teal-400">↓</button>
+                )}
+                <button type="submit" name="_action" value="delete" formnovalidate
+                  data-confirm="Delete this question?"
+                  class="ml-auto flex min-h-12 items-center px-3 text-body font-bold text-error hover:underline">Delete</button>
+              </div>
+            </form>
+          </li>
+        ))}
+      </ul>
+    )}
   </div>
 </AdminLayout>
+
+<script>
+  // Tapping an unanswered question drops it into the add form, so he
+  // never retypes a question the site already asks.
+  document.querySelectorAll<HTMLButtonElement>(".js-prefill").forEach((b) => {
+    b.addEventListener("click", () => {
+      const q = document.getElementById("question") as HTMLInputElement;
+      const c = document.getElementById("category") as HTMLSelectElement;
+      q.value = b.dataset.question ?? "";
+      if (b.dataset.category) c.value = b.dataset.category;
+      document.getElementById("add-faq")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      (document.getElementById("answer") as HTMLTextAreaElement)?.focus({ preventScroll: true });
+    });
+  });
+
+  document.addEventListener("click", (e) => {
+    const el = (e.target as HTMLElement)?.closest("[data-confirm]");
+    if (el && !confirm(el.getAttribute("data-confirm")!)) e.preventDefault();
+  });
+</script>

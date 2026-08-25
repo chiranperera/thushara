@@ -1,27 +1,176 @@
 ---
+/**
+ * /admin/resources — Guides.
+ *
+ * The download counter is the point of this screen. A guide nobody
+ * takes is worth knowing about, and a gated guide that people do take
+ * is the site's second-best lead source after the booking form.
+ */
 export const prerender = false;
+
 import { env } from "cloudflare:workers";
 import AdminLayout from "../../layouts/AdminLayout.astro";
+import Uploader from "../../components/admin/Uploader.tsx";
 import { requireAdmin } from "../../lib/auth";
 import { getCounts } from "../../lib/admin-data";
+import { humanSize } from "../../lib/media";
+import { lifeStages } from "../../lib/site";
 
 const bindings = env as unknown as Record<string, any>;
+const db = bindings.DB;
 const admin = await requireAdmin(Astro.request, bindings.AUTH_SECRET ?? "");
 if (!admin) return Astro.redirect("/admin/login");
-const counts = await getCounts(bindings.DB);
+
+const counts = await getCounts(db);
+const saved = Astro.url.searchParams.get("saved");
+const deleted = Astro.url.searchParams.get("deleted");
+const error = Astro.url.searchParams.get("error");
+
+let guides: any[] = [];
+if (db) {
+  try {
+    const res = await db
+      .prepare(
+        `SELECT id, slug, title, description, life_stage, file_key, page_count, file_size,
+                download_count, gated, published, sort_order
+         FROM resources ORDER BY sort_order, id`,
+      )
+      .all();
+    guides = res.results ?? [];
+  } catch (e) {
+    console.error("[admin] resources query failed", e);
+  }
+}
+
+const totalDownloads = guides.reduce((n, g) => n + Number(g.download_count ?? 0), 0);
+const stageOptions = lifeStages.map((s) => ({ id: s.id, label: s.label }));
+const field = "h-12 w-full rounded-md border border-warm-200 bg-white px-3.5 text-body text-ink-900 focus:border-teal-400";
 ---
 
 <AdminLayout title="Guides" newLeads={counts.newLeads} pendingReviews={counts.pendingReviews}>
   <div class="px-5 py-8 md:px-11 md:py-9">
     <h1 class="font-display text-h1 font-extrabold text-ink-900">Guides</h1>
-    <p class="mt-1.5 text-body text-warm-500">Upload downloadable PDF guides.</p>
+    <p class="mt-1.5 max-w-[64ch] text-body leading-relaxed text-warm-600">
+      PDFs people can download from your
+      <a href="/resources" class="font-bold text-teal-600 underline">Free guides page</a>. If a
+      guide asks for a name and WhatsApp number, every download arrives in
+      <a href="/admin/leads" class="font-bold text-teal-600 underline">Enquiries</a> tagged with
+      which guide it was.
+    </p>
 
-    <div class="mt-8 max-w-[620px] rounded-xl border border-dashed border-warm-300 bg-cream-100 p-9 text-center">
-      <p class="text-h4 font-bold text-ink-900">Not built yet</p>
-      <p class="mx-auto mt-2 max-w-[44ch] text-body leading-relaxed text-warm-700">
-        This screen is specified and coming next. Nothing is lost by it being empty —
-        there is no content waiting for it yet.
-      </p>
+    {saved && <p class="mt-5 rounded-lg border border-teal-200 bg-teal-50 px-4 py-3 text-body text-teal-600">Saved.</p>}
+    {deleted && <p class="mt-5 rounded-lg border border-warm-200 bg-cream-100 px-4 py-3 text-body text-warm-700">Guide removed.</p>}
+    {error && <p class="mt-5 rounded-lg border border-error/30 bg-error/8 px-4 py-3 text-body text-error">That didn't save. Please try again.</p>}
+
+    <div class="mt-8 max-w-[860px]">
+      <Uploader client:load kind="guide" lifeStages={stageOptions} />
     </div>
+
+    <div class="mt-12 flex flex-wrap items-baseline gap-x-5 gap-y-2">
+      <h2 class="font-display text-h2 font-extrabold text-ink-900">
+        Your guides <span class="tabular text-warm-400">{guides.length}</span>
+      </h2>
+      {totalDownloads > 0 && (
+        <p class="text-body text-warm-600">
+          <span class="font-display text-h4 font-extrabold tabular text-teal-600">{totalDownloads}</span>
+          {" "}downloads in total
+        </p>
+      )}
+    </div>
+
+    {guides.length === 0 ? (
+      <p class="mt-4 max-w-[62ch] rounded-[18px] border border-dashed border-warm-300 bg-cream-100 p-8 text-body leading-relaxed text-warm-700">
+        No guides yet. The Free guides page currently shows the four planned titles as
+        placeholders so the shape of the page is visible — they become real downloads as soon as
+        you upload a PDF with a matching title.
+      </p>
+    ) : (
+      <ul class="mt-6 flex max-w-[980px] flex-col gap-4">
+        {guides.map((g, i) => (
+          <li class={`rounded-[18px] border border-warm-200 bg-white p-5 ${g.published ? "" : "bg-cream-100 opacity-70"}`}>
+            <form method="POST" action="/api/admin/content" class="flex flex-col gap-4">
+              <input type="hidden" name="_kind" value="guide" />
+              <input type="hidden" name="id" value={g.id} />
+              <input type="hidden" name="dir" value="down" />
+
+              <div class="flex flex-wrap items-center gap-x-5 gap-y-2">
+                <a href={`/media/${g.file_key}`} target="_blank" rel="noopener"
+                   class="text-body font-bold text-teal-600 underline">Open the PDF</a>
+                <span class="font-mono text-caption text-warm-500">
+                  {humanSize(g.file_size)}{g.page_count ? ` · ${g.page_count} pages` : ""} · /resources/{g.slug}
+                </span>
+                <span class="ml-auto text-body text-warm-700">
+                  <span class="font-display text-h4 font-extrabold tabular text-ink-900">{g.download_count ?? 0}</span>
+                  {" "}downloads
+                </span>
+              </div>
+
+              <div class="grid gap-3 sm:grid-cols-2">
+                <div class="sm:col-span-2">
+                  <label class="text-caption font-bold text-warm-600" for={`t-${g.id}`}>Title</label>
+                  <input id={`t-${g.id}`} name="title" value={g.title} required class={`${field} mt-1.5`} />
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="text-caption font-bold text-warm-600" for={`d-${g.id}`}>One-line description</label>
+                  <input id={`d-${g.id}`} name="description" value={g.description ?? ""} class={`${field} mt-1.5`} />
+                </div>
+                <div>
+                  <label class="text-caption font-bold text-warm-600" for={`s-${g.id}`}>Which group</label>
+                  <select id={`s-${g.id}`} name="life_stage" class={`${field} mt-1.5`}>
+                    {stageOptions.map((s) => (
+                      <option value={s.id} selected={s.id === g.life_stage}>{s.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label class="text-caption font-bold text-warm-600" for={`p-${g.id}`}>Pages</label>
+                  <input id={`p-${g.id}`} name="page_count" type="number" min="1" value={g.page_count ?? ""} class={`${field} mt-1.5`} />
+                </div>
+              </div>
+
+              <label class="flex items-start gap-3">
+                <input type="checkbox" name="gated" value="1" checked={g.gated === 1} class="mt-0.5 size-6 shrink-0 accent-teal-600" />
+                <span class="text-body leading-relaxed text-warm-700">
+                  Ask for a name and WhatsApp number before the download
+                </span>
+              </label>
+
+              <div class="flex flex-wrap items-center gap-2">
+                <button type="submit" name="_action" value="save"
+                  class="flex min-h-12 items-center rounded-full bg-teal-600 px-6 text-body font-bold text-cream-50 hover:bg-teal-500">
+                  Save
+                </button>
+                <button type="submit" name="_action" value="toggle" formnovalidate
+                  class="flex min-h-12 items-center rounded-full border-[1.5px] border-warm-300 px-5 text-body font-bold text-warm-700 hover:border-teal-400">
+                  {g.published ? "Take off the site" : "Put on the site"}
+                </button>
+                {i > 0 && (
+                  <button type="submit" name="_action" value="move" formnovalidate aria-label="Move up"
+                    onclick="this.form.dir.value='up'"
+                    class="flex size-12 items-center justify-center rounded-full border-[1.5px] border-warm-300 text-h4 text-warm-700 hover:border-teal-400">↑</button>
+                )}
+                {i < guides.length - 1 && (
+                  <button type="submit" name="_action" value="move" formnovalidate aria-label="Move down"
+                    onclick="this.form.dir.value='down'"
+                    class="flex size-12 items-center justify-center rounded-full border-[1.5px] border-warm-300 text-h4 text-warm-700 hover:border-teal-400">↓</button>
+                )}
+                <button type="submit" name="_action" value="delete" formnovalidate
+                  data-confirm="Delete this guide? The PDF is deleted too, and any link to it will stop working."
+                  class="ml-auto flex min-h-12 items-center px-3 text-body font-bold text-error hover:underline">
+                  Delete
+                </button>
+              </div>
+            </form>
+          </li>
+        ))}
+      </ul>
+    )}
   </div>
 </AdminLayout>
+
+<script>
+  document.addEventListener("click", (e) => {
+    const el = (e.target as HTMLElement)?.closest("[data-confirm]");
+    if (el && !confirm(el.getAttribute("data-confirm")!)) e.preventDefault();
+  });
+</script>

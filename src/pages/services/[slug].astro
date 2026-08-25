@@ -25,12 +25,68 @@ import { serviceContent, CLAIM_STEPS } from "../../lib/service-content";
 
 const { slug } = Astro.params;
 const meta = getService(slug ?? "");
-const content = serviceContent[slug ?? ""];
-if (!meta || !content) return Astro.redirect("/services");
+const base = serviceContent[slug ?? ""];
+if (!meta || !base) return Astro.redirect("/services");
 
 const bindings = env as unknown as Record<string, any>;
 const settings = await getSiteSettings(bindings.DB);
 Astro.response.headers.set("cache-control", EDGE_CACHE);
+
+/**
+ * Anything Thushara has rewritten in /admin/services overrides the copy
+ * shipped in the code. A service he has never edited has no row at all,
+ * so the approved wording stands untouched.
+ */
+let content = base;
+let faqOverrides: { q: string; a: string }[] = [];
+try {
+  if (bindings.DB) {
+    const [svc, faq] = await bindings.DB.batch([
+      bindings.DB.prepare(`SELECT title, promise, intro, sections, published FROM services WHERE slug = ?`).bind(slug),
+      bindings.DB.prepare(
+        `SELECT question, answer FROM faqs WHERE service = ? AND published = 1 ORDER BY sort_order, id`,
+      ).bind(slug),
+    ]);
+
+    const row: any = svc.results?.[0];
+    if (row) {
+      if (row.published === 0) return Astro.redirect("/services");
+      // Every service has a row from the seed migration, carrying only
+      // a short nav title. `sections` is written the first time he
+      // saves, so it is the marker for "he has actually edited this" —
+      // without it the seed's short title would quietly replace the
+      // full one from his approved copy.
+      if (row.sections) {
+        let closing = base.closing;
+        try {
+          closing = JSON.parse(row.sections)?.closing || closing;
+        } catch { /* keep the approved closing */ }
+        content = {
+          ...base,
+          title: row.title || base.title,
+          promise: row.promise || base.promise,
+          intro: row.intro || base.intro,
+          closing,
+        };
+      }
+    }
+
+    faqOverrides = ((faq.results ?? []) as any[]).map((r) => ({ q: r.question, a: r.answer }));
+  }
+} catch (e) {
+  console.error("[service] overrides failed", e);
+}
+
+// Real answers he has written replace the placeholders for the same
+// question, and anything new is added underneath.
+const faqs = faqOverrides.length
+  ? [
+      ...content.faqs.map((f) => faqOverrides.find((o) => o.q.trim().toLowerCase() === f.q.trim().toLowerCase()) ?? f),
+      ...faqOverrides.filter(
+        (o) => !content.faqs.some((f) => f.q.trim().toLowerCase() === o.q.trim().toLowerCase()),
+      ),
+    ]
+  : content.faqs;
 
 const wa = whatsappHref(
   settings.whatsapp,
@@ -381,7 +437,7 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
       <h2 class="font-display text-h2 font-extrabold text-teal-600">Questions people actually ask</h2>
 
       <div class="mt-9 max-w-[860px]">
-        {content.faqs.map((f, i) => (
+        {faqs.map((f, i) => (
           <details class="faq group border-t border-warm-200 last:border-b" open={i === 0}>
             <summary class="flex cursor-pointer list-none items-center justify-between gap-6 py-6 text-h4 font-bold text-ink-900 [&::-webkit-details-marker]:hidden">
               {f.q}

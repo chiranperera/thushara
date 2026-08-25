@@ -21,7 +21,39 @@ const bindings = env as unknown as Record<string, any>;
 const settings = await getSiteSettings(bindings.DB);
 Astro.response.headers.set("cache-control", EDGE_CACHE);
 
-const grouped = faqCategories.map((c) => ({ name: c, items: faqs.filter((f) => f.category === c) })).filter((g) => g.items.length);
+/**
+ * Answers Thushara has written in /admin/faq replace the placeholder
+ * for the same question, and anything new joins its category. The
+ * questions in the code stay as the backbone so the page never loses
+ * the awkward ones just because they are still unanswered.
+ */
+let live: any[] = [];
+try {
+  if (bindings.DB) {
+    const res = await bindings.DB.prepare(
+      `SELECT question, answer, category FROM faqs WHERE published = 1 ORDER BY sort_order, id`,
+    ).all();
+    live = res.results ?? [];
+  }
+} catch (e) { console.error("[faq] query failed", e); }
+
+const key = (s: string) => s.trim().toLowerCase();
+const byQuestion = new Map(live.map((r) => [key(r.question), r]));
+
+const merged = [
+  ...faqs.map((f) => {
+    const r = byQuestion.get(key(f.q));
+    return r ? { ...f, a: r.answer, ready: true } : f;
+  }),
+  ...live
+    .filter((r) => !faqs.some((f) => key(f.q) === key(r.question)))
+    .map((r) => ({ q: r.question, a: r.answer, category: r.category ?? "Getting started", ready: true })),
+];
+
+const categories = [...faqCategories, ...merged.map((f) => f.category)].filter(
+  (c, i, all) => all.indexOf(c) === i,
+);
+const grouped = categories.map((c) => ({ name: c, items: merged.filter((f) => f.category === c) })).filter((g) => g.items.length);
 const anchor = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 ---
 

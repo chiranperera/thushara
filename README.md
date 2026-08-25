@@ -91,6 +91,26 @@ Deliberately absent: blog editor, page builder, theme settings,
 analytics, user management, plugins. Each would add power he does not
 need and complexity he cannot afford.
 
+**Photos and Guides** upload to the R2 bucket bound as `MEDIA`; the
+database records only the key. Uploads pass through the Worker rather
+than going direct to R2 — direct upload needs S3 credentials generated
+and stored by hand, and a few megabytes through a Worker costs nothing
+and needs no configuration. Photos are resized to 1600px and thumbnailed
+**in the browser** before upload, so a 5MB phone photo becomes ~200KB on
+the way out and the server never processes an image.
+
+Deleting a photo or guide deletes the file from R2 too. Nothing else
+does, so an orphaned object means a bug.
+
+**Service pages** only expose the headline, the italic line, the opening
+paragraph and the closing line. What each policy covers is not editable:
+it is regulated product description taken from his approved copy, and a
+free-text box over it is a way to publish something wrong. Every service
+already has a row from the seed migration carrying a short nav title, so
+a row existing means nothing — `sections` is written on his first save
+and is the marker for "he actually edited this". Without that test the
+seed's short title silently replaces the full one.
+
 **Reviews are never auto-published.** The client asked for automatic
 publishing; a public unmoderated form on a regulated professional's site
 invites spam, abuse and misleading claims about policies. Submissions
@@ -118,9 +138,11 @@ Blocking before launch:
 
 Content still needed from Thushara:
 
-- Photography (shot list in `design-brief/03`)
-- 21 of 29 FAQ answers, marked `PENDING` in `src/lib/faq-content.ts`
-  rather than guessed
+- Photography (shot list in `design-brief/03`) — including the hero
+  portrait, which is currently a stock photograph of someone else
+- 21 of 29 FAQ answers, and all 26 on the service pages. They are marked
+  `PENDING` in `src/lib/faq-content.ts` and `service-content.ts` rather
+  than guessed; `/admin/faq` lists them and he answers them there.
 - Cover-level table figures (`figure pending`)
 - The four PDF guides
 - Confirmation of his real career dates on `/about`

@@ -1,27 +1,153 @@
 ---
+/**
+ * /admin/gallery — Photos.
+ *
+ * Everything added here appears on /gallery, and the four most recent
+ * visible photos fill the "Awards and events" strip on /about. That is
+ * said on the screen, because "where does this go?" is the first thing
+ * anyone asks of an upload form.
+ */
 export const prerender = false;
+
 import { env } from "cloudflare:workers";
 import AdminLayout from "../../layouts/AdminLayout.astro";
+import Uploader from "../../components/admin/Uploader.tsx";
 import { requireAdmin } from "../../lib/auth";
 import { getCounts } from "../../lib/admin-data";
+import { GALLERY_CATEGORIES } from "../../lib/media";
 
 const bindings = env as unknown as Record<string, any>;
+const db = bindings.DB;
 const admin = await requireAdmin(Astro.request, bindings.AUTH_SECRET ?? "");
 if (!admin) return Astro.redirect("/admin/login");
-const counts = await getCounts(bindings.DB);
+
+const counts = await getCounts(db);
+const saved = Astro.url.searchParams.get("saved");
+const deleted = Astro.url.searchParams.get("deleted");
+const error = Astro.url.searchParams.get("error");
+
+let photos: any[] = [];
+if (db) {
+  try {
+    const res = await db
+      .prepare(
+        `SELECT id, image_key, thumb_key, caption, alt_text, category, visible, sort_order
+         FROM gallery_items ORDER BY sort_order, id`,
+      )
+      .all();
+    photos = res.results ?? [];
+  } catch (e) {
+    console.error("[admin] gallery query failed", e);
+  }
+}
+
+const catLabel = (id: string) => GALLERY_CATEGORIES.find((c) => c.id === id)?.label ?? id;
+const field = "h-12 w-full rounded-md border border-warm-200 bg-white px-3.5 text-body text-ink-900 focus:border-teal-400";
 ---
 
 <AdminLayout title="Photos" newLeads={counts.newLeads} pendingReviews={counts.pendingReviews}>
   <div class="px-5 py-8 md:px-11 md:py-9">
     <h1 class="font-display text-h1 font-extrabold text-ink-900">Photos</h1>
-    <p class="mt-1.5 text-body text-warm-500">Upload award photos, MDRT events and client moments.</p>
+    <p class="mt-1.5 max-w-[62ch] text-body leading-relaxed text-warm-600">
+      Award ceremonies, MDRT events, client moments. These appear on your
+      <a href="/gallery" class="font-bold text-teal-600 underline">Gallery page</a>, and the four
+      most recent fill the "Awards and events" strip on your
+      <a href="/about" class="font-bold text-teal-600 underline">About page</a>.
+    </p>
 
-    <div class="mt-8 max-w-[620px] rounded-xl border border-dashed border-warm-300 bg-cream-100 p-9 text-center">
-      <p class="text-h4 font-bold text-ink-900">Not built yet</p>
-      <p class="mx-auto mt-2 max-w-[44ch] text-body leading-relaxed text-warm-700">
-        This screen is specified and coming next. Nothing is lost by it being empty —
-        there is no content waiting for it yet.
-      </p>
+    {saved && <p class="mt-5 rounded-lg border border-teal-200 bg-teal-50 px-4 py-3 text-body text-teal-600">Saved.</p>}
+    {deleted && <p class="mt-5 rounded-lg border border-warm-200 bg-cream-100 px-4 py-3 text-body text-warm-700">Photo removed.</p>}
+    {error && <p class="mt-5 rounded-lg border border-error/30 bg-error/8 px-4 py-3 text-body text-error">That didn't save. Please try again.</p>}
+
+    <div class="mt-8 max-w-[860px]">
+      <Uploader client:load kind="photo" categories={GALLERY_CATEGORIES} />
     </div>
+
+    <h2 class="mt-12 font-display text-h2 font-extrabold text-ink-900">
+      Your photos <span class="tabular text-warm-400">{photos.length}</span>
+    </h2>
+
+    {photos.length === 0 ? (
+      <p class="mt-4 max-w-[60ch] rounded-[18px] border border-dashed border-warm-300 bg-cream-100 p-8 text-body leading-relaxed text-warm-700">
+        Nothing uploaded yet. Until there is, the Gallery page shows empty frames rather than
+        stock photographs of other people — which is the right way round.
+      </p>
+    ) : (
+      <ul class="mt-6 flex max-w-[980px] flex-col gap-4">
+        {photos.map((p, i) => (
+          <li class={`rounded-[18px] border bg-white p-5 ${p.visible ? "border-warm-200" : "border-warm-200 bg-cream-100 opacity-70"}`}>
+            <form method="POST" action="/api/admin/content" class="flex flex-col gap-4 sm:flex-row sm:items-start">
+              <input type="hidden" name="_kind" value="photo" />
+              <input type="hidden" name="id" value={p.id} />
+
+              <img
+                src={`/media/${p.thumb_key ?? p.image_key}`}
+                alt={p.alt_text}
+                width="112" height="112" loading="lazy" decoding="async"
+                class="size-28 shrink-0 rounded-lg bg-cream-100 object-cover"
+              />
+
+              <div class="grid min-w-0 flex-1 gap-3 sm:grid-cols-2">
+                <div class="sm:col-span-2">
+                  <label class="text-caption font-bold text-warm-600" for={`cap-${p.id}`}>Caption</label>
+                  <input id={`cap-${p.id}`} name="caption" value={p.caption ?? ""} class={`${field} mt-1.5`} />
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="text-caption font-bold text-warm-600" for={`alt-${p.id}`}>Description for screen readers</label>
+                  <input id={`alt-${p.id}`} name="alt_text" value={p.alt_text ?? ""} class={`${field} mt-1.5`} />
+                </div>
+                <div>
+                  <label class="text-caption font-bold text-warm-600" for={`cat-${p.id}`}>Section</label>
+                  <select id={`cat-${p.id}`} name="category" class={`${field} mt-1.5`}>
+                    {GALLERY_CATEGORIES.map((c) => (
+                      <option value={c.id} selected={c.id === p.category}>{c.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div class="flex flex-wrap items-end gap-2">
+                  <button type="submit" name="_action" value="save"
+                    class="flex min-h-12 items-center rounded-full bg-teal-600 px-6 text-body font-bold text-cream-50 hover:bg-teal-500">
+                    Save
+                  </button>
+                  <button type="submit" name="_action" value="toggle"
+                    class="flex min-h-12 items-center rounded-full border-[1.5px] border-warm-300 px-5 text-body font-bold text-warm-700 hover:border-teal-400">
+                    {p.visible ? "Hide" : "Show"}
+                  </button>
+                  {i > 0 && (
+                    <button type="submit" name="_action" value="move" formnovalidate
+                      class="flex size-12 items-center justify-center rounded-full border-[1.5px] border-warm-300 text-h4 text-warm-700 hover:border-teal-400"
+                      aria-label="Move up" onclick="this.form.dir.value='up'">↑</button>
+                  )}
+                  {i < photos.length - 1 && (
+                    <button type="submit" name="_action" value="move" formnovalidate
+                      class="flex size-12 items-center justify-center rounded-full border-[1.5px] border-warm-300 text-h4 text-warm-700 hover:border-teal-400"
+                      aria-label="Move down" onclick="this.form.dir.value='down'">↓</button>
+                  )}
+                  <input type="hidden" name="dir" value="down" />
+                  <button type="submit" name="_action" value="delete" formnovalidate
+                    data-confirm="Delete this photo? This cannot be undone."
+                    class="flex min-h-12 items-center px-3 text-body font-bold text-error hover:underline">
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </form>
+
+            {!p.visible && (
+              <p class="mt-3 text-small text-warm-500">Hidden — not shown on the website.</p>
+            )}
+          </li>
+        ))}
+      </ul>
+    )}
   </div>
 </AdminLayout>
+
+<script>
+  // Deleting a photo also deletes the file, so it asks first.
+  document.addEventListener("click", (e) => {
+    const el = (e.target as HTMLElement)?.closest("[data-confirm]");
+    if (el && !confirm(el.getAttribute("data-confirm")!)) e.preventDefault();
+  });
+</script>

@@ -1,27 +1,155 @@
 ---
+/**
+ * /admin/services — Service pages.
+ *
+ * Deliberately limited to the four pieces of writing that are worth
+ * changing: the headline, the line under it, the opening paragraph and
+ * the closing line. The cover lists and benefits are regulated product
+ * descriptions taken from his approved copy, and a free-text box over
+ * those would be a way to accidentally publish something wrong.
+ *
+ * Rows are created on first save, so a service he has never edited
+ * simply keeps the text written from his copy.
+ */
 export const prerender = false;
+
 import { env } from "cloudflare:workers";
 import AdminLayout from "../../layouts/AdminLayout.astro";
 import { requireAdmin } from "../../lib/auth";
 import { getCounts } from "../../lib/admin-data";
+import { serviceContent } from "../../lib/service-content";
+import { services as siteServices } from "../../lib/site";
 
 const bindings = env as unknown as Record<string, any>;
+const db = bindings.DB;
 const admin = await requireAdmin(Astro.request, bindings.AUTH_SECRET ?? "");
 if (!admin) return Astro.redirect("/admin/login");
-const counts = await getCounts(bindings.DB);
+
+const counts = await getCounts(db);
+const saved = Astro.url.searchParams.get("saved");
+const error = Astro.url.searchParams.get("error");
+
+let rows = new Map<string, any>();
+if (db) {
+  try {
+    const res = await db.prepare(`SELECT id, slug, title, promise, intro, sections, published FROM services`).all();
+    for (const r of res.results ?? []) rows.set((r as any).slug, r);
+  } catch (e) {
+    console.error("[admin] services query failed", e);
+  }
+}
+
+/**
+ * File copy is the default; a saved row overrides it.
+ *
+ * Every service already has a row from the seed migration carrying
+ * only a short nav title, so the row's mere existence means nothing.
+ * `sections` is written on his first save, which makes it the honest
+ * test for "he has edited this page".
+ */
+const list = siteServices.map((s) => {
+  const file = serviceContent[s.slug];
+  const row = rows.get(s.slug);
+  const edited = !!row?.sections;
+
+  let closing = file?.closing ?? "";
+  if (edited) {
+    try {
+      closing = JSON.parse(row.sections)?.closing || closing;
+    } catch { /* keep the file value */ }
+  }
+
+  return {
+    slug: s.slug,
+    edited,
+    published: row ? row.published === 1 : true,
+    title: (edited && row.title) || file?.title || s.title,
+    promise: (edited && row.promise) || file?.promise || "",
+    intro: (edited && row.intro) || file?.intro || "",
+    closing,
+  };
+});
+
+const field = "w-full rounded-md border border-warm-200 bg-white px-3.5 py-3 text-body text-ink-900 focus:border-teal-400";
 ---
 
 <AdminLayout title="Service pages" newLeads={counts.newLeads} pendingReviews={counts.pendingReviews}>
   <div class="px-5 py-8 md:px-11 md:py-9">
     <h1 class="font-display text-h1 font-extrabold text-ink-900">Service pages</h1>
-    <p class="mt-1.5 text-body text-warm-500">Edit the copy on your eight service pages.</p>
+    <p class="mt-1.5 max-w-[66ch] text-body leading-relaxed text-warm-600">
+      The wording at the top and bottom of each of your eight service pages. What each policy
+      covers is not editable here — that comes from your approved copy, and it is the part where a
+      wrong word matters most.
+    </p>
 
-    <div class="mt-8 max-w-[620px] rounded-xl border border-dashed border-warm-300 bg-cream-100 p-9 text-center">
-      <p class="text-h4 font-bold text-ink-900">Not built yet</p>
-      <p class="mx-auto mt-2 max-w-[44ch] text-body leading-relaxed text-warm-700">
-        This screen is specified and coming next. Nothing is lost by it being empty —
-        there is no content waiting for it yet.
-      </p>
-    </div>
+    {saved && <p class="mt-5 rounded-lg border border-teal-200 bg-teal-50 px-4 py-3 text-body text-teal-600">Saved.</p>}
+    {error && <p class="mt-5 rounded-lg border border-error/30 bg-error/8 px-4 py-3 text-body text-error">That didn't save. Please try again.</p>}
+
+    <ul class="mt-8 flex max-w-[900px] flex-col gap-5">
+      {list.map((s) => (
+        <li class={`rounded-[18px] border border-warm-200 bg-white p-6 ${s.published ? "" : "bg-cream-100 opacity-70"}`}>
+          <form method="POST" action="/api/admin/services" class="flex flex-col gap-4">
+            <input type="hidden" name="slug" value={s.slug} />
+
+            <div class="flex flex-wrap items-baseline justify-between gap-3">
+              <a href={`/services/${s.slug}`} target="_blank" rel="noopener"
+                 class="font-display text-h3 font-extrabold text-teal-600 underline">{s.title}</a>
+              <span class="font-mono text-caption text-warm-500">
+                /services/{s.slug}{s.edited ? "" : " · not edited yet"}
+              </span>
+            </div>
+
+            <div>
+              <label class="text-small font-bold text-warm-800" for={`t-${s.slug}`}>Headline</label>
+              <input id={`t-${s.slug}`} name="title" value={s.title} required class={`${field} mt-2 h-13`} />
+            </div>
+
+            <div>
+              <label class="text-small font-bold text-warm-800" for={`p-${s.slug}`}>
+                The line underneath <span class="font-normal text-warm-500">— shown in italics</span>
+              </label>
+              <input id={`p-${s.slug}`} name="promise" value={s.promise} class={`${field} mt-2 h-13`} />
+            </div>
+
+            <div>
+              <label class="text-small font-bold text-warm-800" for={`i-${s.slug}`}>Opening paragraph</label>
+              <textarea id={`i-${s.slug}`} name="intro" rows="4" class={`${field} mt-2 leading-relaxed`}>{s.intro}</textarea>
+            </div>
+
+            <div>
+              <label class="text-small font-bold text-warm-800" for={`c-${s.slug}`}>
+                Closing line <span class="font-normal text-warm-500">— above the booking buttons</span>
+              </label>
+              <textarea id={`c-${s.slug}`} name="closing" rows="2" class={`${field} mt-2 leading-relaxed`}>{s.closing}</textarea>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <button type="submit" name="_action" value="save"
+                class="flex min-h-12 items-center rounded-full bg-teal-600 px-7 text-body font-bold text-cream-50 hover:bg-teal-500">Save</button>
+              {s.edited && (
+                <>
+                  <button type="submit" name="_action" value="toggle" formnovalidate
+                    class="flex min-h-12 items-center rounded-full border-[1.5px] border-warm-300 px-5 text-body font-bold text-warm-700 hover:border-teal-400">
+                    {s.published ? "Take off the site" : "Put on the site"}
+                  </button>
+                  <button type="submit" name="_action" value="revert" formnovalidate
+                    data-confirm="Put this page back to its original wording?"
+                    class="ml-auto flex min-h-12 items-center px-3 text-body font-bold text-warm-600 hover:text-error hover:underline">
+                    Undo my changes
+                  </button>
+                </>
+              )}
+            </div>
+          </form>
+        </li>
+      ))}
+    </ul>
   </div>
 </AdminLayout>
+
+<script>
+  document.addEventListener("click", (e) => {
+    const el = (e.target as HTMLElement)?.closest("[data-confirm]");
+    if (el && !confirm(el.getAttribute("data-confirm")!)) e.preventDefault();
+  });
+</script>
