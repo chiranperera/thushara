@@ -98,21 +98,21 @@ export default function LifeStageServices({ stages, services }: Props) {
                     {/* icon watermark, glowing */}
                     <span
                       aria-hidden="true"
-                      className="pointer-events-none absolute -right-[26px] -top-[26px] size-[170px] bg-contain bg-center bg-no-repeat"
+                      className="pointer-events-none absolute right-7 top-7 size-[86px] bg-contain bg-center bg-no-repeat"
                       style={{
                         backgroundImage: `url(/icons/cut-${s.icon}.png)`,
-                        opacity: on ? 0.4 : 0.28,
-                        filter: "drop-shadow(0 0 26px rgba(7,164,207,0.45))",
+                        opacity: on ? 0.55 : 0.4,
+                        filter: "drop-shadow(0 0 16px rgba(7,164,207,0.45))",
                       }}
                     />
                     <span
-                      className={`relative font-display text-small font-extrabold tabular tracking-wide ${
+                      className={`relative font-display text-small font-extrabold tracking-wide ${
                         on ? "text-gold-400" : "text-cyan-300/85"
                       }`}
                     >
                       {s.ageRange}
                     </span>
-                    <span className="relative mt-[76px] font-display text-h3 font-extrabold leading-tight text-cream-50">
+                    <span className="relative mt-14 font-display text-h3 font-extrabold leading-tight text-cream-50">
                       {s.label}
                     </span>
                     <span className="relative mt-3.5 max-w-[26ch] text-body leading-relaxed text-cream-50/68">

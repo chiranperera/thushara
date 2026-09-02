@@ -118,10 +118,10 @@
   /* ---------- Elevation: warm-tinted, soft, minimal ----------
      Prefer borders and background changes. Shadow only for
      genuinely floating elements. */
-  --shadow-sm: 0 1px 2px rgba(22, 26, 25, 0.05);
-  --shadow-md: 0 4px 16px rgba(22, 26, 25, 0.07);
-  --shadow-lg: 0 12px 32px rgba(22, 26, 25, 0.10);
-  --shadow-xl: 0 24px 56px rgba(22, 26, 25, 0.14);
+  --shadow-sm: 0 1px 2px rgba(9, 20, 34, 0.06);
+  --shadow-md: 0 4px 16px rgba(9, 20, 34, 0.08);
+  --shadow-lg: 0 12px 32px rgba(9, 20, 34, 0.11);
+  --shadow-xl: 0 24px 56px rgba(9, 20, 34, 0.15);
 
   /* ---------- Containers ---------- */
   --container-wide: 1360px;
