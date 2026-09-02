@@ -359,12 +359,12 @@
    ============================================================ */
 
 #site-header[data-over-hero] {
-  transition: background-color 220ms ease, border-color 220ms ease;
+  transition: background-color 220ms ease, box-shadow 220ms ease;
 }
 
 #site-header[data-over-hero]:not([data-scrolled]) {
   background-color: transparent;
-  border-color: transparent;
+  box-shadow: none;
   backdrop-filter: none;
 }
 

@@ -157,6 +157,25 @@ const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask abou
           class="absolute bottom-0 left-1/2 h-full w-full -translate-x-1/2 object-contain object-bottom lg:bottom-0 lg:left-0 lg:h-full lg:translate-x-0 lg:[object-position:left_bottom]"
         />
       </picture>
+
+      {/* Same frame, in motion. The still stays underneath as the
+          fallback and is never removed — pull the <video> and the
+          picture above is the hero again, unchanged.
+
+          Transparent video has no feature test: Chromium and Firefox
+          carry the alpha in VP9/WebM, Safari only in HEVC/MP4, and each
+          will happily play the other's file with the alpha silently
+          dropped — which would paint an opaque black slab over him. So
+          the engine is named rather than probed, and anything not
+          recognised keeps the photograph. */}
+      <video
+        id="hero-portrait-video"
+        aria-hidden="true"
+        muted loop playsinline preload="none" disableRemotePlayback
+        data-webm="/video/thushara.webm"
+        data-mp4="/video/thushara.mp4"
+        class="absolute bottom-0 left-0 hidden h-full w-full object-contain opacity-0 transition-opacity duration-700 lg:block lg:[object-position:left_bottom]"
+      ></video>
     </div>
   </section>
 
@@ -193,6 +212,46 @@ const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask abou
       for (const el of [a, b]) el.style.transition = "opacity 200ms ease";
       document.addEventListener("visibilitychange", () => (document.hidden ? stop() : start()));
       start();
+    })();
+  </script>
+
+  <script is:inline>
+    (() => {
+      const v = document.getElementById("hero-portrait-video");
+      if (!v) return;
+
+      const conn = navigator.connection;
+      if (conn?.saveData || /(^|-)2g$/.test(conn?.effectiveType ?? "")) return;
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      if (!window.matchMedia("(min-width: 1024px)").matches) return;
+
+      const ua = navigator.userAgent;
+      const isSafari = /Safari/.test(ua) && !/Chrome|Chromium|CriOS|FxiOS|Edg|Android/.test(ua);
+      const src = isSafari ? v.dataset.mp4 : /Chrome|Chromium|Firefox|Edg/.test(ua) ? v.dataset.webm : null;
+      if (!src) return;
+
+      const start = () => {
+        v.src = src;
+        v.load();
+        const show = () => {
+          v.style.opacity = "1";
+          v.play().catch(() => { v.style.opacity = "0"; });
+        };
+        v.addEventListener("loadeddata", show, { once: true });
+        v.addEventListener("error", () => { v.style.opacity = "0"; }, { once: true });
+      };
+
+      const idle = () =>
+        "requestIdleCallback" in window
+          ? requestIdleCallback(start, { timeout: 3000 })
+          : setTimeout(start, 1200);
+      if (document.readyState === "complete") idle();
+      else window.addEventListener("load", idle, { once: true });
+
+      document.addEventListener("visibilitychange", () => {
+        if (!v.src) return;
+        document.hidden ? v.pause() : v.play().catch(() => {});
+      });
     })();
   </script>
 
