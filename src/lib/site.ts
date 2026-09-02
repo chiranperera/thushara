@@ -38,6 +38,14 @@ export const site = {
     yearsExperience: 16,
     mdrtYears: 14,
     mdrtStatus: "Lifetime Member",
+    /**
+     * Court of the Table — MDRT's second tier, roughly three times the
+     * production required for membership. Four years, three of them
+     * consecutive and current, which is a stronger signal than the
+     * membership count on its own.
+     */
+    cotYears: 4,
+    cotRecent: "2024, 2025, 2026",
     recognition: "Top Performer in Life & General Insurance, Regional",
   },
 

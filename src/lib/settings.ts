@@ -13,6 +13,8 @@ export interface SiteSettings {
   yearsExperience: number;
   mdrtYears: number;
   mdrtStatus: string;
+  /** Court of the Table years. 0 hides it rather than printing a zero. */
+  cotYears: number;
   recognition: string;
   /** null while PENDING — do not render */
   phone: string | null;
@@ -30,6 +32,7 @@ const FALLBACK: SiteSettings = {
   yearsExperience: site.credentials.yearsExperience,
   mdrtYears: site.credentials.mdrtYears,
   mdrtStatus: site.credentials.mdrtStatus,
+  cotYears: site.credentials.cotYears,
   recognition: site.credentials.recognition,
   phone: null,
   whatsapp: null,
@@ -73,6 +76,7 @@ export async function getSiteSettings(db: any): Promise<SiteSettings> {
   return {
     yearsExperience: num("years_experience", FALLBACK.yearsExperience),
     mdrtYears: num("mdrt_years", FALLBACK.mdrtYears),
+    cotYears: Number(map.get("cot_years") ?? FALLBACK.cotYears) || 0,
     mdrtStatus: val("mdrt_status") ?? FALLBACK.mdrtStatus,
     recognition: val("recognition") ?? FALLBACK.recognition,
     phone,

@@ -5,7 +5,7 @@ import { requireAdmin } from "../../../lib/auth";
 
 export const prerender = false;
 
-const PROFILE_KEYS = ["phone", "whatsapp", "email", "service_area", "years_experience", "mdrt_years"];
+const PROFILE_KEYS = ["phone", "whatsapp", "email", "service_area", "years_experience", "mdrt_years", "cot_years"];
 const NUMERIC = ["appointment_minutes", "buffer_minutes", "max_per_day"];
 
 export const POST: APIRoute = async ({ request }) => {

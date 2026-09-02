@@ -67,6 +67,7 @@ const pending = (k: string) => settings.get(k) === "PENDING";
           {[
             { name:"years_experience", label:"Years of experience", fallback:"16" },
             { name:"mdrt_years", label:"MDRT years", fallback:"14" },
+            { name:"cot_years", label:"Court of the Table years", fallback:"4" },
           ].map((f)=>(
             <div>
               <label for={f.name} class="text-small font-bold text-cream-50/80">{f.label}</label>

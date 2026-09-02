@@ -52,6 +52,8 @@ const structuredData = {
     hasCredential: [
       { "@type": "EducationalOccupationalCredential", credentialCategory: "Professional membership",
         name: `MDRT ${site.credentials.mdrtStatus} (${site.credentials.mdrtYears}x qualifier)` },
+      { "@type": "EducationalOccupationalCredential", credentialCategory: "Professional membership",
+        name: `MDRT Court of the Table (${site.credentials.cotYears}x qualifier)` },
       ...site.qualifications.map((q) => ({
         "@type": "EducationalOccupationalCredential", credentialCategory: "Diploma", name: q,
       })),

@@ -23,15 +23,18 @@ Astro.response.headers.set("cache-control", EDGE_CACHE);
 const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask about insurance.");
 
 /**
- * His own career line. Years are indicative until Thushara confirms
- * them — flagged on the page rather than presented as fact.
+ * His own career line, confirmed by Thushara. Gold nodes are MDRT and
+ * Court of the Table years.
+ *
+ * Six entries because the desktop row is a fixed six-column grid, so
+ * 2024–26 is shown as one span rather than three near-identical points.
  */
 const career = [
-  { year: "2009", label: "Joined Sri Lanka Insurance", mdrt: false },
-  { year: "2011", label: "First MDRT qualification", mdrt: true },
-  { year: "2015", label: "Regional top performer", mdrt: true },
-  { year: "2019", label: "Senior Financial Consultant", mdrt: true },
-  { year: "2023", label: "MDRT Lifetime Member", mdrt: true, current: true },
+  { year: "2010", label: "Appointed at Sri Lanka Insurance", mdrt: false },
+  { year: "2013", label: "First MDRT, and best in the region", mdrt: true },
+  { year: "2020", label: "First Court of the Table", mdrt: true },
+  { year: "2022", label: "MDRT Lifetime Member", mdrt: true },
+  { year: "2024–26", label: "Court of the Table, three years running", mdrt: true, current: true },
   { year: "Today", label: "Life & General, island-wide", mdrt: false },
 ];
 
@@ -69,7 +72,17 @@ const qualifications = [
   },
 ];
 
-const mdrtBars = Array.from({ length: settings.mdrtYears }, (_, i) => i);
+/**
+ * One bar per MDRT qualifying year. He has qualified every year since
+ * 2013, so the run is counted back from the current year rather than
+ * hard-coded — it stays correct as `mdrt_years` increments.
+ */
+const COT_YEARS = [2020, 2024, 2025, 2026];
+const firstMdrtYear = new Date().getFullYear() - settings.mdrtYears + 1;
+const mdrtBars = Array.from({ length: settings.mdrtYears }, (_, i) => {
+  const year = firstMdrtYear + i;
+  return { year, cot: COT_YEARS.includes(year) };
+});
 
 /** The four most recent photos, once he has uploaded any. */
 let awards: any[] = [];
@@ -163,7 +176,10 @@ try {
         {[
           { figure: String(settings.yearsExperience), label: "Years of professional service" },
           { figure: `${settings.mdrtYears}×`, label: `MDRT member, ${settings.mdrtStatus} status` },
-          { figure: "Top", label: "Performer, Life & General, Region" },
+          // Court of the Table is roughly three times the MDRT
+          // requirement, so it belongs in the figures rather than
+          // buried in prose.
+          { figure: `${settings.cotYears}×`, label: "MDRT Court of the Table" },
           { figure: "Island-wide", label: "Colombo, suburbs and beyond", word: true },
         ].map((s) => (
           <div>
@@ -202,18 +218,34 @@ try {
             after a sustained run of qualifying years, which means the standard was met repeatedly,
             across changing markets, rather than once in a good year.
           </p>
+          {settings.cotYears > 0 && (
+            <p class="mt-5 border-l-2 border-gold-500 pl-5 text-body-lg leading-relaxed text-cream-50/78">
+              <strong class="font-bold text-gold-400">Court of the Table</strong> is the tier above
+              membership — it takes roughly three times the production. He has reached it
+              {" "}{settings.cotYears} times, including {site.credentials.cotRecent}. Three
+              consecutive years says more than any single one of them.
+            </p>
+          )}
 
-          <!-- Qualifying years, indicative shape only -->
-          <div class="mt-9 flex items-end gap-1.5" aria-hidden="true">
-            {mdrtBars.map((i) => {
-              const pct = i / Math.max(1, mdrtBars.length - 1);
-              const h = 26 + Math.round(pct * 42);
-              const colour = pct < 0.35 ? "#12544A" : pct < 0.72 ? "#4FB89C" : "#C9962F";
-              return <span class="flex-1 rounded-sm" style={`height:${h}px;background:${colour}`}></span>;
-            })}
+          {/* One bar per qualifying year, gold where he reached Court
+              of the Table. Real years now, so it says something rather
+              than merely decorating. */}
+          <div class="mt-9 flex items-end gap-1.5">
+            {mdrtBars.map((y) => (
+              <span
+                class="flex-1 rounded-sm"
+                title={`${y.year}${y.cot ? " — Court of the Table" : " — MDRT"}`}
+                style={`height:${y.cot ? 68 : 34}px;background:${y.cot ? "#C9962F" : "#2E7D6B"}`}
+              ></span>
+            ))}
           </div>
-          <p class="mt-3 font-mono text-caption leading-relaxed text-cream-50/40">
-            Qualifying years, indicative shape only — exact year list to be confirmed by Thushara.
+          <div class="mt-2.5 flex items-center justify-between text-caption tabular text-cream-50/45">
+            <span>{mdrtBars[0]?.year}</span>
+            <span>{mdrtBars[mdrtBars.length - 1]?.year}</span>
+          </div>
+          <p class="mt-3.5 text-small leading-relaxed text-cream-50/55">
+            Every year from {mdrtBars[0]?.year}. The taller bars are the
+            {" "}{settings.cotYears} Court of the Table years.
           </p>
         </div>
       </div>
@@ -287,9 +319,9 @@ try {
         ))}
       </ul>
 
-      <p class="mt-7 font-mono text-caption leading-relaxed text-warm-400">
-        Years shown are indicative — Thushara to confirm the real dates before launch. Gold nodes
-        mark MDRT years.
+      <p class="mt-7 text-small leading-relaxed text-warm-500">
+        Gold marks an MDRT or Court of the Table year. Best performer in the region every year
+        since 2013.
       </p>
     </div>
   </section>
