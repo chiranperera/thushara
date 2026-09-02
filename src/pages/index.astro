@@ -97,7 +97,7 @@ const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask abou
   <!-- ============ HERO ============ -->
   <section
     class="relative flex min-h-[640px] flex-col overflow-hidden lg:min-h-[calc(100vh-80px)] lg:max-h-[960px] lg:flex-row"
-    style="background:radial-gradient(120% 110% at 5% 12%,#0B3A33 0%,#062521 42%,#03130F 100%)"
+    style="background:radial-gradient(120% 110% at 5% 12%,#0C2747 0%,#071829 42%,#020913 100%)"
   >
     <span
       aria-hidden="true" class="pointer-events-none absolute inset-0 z-[1]"
@@ -107,7 +107,7 @@ const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask abou
     <!-- copy -->
     <div class="relative z-[2] flex flex-1 flex-col justify-center px-5 pb-8 pt-12 lg:max-w-[60%] lg:flex-none lg:basis-[60%] lg:px-18 lg:pb-0 lg:pt-14">
       <p class="inline-flex items-center gap-2.5 self-start rounded-full border border-cyan-300/28 bg-ink-900/60 py-1.5 pl-2.5 pr-3.5 lg:hidden">
-        <span aria-hidden="true" class="size-[7px] rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(140,247,222,0.9)]"></span>
+        <span aria-hidden="true" class="size-[7px] rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(125,221,247,0.9)]"></span>
         <span class="overline text-cyan-300">{site.title} · Sri Lanka</span>
       </p>
 
@@ -161,13 +161,13 @@ const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask abou
   </section>
 
   <!-- ============ WHY PEOPLE STAY ============ -->
-  <section class="bg-mint-50 py-16 md:py-24">
+  <section class="bg-mist-50 py-16 md:py-24">
     <div class="container-default grid gap-12 px-5 lg:grid-cols-[0.86fr_1fr] lg:items-center lg:gap-20">
       <div class="relative">
-        <div class="flex aspect-4/5 flex-col items-center justify-center gap-2 rounded-xl border border-mint-200 bg-mint-100 p-9 text-center" data-slot="IMG-ABOUT-01">
-          <span aria-hidden="true" class="size-3.5 rotate-45 bg-mint-400"></span>
-          <span class="font-mono text-caption font-bold tracking-wider text-mint-600">IMG-ABOUT-01 · 4:5</span>
-          <span class="max-w-[30ch] font-mono text-caption leading-relaxed text-mint-500">
+        <div class="flex aspect-4/5 flex-col items-center justify-center gap-2 rounded-xl border border-mist-200 bg-mist-100 p-9 text-center" data-slot="IMG-ABOUT-01">
+          <span aria-hidden="true" class="size-3.5 rotate-45 bg-mist-400"></span>
+          <span class="font-mono text-caption font-bold tracking-wider text-mist-600">IMG-ABOUT-01 · 4:5</span>
+          <span class="max-w-[30ch] font-mono text-caption leading-relaxed text-mist-500">
             Thushara with a client, or at his desk mid-conversation. Warm, candid, not posed.
           </span>
         </div>
@@ -179,21 +179,21 @@ const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask abou
             {Array.from({ length: 8 }, (_, i) => (
               <span
                 class="flex-1 rounded-sm"
-                style={`height:${14 + i * 3}px;background:${i < 3 ? "#C9EBE1" : i < 6 ? "#4FB89C" : "#12544A"}`}
+                style={`height:${14 + i * 3}px;background:${i < 3 ? "#C8DCEF" : i < 6 ? "#4C86C4" : "#123A6B"}`}
               ></span>
             ))}
           </div>
           <p class="mt-3">
             <span class="font-display text-h3 font-extrabold tabular text-ink-900">{settings.mdrtYears}</span>
-            <span class="ml-1.5 text-small font-bold text-teal-600">consecutive years</span>
+            <span class="ml-1.5 text-small font-bold text-navy-600">consecutive years</span>
           </p>
           <p class="text-small text-warm-500">{settings.mdrtStatus}</p>
         </div>
       </div>
 
       <div>
-        <p class="overline text-teal-600">Why people stay</p>
-        <h2 class="mt-4 max-w-[18ch] font-display text-h2 font-extrabold text-teal-600">
+        <p class="overline text-navy-600">Why people stay</p>
+        <h2 class="mt-4 max-w-[18ch] font-display text-h2 font-extrabold text-navy-600">
           {settings.yearsExperience} years of the same straight answer.
         </h2>
         <p class="mt-5 max-w-[58ch] text-body-lg leading-relaxed text-warm-700">
@@ -201,11 +201,11 @@ const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask abou
           services. Fewer than 1% of advisors qualify. Thushara has qualified {settings.mdrtYears} times,
           across both life and general insurance.
         </p>
-        <a href="/about" class="mt-7 inline-flex min-h-14 items-center rounded-full bg-teal-600 px-8 text-h4 font-bold text-cream-50 hover:bg-teal-500">
+        <a href="/about" class="mt-7 inline-flex min-h-14 items-center rounded-full bg-navy-600 px-8 text-h4 font-bold text-cream-50 hover:bg-navy-500">
           More about Thushara
         </a>
 
-        <dl class="mt-10 grid grid-cols-2 gap-x-4 gap-y-7 border-t border-mint-200 pt-8 sm:grid-cols-4 sm:divide-x sm:divide-mint-200">
+        <dl class="mt-10 grid grid-cols-2 gap-x-4 gap-y-7 border-t border-mist-200 pt-8 sm:grid-cols-4 sm:divide-x sm:divide-mist-200">
           {[
             { figure: String(settings.yearsExperience), label: "Years of experience" },
             { figure: `${settings.mdrtYears}×`, label: `MDRT — ${settings.mdrtStatus}` },
@@ -215,7 +215,7 @@ const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask abou
             <div class={i > 0 ? "sm:pl-4" : ""}>
               <dt class="sr-only">{s.label}</dt>
               <dd>
-                <span class="block font-display text-[44px] font-extrabold leading-none tabular text-teal-600">{s.figure}</span>
+                <span class="block font-display text-[44px] font-extrabold leading-none tabular text-navy-600">{s.figure}</span>
                 <span class="mt-2.5 block text-small leading-snug text-warm-700">{s.label}</span>
               </dd>
             </div>
@@ -253,8 +253,8 @@ const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask abou
   <section class="bg-cream-100 py-16 md:py-24">
     <div class="container-default grid gap-12 px-5 lg:grid-cols-2 lg:items-center lg:gap-20">
       <div>
-        <p class="overline text-teal-600">For your profession</p>
-        <h2 class="mt-4 max-w-[14ch] font-display text-h2 font-extrabold text-teal-600">
+        <p class="overline text-navy-600">For your profession</p>
+        <h2 class="mt-4 max-w-[14ch] font-display text-h2 font-extrabold text-navy-600">
           Built around how you actually earn.
         </h2>
         <p class="mt-5 max-w-[58ch] text-body-lg leading-relaxed text-warm-700">
@@ -267,7 +267,7 @@ const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask abou
           {professions.map((p, i) => (
             <li>
               <span class={`flex min-h-11 items-center rounded-full px-5 text-small font-bold ${
-                i < 2 ? "bg-teal-600 text-cream-50" : "border border-warm-300 text-warm-700"
+                i < 2 ? "bg-navy-600 text-cream-50" : "border border-warm-300 text-warm-700"
               }`}>{p}</span>
             </li>
           ))}
@@ -279,10 +279,10 @@ const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask abou
         </ul>
 
         <div class="mt-8 flex flex-wrap items-center gap-5">
-          <a href="/for/doctors" class="flex min-h-14 items-center rounded-full bg-teal-600 px-8 text-h4 font-bold text-cream-50 hover:bg-teal-500">
+          <a href="/for/doctors" class="flex min-h-14 items-center rounded-full bg-navy-600 px-8 text-h4 font-bold text-cream-50 hover:bg-navy-500">
             Read the doctors' guide
           </a>
-          <a href="/for/engineers" class="text-h4 font-bold text-teal-600 hover:text-teal-400">
+          <a href="/for/engineers" class="text-h4 font-bold text-navy-600 hover:text-navy-400">
             Read the engineers' guide →
           </a>
         </div>
@@ -290,10 +290,10 @@ const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask abou
       </div>
 
       <div class="relative">
-        <div class="flex aspect-4/5 flex-col items-center justify-center gap-2 rounded-xl border border-mint-200 bg-mint-100 p-9 text-center" data-slot="IMG-PROF-01">
-          <span aria-hidden="true" class="size-3.5 rotate-45 bg-mint-400"></span>
-          <span class="font-mono text-caption font-bold tracking-wider text-mint-600">IMG-PROF-01 · 4:5</span>
-          <span class="max-w-[32ch] font-mono text-caption leading-relaxed text-mint-500">
+        <div class="flex aspect-4/5 flex-col items-center justify-center gap-2 rounded-xl border border-mist-200 bg-mist-100 p-9 text-center" data-slot="IMG-PROF-01">
+          <span aria-hidden="true" class="size-3.5 rotate-45 bg-mist-400"></span>
+          <span class="font-mono text-caption font-bold tracking-wider text-mist-600">IMG-PROF-01 · 4:5</span>
+          <span class="max-w-[32ch] font-mono text-caption leading-relaxed text-mist-500">
             One image that reads as any Sri Lankan professional at work — desk, laptop, plans or
             notes. Not scrubs, not a hard hat. Must be locally shot.
           </span>
@@ -320,7 +320,7 @@ const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask abou
       </div>
 
       <div class="order-1 lg:order-2">
-        <h2 class="font-display text-h2 font-extrabold text-teal-600">
+        <h2 class="font-display text-h2 font-extrabold text-navy-600">
           {settings.yearsExperience} years of doing this properly
         </h2>
         <ul class="mt-8 flex flex-col gap-6">
@@ -388,7 +388,7 @@ const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask abou
   <!-- ============ GUIDES ============ -->
   <section class="bg-cream-50 py-16 md:py-24">
     <div class="container-default px-5">
-      <h2 class="font-display text-h2 font-extrabold text-teal-600">Free guides, no jargon</h2>
+      <h2 class="font-display text-h2 font-extrabold text-navy-600">Free guides, no jargon</h2>
 
       <ul class="mt-10 grid gap-4 md:grid-cols-3">
         {guides.map((g) => (
@@ -397,7 +397,7 @@ const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask abou
             <span class="mt-5 font-display text-h4 font-bold leading-snug text-ink-900">{g.title}</span>
             <span class="mt-2.5 flex-1 text-body leading-relaxed text-warm-700">{g.body}</span>
             <span class="mt-4 font-mono text-caption text-warm-400">{g.slot} · file pending</span>
-            <span class="mt-5 flex min-h-13 items-center justify-center rounded-full border-[1.5px] border-teal-600 text-body font-bold text-teal-600">
+            <span class="mt-5 flex min-h-13 items-center justify-center rounded-full border-[1.5px] border-navy-600 text-body font-bold text-navy-600">
               Download
             </span>
           </li>
@@ -432,7 +432,7 @@ const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask abou
       </div>
 
       {settings.phoneHref && (
-        <a href={settings.phoneHref} class="mt-8 inline-block font-display text-h4 font-bold text-teal-300 hover:text-gold-400">
+        <a href={settings.phoneHref} class="mt-8 inline-block font-display text-h4 font-bold text-navy-300 hover:text-gold-400">
           {settings.phone}
         </a>
       )}

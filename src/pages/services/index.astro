@@ -35,7 +35,7 @@ const groups = lifeStages.map((stage) => ({
   <!-- ============ HERO ============ -->
   <section class="bg-cream-100 py-14 md:py-20">
     <div class="container-default px-5">
-      <p class="overline text-teal-600">Eight covers, one advisor</p>
+      <p class="overline text-navy-600">Eight covers, one advisor</p>
       <h1 class="mt-4 font-display text-display font-extrabold leading-[1.04] tracking-[-0.03em] text-ink-900">
         What I help with
       </h1>
@@ -52,7 +52,7 @@ const groups = lifeStages.map((stage) => ({
       {groups.map((group, gi) => (
         <div>
           <h2 class="flex flex-wrap items-baseline gap-4">
-            <span class="font-display text-h2 font-extrabold text-teal-600">{group.label}</span>
+            <span class="font-display text-h2 font-extrabold text-navy-600">{group.label}</span>
             <span class="font-display text-h4 font-bold tabular text-warm-500">{group.ageRange}</span>
           </h2>
           <span aria-hidden="true" class="mt-4 block h-px w-full bg-gold-500/45"></span>
@@ -63,12 +63,12 @@ const groups = lifeStages.map((stage) => ({
                 <a
                   href={`/services/${s.slug}`}
                   class="relative flex h-full flex-col overflow-hidden rounded-[20px] border border-cyan-300/14 px-8 pb-7 pt-24 transition-shadow hover:shadow-[0_0_0_1px_rgba(224,180,87,0.35)]"
-                  style="background:linear-gradient(165deg,#0A3630 0%,#06231F 70%,#041915 100%)"
+                  style="background:linear-gradient(165deg,#0A2440 0%,#071A2E 70%,#04101F 100%)"
                 >
                   <span
                     aria-hidden="true"
                     class="pointer-events-none absolute -right-4 -top-4 size-[130px] bg-contain bg-center bg-no-repeat opacity-30"
-                    style={`background-image:url(/icons/cut-${s.icon}.png);filter:drop-shadow(0 0 24px rgba(46,214,196,0.45))`}
+                    style={`background-image:url(/icons/cut-${s.icon}.png);filter:drop-shadow(0 0 24px rgba(7,164,207,0.45))`}
                   ></span>
                   <span class="relative font-display text-h3 font-extrabold leading-snug text-cream-50">{s.title}</span>
                   <span class="relative mt-3 flex-1 text-body leading-relaxed text-cream-50/68">{s.short}</span>

@@ -70,8 +70,8 @@ export default function LifeStageServices({ stages, services }: Props) {
         <div className="container-default px-5">
           <div className="grid gap-6 lg:grid-cols-[1.3fr_1fr] lg:items-end">
             <div>
-              <p className="overline text-teal-600">Where are you right now?</p>
-              <h2 className="mt-4 max-w-[20ch] font-display text-h2 font-extrabold text-teal-600">
+              <p className="overline text-navy-600">Where are you right now?</p>
+              <h2 className="mt-4 max-w-[20ch] font-display text-h2 font-extrabold text-navy-600">
                 Everyone needs something different. Let's start with you.
               </h2>
             </div>
@@ -93,7 +93,7 @@ export default function LifeStageServices({ stages, services }: Props) {
                     className={`relative flex h-full w-full flex-col overflow-hidden rounded-[20px] border px-8 pb-8 pt-9 text-left transition-shadow ${
                       on ? "border-gold-400/50 shadow-[0_0_0_1px_rgba(224,180,87,0.35)]" : "border-cyan-300/14"
                     }`}
-                    style={{ background: "linear-gradient(165deg,#0A3630 0%,#06231F 70%,#041915 100%)" }}
+                    style={{ background: "linear-gradient(165deg,#0A2440 0%,#071A2E 70%,#04101F 100%)" }}
                   >
                     {/* icon watermark, glowing */}
                     <span
@@ -102,7 +102,7 @@ export default function LifeStageServices({ stages, services }: Props) {
                       style={{
                         backgroundImage: `url(/icons/cut-${s.icon}.png)`,
                         opacity: on ? 0.4 : 0.28,
-                        filter: "drop-shadow(0 0 26px rgba(46,214,196,0.45))",
+                        filter: "drop-shadow(0 0 26px rgba(7,164,207,0.45))",
                       }}
                     />
                     <span
@@ -138,15 +138,15 @@ export default function LifeStageServices({ stages, services }: Props) {
         <div className="container-default px-5">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="overline text-teal-600">What I help with</p>
-              <h2 className="mt-4 font-display text-h2 font-extrabold text-teal-600">
+              <p className="overline text-navy-600">What I help with</p>
+              <h2 className="mt-4 font-display text-h2 font-extrabold text-navy-600">
                 Eight ways to protect what you're building
               </h2>
             </div>
             {activeStage && (
               <p className="text-small text-warm-500">
                 Ordered for <strong className="text-warm-900">{activeStage.label}</strong>.{" "}
-                <button type="button" onClick={() => choose(activeStage.id)} className="font-bold text-teal-600 underline underline-offset-4">
+                <button type="button" onClick={() => choose(activeStage.id)} className="font-bold text-navy-600 underline underline-offset-4">
                   Change
                 </button>
               </p>
@@ -160,7 +160,7 @@ export default function LifeStageServices({ stages, services }: Props) {
                 <li key={s.slug}>
                   <a
                     href={`/services/${s.slug}`}
-                    className={`group flex h-full flex-col rounded-[20px] border bg-white p-7 transition-all hover:-translate-y-0.5 hover:border-teal-400 ${
+                    className={`group flex h-full flex-col rounded-[20px] border bg-white p-7 transition-all hover:-translate-y-0.5 hover:border-navy-400 ${
                       dim ? "border-warm-200 opacity-55 hover:opacity-100" : "border-warm-200"
                     }`}
                   >
@@ -174,10 +174,10 @@ export default function LifeStageServices({ stages, services }: Props) {
                     <span className="mt-5 font-display text-h4 font-bold leading-snug text-ink-900">{s.title}</span>
                     <span className="mt-2.5 flex-1 text-small leading-relaxed text-warm-700">{s.short}</span>
                     <span className="mt-6 flex items-center justify-between gap-3">
-                      <span className="rounded-md bg-teal-50 px-3 py-1.5 text-caption font-bold text-teal-600">
+                      <span className="rounded-md bg-navy-50 px-3 py-1.5 text-caption font-bold text-navy-600">
                         {stageLabel(s.lifeStage)}
                       </span>
-                      <span aria-hidden="true" className="text-h4 text-warm-500 transition-transform group-hover:translate-x-0.5 group-hover:text-teal-600">
+                      <span aria-hidden="true" className="text-h4 text-warm-500 transition-transform group-hover:translate-x-0.5 group-hover:text-navy-600">
                         →
                       </span>
                     </span>

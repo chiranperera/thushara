@@ -93,8 +93,8 @@ export const SERVICE_LABEL: Record<string, string> = {
 /** Status pill styling. Gold = needs him. */
 export const STATUS_STYLE: Record<string, string> = {
   new: "bg-gold-500 text-ink-900",
-  contacted: "bg-teal-50 text-teal-600",
-  confirmed: "bg-teal-600 text-cream-50",
+  contacted: "bg-navy-50 text-navy-600",
+  confirmed: "bg-navy-600 text-cream-50",
   met: "bg-ink-800 text-cream-50",
   converted: "bg-success text-white",
   not_proceeding: "bg-warm-200 text-warm-700",

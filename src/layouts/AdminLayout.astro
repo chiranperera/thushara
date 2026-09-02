@@ -71,7 +71,7 @@ const isActive = (href: string) => (href === "/admin" ? path === "/admin" : path
                 aria-current={isActive(item.href) ? "page" : undefined}
                 class={`flex min-h-13 items-center justify-between rounded-[10px] px-4 text-[16px] transition-colors ${
                   isActive(item.href)
-                    ? "bg-teal-600 font-bold text-cream-50"
+                    ? "bg-navy-600 font-bold text-cream-50"
                     : "text-cream-50/78 hover:bg-cream-50/6 hover:text-cream-50"
                 }`}
               >
@@ -133,7 +133,7 @@ const isActive = (href: string) => (href === "/admin" ? path === "/admin" : path
             href={item.href}
             aria-current={isActive(item.href) ? "page" : undefined}
             class={`relative flex min-h-15 flex-col items-center justify-center gap-1 text-caption font-bold ${
-              isActive(item.href) ? "text-teal-600" : "text-warm-500"
+              isActive(item.href) ? "text-navy-600" : "text-warm-500"
             }`}
           >
             {item.label}

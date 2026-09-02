@@ -69,7 +69,7 @@ const anchor = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replac
       <div class="relative mt-9 max-w-[690px]">
         <input
           id="q" type="search" placeholder="Search the questions" autocomplete="off"
-          class="h-16 w-full rounded-full border border-warm-200 bg-white pl-14 pr-6 text-body-lg placeholder:text-warm-400 focus:border-teal-400"
+          class="h-16 w-full rounded-full border border-warm-200 bg-white pl-14 pr-6 text-body-lg placeholder:text-warm-400 focus:border-navy-400"
         />
         <span aria-hidden="true" class="absolute left-6 top-1/2 size-4 -translate-y-1/2 rounded-full border-2 border-warm-400"></span>
       </div>
@@ -84,7 +84,7 @@ const anchor = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replac
           {grouped.map((g, i) => (
             <li class="shrink-0 lg:shrink">
               <a href={`#${anchor(g.name)}`}
-                 class={`block rounded-lg px-4 py-3 text-body transition-colors ${i === 0 ? "bg-teal-600 font-bold text-cream-50" : "text-warm-700 hover:bg-cream-100"}`}>
+                 class={`block rounded-lg px-4 py-3 text-body transition-colors ${i === 0 ? "bg-navy-600 font-bold text-cream-50" : "text-warm-700 hover:bg-cream-100"}`}>
                 {g.name}
               </a>
             </li>
@@ -95,7 +95,7 @@ const anchor = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replac
       <div id="list" class="min-w-0">
         {grouped.map((g) => (
           <section id={anchor(g.name)} class="faq-group mb-12 scroll-mt-28 last:mb-0">
-            <p class="overline text-teal-600">{g.name}</p>
+            <p class="overline text-navy-600">{g.name}</p>
             <div class="mt-4">
               {g.items.map((f, i) => (
                 <details class="faq-item group border-t border-warm-200 last:border-b" open={i === 0}>
@@ -117,7 +117,7 @@ const anchor = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replac
           </section>
         ))}
         <p id="none" class="hidden py-8 text-body-lg text-warm-700">
-          Nothing matches that. <a href="/book" class="font-bold text-teal-600 underline underline-offset-4">Ask me directly</a> — it takes twenty minutes.
+          Nothing matches that. <a href="/book" class="font-bold text-navy-600 underline underline-offset-4">Ask me directly</a> — it takes twenty minutes.
         </p>
       </div>
     </div>

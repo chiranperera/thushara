@@ -139,7 +139,7 @@ export default function Uploader({ kind, categories = [], lifeStages = [] }: Pro
     xhr.send(form);
   };
 
-  const field = "h-13 w-full rounded-md border border-warm-200 bg-white px-4 text-body text-ink-900 focus:border-teal-400";
+  const field = "h-13 w-full rounded-md border border-warm-200 bg-white px-4 text-body text-ink-900 focus:border-navy-400";
   const label = "text-small font-bold text-warm-800";
 
   return (
@@ -167,7 +167,7 @@ export default function Uploader({ kind, categories = [], lifeStages = [] }: Pro
             choose(e.dataTransfer?.files?.[0]);
           }}
           class={`flex w-full flex-col items-center justify-center rounded-[14px] border-2 border-dashed px-6 py-12 text-center transition-colors ${
-            over ? "border-teal-500 bg-teal-50" : "border-warm-300 bg-cream-100 hover:border-teal-400"
+            over ? "border-navy-500 bg-navy-50" : "border-warm-300 bg-cream-100 hover:border-navy-400"
           }`}
         >
           <span class="text-h4 font-bold text-ink-900">
@@ -194,7 +194,7 @@ export default function Uploader({ kind, categories = [], lifeStages = [] }: Pro
                 {(file.size / 1024 / 1024).toFixed(1)} MB
                 {isPhoto && " — will be made smaller before uploading"}
               </p>
-              <button type="button" onClick={reset} class="mt-2 text-small font-bold text-teal-600 underline">
+              <button type="button" onClick={reset} class="mt-2 text-small font-bold text-navy-600 underline">
                 Choose a different file
               </button>
             </div>
@@ -245,7 +245,7 @@ export default function Uploader({ kind, categories = [], lifeStages = [] }: Pro
                   <input id="page_count" name="page_count" type="number" min="1" class={`${field} mt-2`} />
                 </div>
                 <label class="flex items-start gap-3 sm:col-span-2">
-                  <input type="checkbox" name="gated" value="1" checked class="mt-1 size-6 shrink-0 accent-teal-600" />
+                  <input type="checkbox" name="gated" value="1" checked class="mt-1 size-6 shrink-0 accent-navy-600" />
                   <span class="text-body leading-relaxed text-warm-700">
                     <strong class="font-bold text-ink-900">Ask for a name and WhatsApp number first.</strong>{" "}
                     Every download then becomes an enquiry. Untick to let people read it without giving
@@ -259,7 +259,7 @@ export default function Uploader({ kind, categories = [], lifeStages = [] }: Pro
           {busy && (
             <div>
               <div class="h-2 overflow-hidden rounded-full bg-cream-100">
-                <div class="h-full rounded-full bg-teal-600 transition-[width]" style={`width:${pct}%`} />
+                <div class="h-full rounded-full bg-navy-600 transition-[width]" style={`width:${pct}%`} />
               </div>
               <p class="mt-2 text-small text-warm-600" role="status">
                 {pct < 100 ? `Uploading — ${pct}%` : "Almost done…"}
@@ -270,7 +270,7 @@ export default function Uploader({ kind, categories = [], lifeStages = [] }: Pro
           <button
             type="submit"
             disabled={busy}
-            class="flex min-h-14 items-center justify-center rounded-full bg-teal-600 px-10 text-h4 font-bold text-cream-50 hover:bg-teal-500 disabled:opacity-60 sm:self-start"
+            class="flex min-h-14 items-center justify-center rounded-full bg-navy-600 px-10 text-h4 font-bold text-cream-50 hover:bg-navy-500 disabled:opacity-60 sm:self-start"
           >
             {busy ? "Uploading…" : isPhoto ? "Add this photo" : "Add this guide"}
           </button>

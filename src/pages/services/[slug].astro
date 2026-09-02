@@ -123,18 +123,18 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
     />
     <div class="container-default relative px-5 py-12 md:py-16">
       <nav aria-label="Breadcrumb" class="text-small text-warm-500">
-        <a href="/" class="hover:text-teal-600">Home</a>
+        <a href="/" class="hover:text-navy-600">Home</a>
         <span aria-hidden="true" class="mx-2">/</span>
-        <a href="/services" class="hover:text-teal-600">Services</a>
+        <a href="/services" class="hover:text-navy-600">Services</a>
         <span aria-hidden="true" class="mx-2">/</span>
         <span class="text-warm-900">{content.title}</span>
       </nav>
 
-      <p class="overline mt-7 text-teal-600">{content.overline}</p>
+      <p class="overline mt-7 text-navy-600">{content.overline}</p>
       <h1 class="mt-4 max-w-[17ch] font-display text-display font-extrabold leading-[1.04] tracking-[-0.03em] text-ink-900">
         {content.title}
       </h1>
-      <p class="mt-5 max-w-[24ch] font-serif text-h2 italic leading-tight text-teal-600">
+      <p class="mt-5 max-w-[24ch] font-serif text-h2 italic leading-tight text-navy-600">
         {content.promise}
       </p>
       <p class="mt-7 max-w-[62ch] text-body-lg leading-relaxed text-warm-700">{content.intro}</p>
@@ -144,7 +144,7 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
           Book a consultation
         </a>
         {wa && (
-          <a target="_blank" rel="noopener noreferrer" href={wa} class="flex min-h-14 items-center gap-2.5 rounded-full border-[1.5px] border-warm-300 px-7 text-h4 font-bold text-ink-900 transition-colors hover:border-teal-600">
+          <a target="_blank" rel="noopener noreferrer" href={wa} class="flex min-h-14 items-center gap-2.5 rounded-full border-[1.5px] border-warm-300 px-7 text-h4 font-bold text-ink-900 transition-colors hover:border-navy-600">
             <span aria-hidden="true" class="size-2.5 rounded-full bg-whatsapp"></span>WhatsApp about this
           </a>
         )}
@@ -170,7 +170,7 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
   <!-- ============ IS THIS FOR YOU ============ -->
   <section class="bg-cream-50 py-16 md:py-20">
     <div class="container-default px-5">
-      <h2 class="font-display text-h2 font-extrabold text-teal-600">Is this for you?</h2>
+      <h2 class="font-display text-h2 font-extrabold text-navy-600">Is this for you?</h2>
 
       <p class="mt-4 max-w-[62ch] text-body-lg leading-relaxed text-warm-700">
         Most people recognise themselves in one of these straight away. If you don't, that is
@@ -202,7 +202,7 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
   <section class="bg-cream-100 py-16 md:py-20">
     <div class="container-default px-5">
       <div class="flex flex-wrap items-start justify-between gap-6">
-        <h2 class="font-display text-h2 font-extrabold text-teal-600">What it actually covers</h2>
+        <h2 class="font-display text-h2 font-extrabold text-navy-600">What it actually covers</h2>
         <p class="max-w-[34ch] text-small leading-relaxed text-warm-500">
           Dotted terms carry a plain-English gloss on hover and on tap.
         </p>
@@ -241,7 +241,7 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
   <section class="bg-cream-50 py-16 md:py-20">
     <div class="container-default px-5">
       <div class="max-w-[60ch]">
-        <h2 class="font-display text-h2 font-extrabold leading-tight text-teal-600">{content.why.heading}</h2>
+        <h2 class="font-display text-h2 font-extrabold leading-tight text-navy-600">{content.why.heading}</h2>
         <p class="mt-5 text-body-lg leading-relaxed text-warm-700">{content.why.standfirst}</p>
       </div>
 
@@ -265,8 +265,8 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
   {content.table && (
     <section class="bg-cream-50 py-16 md:py-20">
       <div class="container-default px-5">
-        <p class="overline text-teal-600">{content.table.caption}</p>
-        <h2 class="mt-4 max-w-[20ch] font-display text-h2 font-extrabold text-teal-600">{content.table.heading}</h2>
+        <p class="overline text-navy-600">{content.table.caption}</p>
+        <h2 class="mt-4 max-w-[20ch] font-display text-h2 font-extrabold text-navy-600">{content.table.heading}</h2>
 
         <div class="mt-9 overflow-x-auto">
           <table class="w-full min-w-[640px] overflow-hidden rounded-xl border border-warm-200 bg-white text-left">
@@ -296,7 +296,7 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
             Indicative guidance only, never a quotation. Actual cover levels depend on your
             profession, contracts, and claims history. Figures to be supplied by Thushara before launch.
           </p>
-          <a href={`/book?service=${meta.slug}`} class="flex min-h-13 items-center rounded-full bg-teal-600 px-7 text-body font-bold text-cream-50 hover:bg-teal-500">
+          <a href={`/book?service=${meta.slug}`} class="flex min-h-13 items-center rounded-full bg-navy-600 px-7 text-body font-bold text-cream-50 hover:bg-navy-500">
             Discuss this with me
           </a>
         </div>
@@ -325,7 +325,7 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
 
       <!-- rule -->
       <div class="relative mt-6 hidden h-6 md:block">
-        <span aria-hidden="true" class="absolute inset-x-0 top-[11px] h-0.5 bg-teal-500/40"></span>
+        <span aria-hidden="true" class="absolute inset-x-0 top-[11px] h-0.5 bg-navy-500/40"></span>
         <span
           aria-hidden="true" class="absolute left-0 top-[11px] h-0.5 bg-gold-500"
           style={`width:calc((100% - 80px)/6 * ${activeIdx} + ${activeIdx * 16 + 12}px)`}
@@ -337,7 +337,7 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
                 ? <span class="block size-6 rounded-full bg-gold-500 shadow-[0_0_0_6px_rgba(201,150,47,0.18)]"></span>
                 : i < activeIdx
                   ? <span class="block size-4 rounded-full bg-gold-500"></span>
-                  : <span class="block size-4 rounded-full border-2 border-teal-500 bg-ink-900"></span>}
+                  : <span class="block size-4 rounded-full border-2 border-navy-500 bg-ink-900"></span>}
             </span>
           ))}
         </div>
@@ -369,10 +369,10 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
   <section class="bg-cream-50 py-16 md:py-20">
     <div class="container-default grid gap-12 px-5 lg:grid-cols-[0.75fr_1fr] lg:items-center lg:gap-16">
       <div class="relative">
-        <div class="flex aspect-4/5 flex-col items-center justify-center gap-2 rounded-xl border border-mint-200 bg-mint-100 p-9 text-center" data-slot="IMG-ABOUT-01">
-          <span aria-hidden="true" class="size-3.5 rotate-45 bg-mint-400"></span>
-          <span class="font-mono text-caption font-bold tracking-wider text-mint-600">IMG-ABOUT-01 · 4:5</span>
-          <span class="max-w-[26ch] font-mono text-caption leading-relaxed text-mint-500">
+        <div class="flex aspect-4/5 flex-col items-center justify-center gap-2 rounded-xl border border-mist-200 bg-mist-100 p-9 text-center" data-slot="IMG-ABOUT-01">
+          <span aria-hidden="true" class="size-3.5 rotate-45 bg-mist-400"></span>
+          <span class="font-mono text-caption font-bold tracking-wider text-mist-600">IMG-ABOUT-01 · 4:5</span>
+          <span class="max-w-[26ch] font-mono text-caption leading-relaxed text-mist-500">
             Reused across service pages. Warm, candid, mid-conversation.
           </span>
         </div>
@@ -383,8 +383,8 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
       </div>
 
       <div>
-        <p class="overline text-teal-600">Why work with me</p>
-        <h2 class="mt-4 max-w-[18ch] font-display text-h2 font-extrabold text-teal-600">
+        <p class="overline text-navy-600">Why work with me</p>
+        <h2 class="mt-4 max-w-[18ch] font-display text-h2 font-extrabold text-navy-600">
           {settings.yearsExperience} years of the same straight answer.
         </h2>
         {/* His own framing line, with the year count read from settings
@@ -410,7 +410,7 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
   <section class="bg-cream-100 py-16 md:py-20">
     <div class="container-default px-5">
       <div class="flex flex-wrap items-start justify-between gap-6">
-        <h2 class="max-w-[16ch] font-display text-h2 font-extrabold text-teal-600">
+        <h2 class="max-w-[16ch] font-display text-h2 font-extrabold text-navy-600">
           What happens when you need to claim
         </h2>
         <p class="max-w-[42ch] text-body leading-relaxed text-warm-700">
@@ -434,7 +434,7 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
   <!-- ============ FAQ ============ -->
   <section class="bg-cream-50 py-16 md:py-20">
     <div class="container-default px-5">
-      <h2 class="font-display text-h2 font-extrabold text-teal-600">Questions people actually ask</h2>
+      <h2 class="font-display text-h2 font-extrabold text-navy-600">Questions people actually ask</h2>
 
       <div class="mt-9 max-w-[860px]">
         {faqs.map((f, i) => (
@@ -451,7 +451,7 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
         ))}
       </div>
 
-      <a href="/faq" class="mt-7 inline-block text-body font-bold text-teal-600 hover:text-teal-400">
+      <a href="/faq" class="mt-7 inline-block text-body font-bold text-navy-600 hover:text-navy-400">
         All frequently asked questions →
       </a>
     </div>
@@ -465,7 +465,7 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
   <!-- ============ RELATED ============ -->
   <section class="bg-cream-50 py-16 md:py-20">
     <div class="container-default px-5">
-      <h2 class="font-display text-h2 font-extrabold text-teal-600">What usually goes with this</h2>
+      <h2 class="font-display text-h2 font-extrabold text-navy-600">What usually goes with this</h2>
 
       <ul class="mt-9 grid gap-4 md:grid-cols-3">
         {related.map((r) => (
@@ -473,12 +473,12 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
             <a
               href={`/services/${r.slug}`}
               class="relative flex h-full flex-col overflow-hidden rounded-[20px] border border-cyan-300/14 px-8 pb-7 pt-9 transition-shadow hover:shadow-[0_0_0_1px_rgba(224,180,87,0.35)]"
-              style="background:linear-gradient(165deg,#0A3630 0%,#06231F 70%,#041915 100%)"
+              style="background:linear-gradient(165deg,#0A2440 0%,#071A2E 70%,#04101F 100%)"
             >
               <span
                 aria-hidden="true"
                 class="pointer-events-none absolute -right-6 -top-6 size-[150px] bg-contain bg-center bg-no-repeat opacity-30"
-                style={`background-image:url(/icons/cut-${r.icon}.png);filter:drop-shadow(0 0 26px rgba(46,214,196,0.45))`}
+                style={`background-image:url(/icons/cut-${r.icon}.png);filter:drop-shadow(0 0 26px rgba(7,164,207,0.45))`}
               ></span>
               <span class="relative mt-12 font-display text-h4 font-bold text-cream-50">{r.title}</span>
               <span class="relative mt-2.5 flex-1 text-body leading-relaxed text-cream-50/68">{r.short}</span>

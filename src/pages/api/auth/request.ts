@@ -82,16 +82,16 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
       subject: "Sign in to your website",
       html: `<!doctype html><html><body style="margin:0;background:#F4F1E9;padding:24px 12px">
 <table role="presentation" width="100%"><tr><td align="center">
-<table role="presentation" style="max-width:480px;background:#FBFAF6;border:1px solid #DCDFDC;border-radius:16px">
-<tr><td style="background:#06231F;padding:20px 28px">
+<table role="presentation" style="max-width:480px;background:#FBFAF6;border:1px solid #DCDEDF;border-radius:16px">
+<tr><td style="background:#071A2E;padding:20px 28px">
   <div style="font:700 12px/1.4 -apple-system,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#C9962F">Sign in</div>
 </td></tr>
 <tr><td style="padding:28px">
-  <p style="margin:0 0 20px;font:400 18px/1.6 -apple-system,sans-serif;color:#161A19">
+  <p style="margin:0 0 20px;font:400 18px/1.6 -apple-system,sans-serif;color:#16181A">
     Tap the button below to sign in to your website. It works once, and expires in ${MAGIC_LINK_MINUTES} minutes.
   </p>
-  <a href="${link}" style="display:block;text-align:center;padding:16px;background:#12544A;color:#FBFAF6;text-decoration:none;border-radius:999px;font:700 17px/1 -apple-system,sans-serif">Sign in</a>
-  <p style="margin:20px 0 0;font:400 15px/1.5 -apple-system,sans-serif;color:#737C79">
+  <a href="${link}" style="display:block;text-align:center;padding:16px;background:#123A6B;color:#FBFAF6;text-decoration:none;border-radius:999px;font:700 17px/1 -apple-system,sans-serif">Sign in</a>
+  <p style="margin:20px 0 0;font:400 15px/1.5 -apple-system,sans-serif;color:#6E7377">
     If you didn't ask for this, you can ignore it — nothing will happen.
   </p>
 </td></tr></table></td></tr></table></body></html>`,

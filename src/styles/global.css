@@ -3,21 +3,26 @@
 /* ============================================================
    Thushara Rathnayake — Design tokens
    Source: design-brief/03-brand-identity-direction.md + 04-design-system.md
-   Palette: "Deep Teal & Gold". Do not invent values outside this scale.
+   Palette: "Deep Navy & Gold". Do not invent values outside this scale.
+
+   Navy #123A6B is drawn from the client's own photographs: his suit,
+   the Sri Lanka Insurance awards backdrops, and the hue of the SLIC
+   mark itself — adjacent to the company without borrowing its colour.
+   Gold is the MDRT awards gold and is unchanged.
    ============================================================ */
 
 @theme {
-  /* ---------- Colour: core, deep teal-green ---------- */
-  --color-ink-900: #06231F;
-  --color-ink-800: #0A322D;
-  --color-ink-700: #0E4038;
-  --color-teal-600: #12544A;
-  --color-teal-500: #16705F;
-  --color-teal-400: #1E8F78;
-  --color-teal-300: #4FB89C;
-  --color-teal-200: #8FD6C4;
-  --color-teal-100: #C9EBE1;
-  --color-teal-50: #EBF7F3;
+  /* ---------- Colour: core, deep navy ---------- */
+  --color-ink-900: #071A2E;
+  --color-ink-800: #0B2138;
+  --color-ink-700: #0E2C4A;
+  --color-navy-600: #123A6B;
+  --color-navy-500: #17487F;
+  --color-navy-400: #1E5C9E;
+  --color-navy-300: #4C86C4;
+  --color-navy-200: #8FB4DC;
+  --color-navy-100: #C8DCEF;
+  --color-navy-50: #EAF1F9;
 
   /* ---------- Colour: accent, antique gold ----------
      Gold means CREDENTIAL. MDRT figures, award markers, active
@@ -34,43 +39,47 @@
   --color-cream-100: #F4F1E9;
   --color-canvas: #E7E5DE;
 
-  /* ---------- Neutrals, cooled to sit with teal ---------- */
-  --color-warm-900: #161A19;
-  --color-warm-800: #2A302E;
-  --color-warm-700: #464E4B;
-  --color-warm-500: #737C79;
-  --color-warm-400: #98A09D;
-  --color-warm-300: #BCC2BF;
-  --color-warm-200: #DCDFDC;
-  --color-warm-100: #ECEEEC;
+  /* ---------- Neutrals, biased blue to sit with navy ----------
+     warm-500 is the smallest text on cream; it is set to clear 4.5:1. */
+  --color-warm-900: #16181A;
+  --color-warm-800: #2A2D30;
+  --color-warm-700: #464A4E;
+  --color-warm-500: #6E7377;
+  --color-warm-400: #989CA0;
+  --color-warm-300: #BCBFC2;
+  --color-warm-200: #DCDEDF;
+  --color-warm-100: #ECEDEE;
 
 
-  /* ---------- Deep hero greens ----------
+  /* ---------- Deep hero navies ----------
      The hero uses a radial gradient through these three. They sit
      below ink-900 and exist only for that treatment. */
-  --color-ink-950: #041915;
-  --color-ink-975: #03130F;
-  --color-hero-1: #0B3A33;
-  --color-hero-2: #062521;
-  --color-hero-3: #03130F;
-  --color-ink-850: #0A3630;
+  --color-ink-950: #04101F;
+  --color-ink-975: #020913;
+  --color-hero-1: #0C2747;
+  --color-hero-2: #071829;
+  --color-hero-3: #020913;
+  --color-ink-850: #0A2440;
 
-  /* ---------- Mint surfaces ----------
-     The "why people stay" section sits on mint, not cream. */
-  --color-mint-50: #EAF6F1;
-  --color-mint-100: #DCE9E3;
-  --color-mint-200: #C4D8D0;
-  --color-mint-600: #4F6B62;
-  --color-mint-500: #7E948B;
-  --color-mint-400: #8FAFA4;
+  /* ---------- Mist surfaces ----------
+     The "why people stay" section sits on mist, not cream. */
+  --color-mist-50: #EAF1F6;
+  --color-mist-100: #DCE3E9;
+  --color-mist-200: #C4CFD8;
+  --color-mist-600: #4F5E6B;
+  --color-mist-500: #7E8A94;
+  --color-mist-400: #8FA1AF;
 
   /* ---------- Bright accents on dark ----------
-     Used for the hero pill, hairline borders and the icon glow. */
-  --color-cyan-300: #8CF7DE;
-  --color-cyan-500: #28C8BE;
+     Hero pill, hairline borders, icon glow. cyan-500 is the client's
+     chosen #07A4CF; cyan-300 is a light tint of the same hue, used
+     where the accent has to carry small text on a dark ground.
+     Never a button — every button is navy, gold or WhatsApp green. */
+  --color-cyan-300: #7DDDF7;
+  --color-cyan-500: #07A4CF;
 
   /* ---------- Semantic ---------- */
-  --color-success: #157F5C;
+  --color-success: #157F4A;
   --color-danger: #B33A2B;
   --color-warning: #C07C14;
   --color-info: #2A6494;
@@ -214,15 +223,15 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Focus is never removed. 2px teal ring, 2px offset. */
+  /* Focus is never removed. 2px navy ring, 2px offset. */
   :focus-visible {
-    outline: 2px solid var(--color-teal-400);
+    outline: 2px solid var(--color-navy-400);
     outline-offset: 2px;
     border-radius: 2px;
   }
 
   ::selection {
-    background: var(--color-teal-100);
+    background: var(--color-navy-100);
     color: var(--color-ink-900);
   }
 

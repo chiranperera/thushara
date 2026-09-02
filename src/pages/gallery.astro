@@ -64,7 +64,7 @@ const placeholders = ["IMG-GAL-01 · MDRT & Awards", "IMG-GAL-02", "IMG-GAL-03",
       <div class="container-default -mx-1 flex gap-2 overflow-x-auto px-5 py-5">
         {CATS.map((c) => (
           <a href={c.id === "all" ? "/gallery" : `/gallery?c=${c.id}`}
-             class={`shrink-0 rounded-full px-5 py-2.5 text-small ${filter === c.id ? "bg-teal-600 font-bold text-cream-50" : "border border-warm-200 text-warm-700"}`}>
+             class={`shrink-0 rounded-full px-5 py-2.5 text-small ${filter === c.id ? "bg-navy-600 font-bold text-cream-50" : "border border-warm-200 text-warm-700"}`}>
             {c.label}
           </a>
         ))}
@@ -88,12 +88,12 @@ const placeholders = ["IMG-GAL-01 · MDRT & Awards", "IMG-GAL-02", "IMG-GAL-03",
         <>
           <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {placeholders.map((slot, i) => (
-              <li class="flex aspect-4/3 items-center justify-center rounded-xl border border-mint-200 bg-mint-100 p-6 text-center">
+              <li class="flex aspect-4/3 items-center justify-center rounded-xl border border-mist-200 bg-mist-100 p-6 text-center">
                 <span>
-                  {i === 0 && <span aria-hidden="true" class="mx-auto mb-2 block size-3.5 rotate-45 bg-mint-400"></span>}
-                  <span class="block font-mono text-caption font-bold tracking-wider text-mint-600">{slot}</span>
+                  {i === 0 && <span aria-hidden="true" class="mx-auto mb-2 block size-3.5 rotate-45 bg-mist-400"></span>}
+                  <span class="block font-mono text-caption font-bold tracking-wider text-mist-600">{slot}</span>
                   {i === 0 && (
-                    <span class="mt-2 block max-w-[30ch] font-mono text-caption leading-relaxed text-mint-500">
+                    <span class="mt-2 block max-w-[30ch] font-mono text-caption leading-relaxed text-mist-500">
                       Caption required for every image — the caption is what makes an award photo
                       meaningful to someone who does not know the organisation.
                     </span>

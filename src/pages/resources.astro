@@ -47,7 +47,7 @@ const pending = rows.length === 0;
 
   <section class="bg-cream-100 py-14 md:py-20">
     <div class="container-default px-5">
-      <p class="overline text-teal-600">Resources</p>
+      <p class="overline text-navy-600">Resources</p>
       <h1 class="mt-4 font-display text-display font-extrabold leading-[1.04] tracking-[-0.03em] text-ink-900">
         Free guides. No jargon.
       </h1>
@@ -63,7 +63,7 @@ const pending = rows.length === 0;
       {groups.filter((g) => g.items.length).map((group) => (
         <div>
           <h2 class="flex flex-wrap items-baseline gap-4">
-            <span class="font-display text-h2 font-extrabold text-teal-600">{group.label}</span>
+            <span class="font-display text-h2 font-extrabold text-navy-600">{group.label}</span>
             <span class="font-display text-h4 font-bold tabular text-warm-500">{group.ageRange}</span>
           </h2>
           <span aria-hidden="true" class="mt-4 block h-px w-full bg-gold-500/45"></span>
@@ -79,12 +79,12 @@ const pending = rows.length === 0;
                 </span>
                 {g.gated ? (
                   <a href={`/resources/${g.slug}`}
-                     class="mt-5 flex min-h-13 items-center justify-center rounded-full bg-teal-600 text-body font-bold text-cream-50 hover:bg-teal-500">
+                     class="mt-5 flex min-h-13 items-center justify-center rounded-full bg-navy-600 text-body font-bold text-cream-50 hover:bg-navy-500">
                     Download
                   </a>
                 ) : (
                   <a href={`/resources/${g.slug}`}
-                     class="mt-5 flex min-h-13 items-center justify-center rounded-full border-[1.5px] border-teal-600 text-body font-bold text-teal-600 hover:bg-teal-50">
+                     class="mt-5 flex min-h-13 items-center justify-center rounded-full border-[1.5px] border-navy-600 text-body font-bold text-navy-600 hover:bg-navy-50">
                     Read without giving details
                   </a>
                 )}

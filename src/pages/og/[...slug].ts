@@ -31,7 +31,7 @@ function card(o: { eyebrow: string; title: string; years: number; mdrt: number }
   const startY = Math.max(268, 330 - (lines.length - 1) * 34);
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
 <defs><radialGradient id="bg" cx="5%" cy="12%" r="120%">
-<stop offset="0%" stop-color="#0B3A33"/><stop offset="42%" stop-color="#062521"/><stop offset="100%" stop-color="#03130F"/>
+<stop offset="0%" stop-color="#0C2747"/><stop offset="42%" stop-color="#071829"/><stop offset="100%" stop-color="#020913"/>
 </radialGradient></defs>
 <rect width="1200" height="630" fill="url(#bg)"/>
 <g transform="translate(80,74)">
@@ -40,7 +40,7 @@ function card(o: { eyebrow: string; title: string; years: number; mdrt: number }
 <circle cx="34" cy="9" r="7" fill="#C9962F"/>
 </g>
 <text x="146" y="96" font-family="Helvetica,Arial,sans-serif" font-size="25" font-weight="700" fill="#FBFAF6">${esc(site.name)}</text>
-<text x="146" y="124" font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="700" letter-spacing="2.2" fill="#8CF7DE">${esc(site.title.toUpperCase())}</text>
+<text x="146" y="124" font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="700" letter-spacing="2.2" fill="#7DDDF7">${esc(site.title.toUpperCase())}</text>
 <text x="80" y="176" font-family="Helvetica,Arial,sans-serif" font-size="18" font-weight="700" letter-spacing="2.6" fill="#E0B457">${esc(o.eyebrow.toUpperCase())}</text>
 ${lines.map((l, i) => `<text x="80" y="${startY + i * 68}" font-family="Helvetica,Arial,sans-serif" font-size="60" font-weight="700" fill="#FBFAF6">${esc(l)}</text>`).join("")}
 <rect x="80" y="516" width="1040" height="1" fill="#FBFAF6" opacity="0.2"/>

@@ -47,7 +47,7 @@ const theirs = [
 
   <section class="bg-cream-100 py-14 md:py-20">
     <div class="container-default px-5">
-      <p class="overline text-teal-600">How working with me works</p>
+      <p class="overline text-navy-600">How working with me works</p>
       <h1 class="mt-4 max-w-[20ch] font-display text-display font-extrabold leading-[1.04] tracking-[-0.03em] text-ink-900">
         No pressure. No jargon. Here's exactly what happens.
       </h1>
@@ -60,7 +60,7 @@ const theirs = [
         {steps.map((s, i) => (
           <li class="relative pb-12 pl-11 last:pb-0">
             {!s.last && <span aria-hidden="true" class="absolute left-[5px] top-4 h-full w-0.5 bg-gold-500/60"></span>}
-            <span aria-hidden="true" class={`absolute left-0 top-1.5 block size-3 rounded-full ${s.last ? "bg-teal-600" : "bg-gold-500"}`}></span>
+            <span aria-hidden="true" class={`absolute left-0 top-1.5 block size-3 rounded-full ${s.last ? "bg-navy-600" : "bg-gold-500"}`}></span>
             <h2 class="font-display text-h3 font-extrabold text-ink-900">{s.lead}</h2>
             <p class="mt-2 text-body-lg leading-relaxed text-warm-700">
               {s.body}{s.emphasis && <> <strong class="font-bold text-ink-900">{s.emphasis}</strong></>}
@@ -98,11 +98,11 @@ const theirs = [
 
   <section class="bg-cream-100 py-16 md:py-20">
     <div class="container-default px-5">
-      <h2 class="font-display text-h2 font-extrabold text-teal-600">How claims work, in full</h2>
+      <h2 class="font-display text-h2 font-extrabold text-navy-600">How claims work, in full</h2>
 
       <div class="mt-9 grid gap-4 md:grid-cols-2">
         <div class="rounded-[20px] border border-warm-200 bg-white p-8">
-          <p class="overline text-teal-600">What I do</p>
+          <p class="overline text-navy-600">What I do</p>
           <ul class="mt-5 flex flex-col gap-4">
             {mine.map((m) => <li class="text-body-lg leading-relaxed text-warm-800">{m}</li>)}
           </ul>

@@ -72,12 +72,12 @@ const href = (f: string) => `/admin/leads?filter=${f}${q ? `&q=${encodeURICompon
           <input type="hidden" name="filter" value={filter} />
           <input
             type="search" name="q" value={q} placeholder="Search by name"
-            class="h-12 w-full rounded-full border border-warm-200 bg-white px-5 text-body placeholder:text-warm-400 focus:border-teal-400 md:w-70"
+            class="h-12 w-full rounded-full border border-warm-200 bg-white px-5 text-body placeholder:text-warm-400 focus:border-navy-400 md:w-70"
           />
         </form>
         <a
           href="/api/admin/leads/export"
-          class="flex h-12 shrink-0 items-center rounded-full border-[1.5px] border-warm-200 px-5 text-body font-bold text-teal-600 hover:border-teal-300"
+          class="flex h-12 shrink-0 items-center rounded-full border-[1.5px] border-warm-200 px-5 text-body font-bold text-navy-600 hover:border-navy-300"
         >Export</a>
       </div>
     </div>
@@ -89,8 +89,8 @@ const href = (f: string) => `/admin/leads?filter=${f}${q ? `&q=${encodeURICompon
           href={href(f.id)}
           class={`shrink-0 rounded-full px-4.5 py-2.5 text-small transition-colors ${
             filter === f.id
-              ? "bg-teal-600 font-bold text-cream-50"
-              : "border border-warm-200 text-warm-700 hover:border-teal-300"
+              ? "bg-navy-600 font-bold text-cream-50"
+              : "border border-warm-200 text-warm-700 hover:border-navy-300"
           }`}
         >{f.label}</a>
       ))}
@@ -107,7 +107,7 @@ const href = (f: string) => `/admin/leads?filter=${f}${q ? `&q=${encodeURICompon
               : `No enquiries with the status “${STATUS_LABEL[filter] ?? filter}”.`}
         </p>
         {(filter !== "all" || q) && (
-          <a href="/admin/leads" class="mt-5 inline-block text-body font-bold text-teal-600 underline underline-offset-4">
+          <a href="/admin/leads" class="mt-5 inline-block text-body font-bold text-navy-600 underline underline-offset-4">
             Show everything
           </a>
         )}
@@ -118,7 +118,7 @@ const href = (f: string) => `/admin/leads?filter=${f}${q ? `&q=${encodeURICompon
         <div class="mt-7 hidden overflow-hidden rounded-xl border border-warm-200 md:block">
           <div class="grid grid-cols-[1.2fr_1fr_1.3fr_1.1fr_.9fr_.8fr] border-b border-warm-200 bg-cream-100">
             {["Name", "Profession", "Interested in", "Requested", "Status", "Received"].map((h) => (
-              <div class="px-5 py-3.5 text-caption font-bold tracking-[.06em] uppercase text-teal-600/80">{h}</div>
+              <div class="px-5 py-3.5 text-caption font-bold tracking-[.06em] uppercase text-navy-600/80">{h}</div>
             ))}
           </div>
           {leads.map((lead) => (
@@ -161,7 +161,7 @@ const href = (f: string) => `/admin/leads?filter=${f}${q ? `&q=${encodeURICompon
                 </div>
                 <p class="mt-3 text-body text-warm-700">{serviceNames(lead.services)}</p>
                 <div class="mt-3 flex items-baseline justify-between gap-3">
-                  <span class="text-body font-bold text-teal-600">
+                  <span class="text-body font-bold text-navy-600">
                     {appointmentLabel(lead.preferred_date, lead.preferred_time)}
                   </span>
                   <span class="text-small text-warm-500">{relativeTime(lead.created_at)}</span>

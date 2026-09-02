@@ -88,7 +88,7 @@ export default function MilestoneLine({ nodes, initialActive = 1 }: Props) {
 
         {/* the rule + nodes */}
         <div className="relative mt-6 h-6">
-          <span className="absolute inset-x-0 top-[11px] h-0.5 bg-teal-500/40" aria-hidden="true" />
+          <span className="absolute inset-x-0 top-[11px] h-0.5 bg-navy-500/40" aria-hidden="true" />
           <span
             className="absolute left-0 top-[11px] h-0.5 bg-gold-500 transition-[width] duration-700 ease-out"
             style={{ width: fillWidth }}
@@ -102,7 +102,7 @@ export default function MilestoneLine({ nodes, initialActive = 1 }: Props) {
                 ) : i < active ? (
                   <span className="block size-4 rounded-full bg-gold-500 transition-all" />
                 ) : (
-                  <span className="block size-4 rounded-full border-2 border-teal-500 bg-ink-900 transition-all" />
+                  <span className="block size-4 rounded-full border-2 border-navy-500 bg-ink-900 transition-all" />
                 )}
               </span>
             ))}
@@ -115,7 +115,7 @@ export default function MilestoneLine({ nodes, initialActive = 1 }: Props) {
             <a
               key={node.age}
               href={node.href}
-              className={`text-small transition-colors ${i === active ? "font-bold text-gold-400" : "text-teal-300 hover:text-gold-400"}`}
+              className={`text-small transition-colors ${i === active ? "font-bold text-gold-400" : "text-navy-300 hover:text-gold-400"}`}
             >
               {node.linkLabel} →
             </a>
@@ -144,19 +144,19 @@ export default function MilestoneLine({ nodes, initialActive = 1 }: Props) {
 
       {/* ---------------- mobile: vertical spine ---------------- */}
       <ul className="relative md:hidden">
-        <span className="absolute left-[7px] top-2 bottom-2 w-0.5 bg-teal-500/40" aria-hidden="true" />
+        <span className="absolute left-[7px] top-2 bottom-2 w-0.5 bg-navy-500/40" aria-hidden="true" />
         {nodes.map((node, i) => (
           <li key={node.age} className="relative pb-8 pl-8 last:pb-0">
             <span
               className={`absolute left-0 top-1.5 block size-4 rounded-full ${
-                i <= active ? "bg-gold-500" : "border-2 border-teal-500 bg-ink-900"
+                i <= active ? "bg-gold-500" : "border-2 border-navy-500 bg-ink-900"
               }`}
               aria-hidden="true"
             />
             <span className="font-display text-[22px] font-extrabold tabular text-gold-400">{node.age}</span>
             <p className="mt-0.5 text-body font-bold text-cream-50">{node.milestone}</p>
             {node.note && <p className="mt-2 text-small leading-relaxed text-cream-50/65">{node.note}</p>}
-            <a href={node.href} className="mt-2.5 inline-block text-small font-bold text-teal-300">
+            <a href={node.href} className="mt-2.5 inline-block text-small font-bold text-navy-300">
               {node.linkLabel} →
             </a>
           </li>

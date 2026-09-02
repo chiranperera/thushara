@@ -44,7 +44,7 @@ if (db) {
 
 const totalDownloads = guides.reduce((n, g) => n + Number(g.download_count ?? 0), 0);
 const stageOptions = lifeStages.map((s) => ({ id: s.id, label: s.label }));
-const field = "h-12 w-full rounded-md border border-warm-200 bg-white px-3.5 text-body text-ink-900 focus:border-teal-400";
+const field = "h-12 w-full rounded-md border border-warm-200 bg-white px-3.5 text-body text-ink-900 focus:border-navy-400";
 ---
 
 <AdminLayout title="Guides" newLeads={counts.newLeads} pendingReviews={counts.pendingReviews}>
@@ -52,13 +52,13 @@ const field = "h-12 w-full rounded-md border border-warm-200 bg-white px-3.5 tex
     <h1 class="font-display text-h1 font-extrabold text-ink-900">Guides</h1>
     <p class="mt-1.5 max-w-[64ch] text-body leading-relaxed text-warm-600">
       PDFs people can download from your
-      <a href="/resources" class="font-bold text-teal-600 underline">Free guides page</a>. If a
+      <a href="/resources" class="font-bold text-navy-600 underline">Free guides page</a>. If a
       guide asks for a name and WhatsApp number, every download arrives in
-      <a href="/admin/leads" class="font-bold text-teal-600 underline">Enquiries</a> tagged with
+      <a href="/admin/leads" class="font-bold text-navy-600 underline">Enquiries</a> tagged with
       which guide it was.
     </p>
 
-    {saved && <p class="mt-5 rounded-lg border border-teal-200 bg-teal-50 px-4 py-3 text-body text-teal-600">Saved.</p>}
+    {saved && <p class="mt-5 rounded-lg border border-navy-200 bg-navy-50 px-4 py-3 text-body text-navy-600">Saved.</p>}
     {deleted && <p class="mt-5 rounded-lg border border-warm-200 bg-cream-100 px-4 py-3 text-body text-warm-700">Guide removed.</p>}
     {error && <p class="mt-5 rounded-lg border border-error/30 bg-error/8 px-4 py-3 text-body text-error">That didn't save. Please try again.</p>}
 
@@ -72,7 +72,7 @@ const field = "h-12 w-full rounded-md border border-warm-200 bg-white px-3.5 tex
       </h2>
       {totalDownloads > 0 && (
         <p class="text-body text-warm-600">
-          <span class="font-display text-h4 font-extrabold tabular text-teal-600">{totalDownloads}</span>
+          <span class="font-display text-h4 font-extrabold tabular text-navy-600">{totalDownloads}</span>
           {" "}downloads in total
         </p>
       )}
@@ -95,7 +95,7 @@ const field = "h-12 w-full rounded-md border border-warm-200 bg-white px-3.5 tex
 
               <div class="flex flex-wrap items-center gap-x-5 gap-y-2">
                 <a href={`/media/${g.file_key}`} target="_blank" rel="noopener"
-                   class="text-body font-bold text-teal-600 underline">Open the PDF</a>
+                   class="text-body font-bold text-navy-600 underline">Open the PDF</a>
                 <span class="font-mono text-caption text-warm-500">
                   {humanSize(g.file_size)}{g.page_count ? ` · ${g.page_count} pages` : ""} · /resources/{g.slug}
                 </span>
@@ -129,7 +129,7 @@ const field = "h-12 w-full rounded-md border border-warm-200 bg-white px-3.5 tex
               </div>
 
               <label class="flex items-start gap-3">
-                <input type="checkbox" name="gated" value="1" checked={g.gated === 1} class="mt-0.5 size-6 shrink-0 accent-teal-600" />
+                <input type="checkbox" name="gated" value="1" checked={g.gated === 1} class="mt-0.5 size-6 shrink-0 accent-navy-600" />
                 <span class="text-body leading-relaxed text-warm-700">
                   Ask for a name and WhatsApp number before the download
                 </span>
@@ -137,22 +137,22 @@ const field = "h-12 w-full rounded-md border border-warm-200 bg-white px-3.5 tex
 
               <div class="flex flex-wrap items-center gap-2">
                 <button type="submit" name="_action" value="save"
-                  class="flex min-h-12 items-center rounded-full bg-teal-600 px-6 text-body font-bold text-cream-50 hover:bg-teal-500">
+                  class="flex min-h-12 items-center rounded-full bg-navy-600 px-6 text-body font-bold text-cream-50 hover:bg-navy-500">
                   Save
                 </button>
                 <button type="submit" name="_action" value="toggle" formnovalidate
-                  class="flex min-h-12 items-center rounded-full border-[1.5px] border-warm-300 px-5 text-body font-bold text-warm-700 hover:border-teal-400">
+                  class="flex min-h-12 items-center rounded-full border-[1.5px] border-warm-300 px-5 text-body font-bold text-warm-700 hover:border-navy-400">
                   {g.published ? "Take off the site" : "Put on the site"}
                 </button>
                 {i > 0 && (
                   <button type="submit" name="_action" value="move" formnovalidate aria-label="Move up"
                     onclick="this.form.dir.value='up'"
-                    class="flex size-12 items-center justify-center rounded-full border-[1.5px] border-warm-300 text-h4 text-warm-700 hover:border-teal-400">↑</button>
+                    class="flex size-12 items-center justify-center rounded-full border-[1.5px] border-warm-300 text-h4 text-warm-700 hover:border-navy-400">↑</button>
                 )}
                 {i < guides.length - 1 && (
                   <button type="submit" name="_action" value="move" formnovalidate aria-label="Move down"
                     onclick="this.form.dir.value='down'"
-                    class="flex size-12 items-center justify-center rounded-full border-[1.5px] border-warm-300 text-h4 text-warm-700 hover:border-teal-400">↓</button>
+                    class="flex size-12 items-center justify-center rounded-full border-[1.5px] border-warm-300 text-h4 text-warm-700 hover:border-navy-400">↓</button>
                 )}
                 <button type="submit" name="_action" value="delete" formnovalidate
                   data-confirm="Delete this guide? The PDF is deleted too, and any link to it will stop working."

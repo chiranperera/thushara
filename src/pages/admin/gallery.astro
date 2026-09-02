@@ -42,7 +42,7 @@ if (db) {
 }
 
 const catLabel = (id: string) => GALLERY_CATEGORIES.find((c) => c.id === id)?.label ?? id;
-const field = "h-12 w-full rounded-md border border-warm-200 bg-white px-3.5 text-body text-ink-900 focus:border-teal-400";
+const field = "h-12 w-full rounded-md border border-warm-200 bg-white px-3.5 text-body text-ink-900 focus:border-navy-400";
 ---
 
 <AdminLayout title="Photos" newLeads={counts.newLeads} pendingReviews={counts.pendingReviews}>
@@ -50,12 +50,12 @@ const field = "h-12 w-full rounded-md border border-warm-200 bg-white px-3.5 tex
     <h1 class="font-display text-h1 font-extrabold text-ink-900">Photos</h1>
     <p class="mt-1.5 max-w-[62ch] text-body leading-relaxed text-warm-600">
       Award ceremonies, MDRT events, client moments. These appear on your
-      <a href="/gallery" class="font-bold text-teal-600 underline">Gallery page</a>, and the four
+      <a href="/gallery" class="font-bold text-navy-600 underline">Gallery page</a>, and the four
       most recent fill the "Awards and events" strip on your
-      <a href="/about" class="font-bold text-teal-600 underline">About page</a>.
+      <a href="/about" class="font-bold text-navy-600 underline">About page</a>.
     </p>
 
-    {saved && <p class="mt-5 rounded-lg border border-teal-200 bg-teal-50 px-4 py-3 text-body text-teal-600">Saved.</p>}
+    {saved && <p class="mt-5 rounded-lg border border-navy-200 bg-navy-50 px-4 py-3 text-body text-navy-600">Saved.</p>}
     {deleted && <p class="mt-5 rounded-lg border border-warm-200 bg-cream-100 px-4 py-3 text-body text-warm-700">Photo removed.</p>}
     {error && <p class="mt-5 rounded-lg border border-error/30 bg-error/8 px-4 py-3 text-body text-error">That didn't save. Please try again.</p>}
 
@@ -107,21 +107,21 @@ const field = "h-12 w-full rounded-md border border-warm-200 bg-white px-3.5 tex
 
                 <div class="flex flex-wrap items-end gap-2">
                   <button type="submit" name="_action" value="save"
-                    class="flex min-h-12 items-center rounded-full bg-teal-600 px-6 text-body font-bold text-cream-50 hover:bg-teal-500">
+                    class="flex min-h-12 items-center rounded-full bg-navy-600 px-6 text-body font-bold text-cream-50 hover:bg-navy-500">
                     Save
                   </button>
                   <button type="submit" name="_action" value="toggle"
-                    class="flex min-h-12 items-center rounded-full border-[1.5px] border-warm-300 px-5 text-body font-bold text-warm-700 hover:border-teal-400">
+                    class="flex min-h-12 items-center rounded-full border-[1.5px] border-warm-300 px-5 text-body font-bold text-warm-700 hover:border-navy-400">
                     {p.visible ? "Hide" : "Show"}
                   </button>
                   {i > 0 && (
                     <button type="submit" name="_action" value="move" formnovalidate
-                      class="flex size-12 items-center justify-center rounded-full border-[1.5px] border-warm-300 text-h4 text-warm-700 hover:border-teal-400"
+                      class="flex size-12 items-center justify-center rounded-full border-[1.5px] border-warm-300 text-h4 text-warm-700 hover:border-navy-400"
                       aria-label="Move up" onclick="this.form.dir.value='up'">↑</button>
                   )}
                   {i < photos.length - 1 && (
                     <button type="submit" name="_action" value="move" formnovalidate
-                      class="flex size-12 items-center justify-center rounded-full border-[1.5px] border-warm-300 text-h4 text-warm-700 hover:border-teal-400"
+                      class="flex size-12 items-center justify-center rounded-full border-[1.5px] border-warm-300 text-h4 text-warm-700 hover:border-navy-400"
                       aria-label="Move down" onclick="this.form.dir.value='down'">↓</button>
                   )}
                   <input type="hidden" name="dir" value="down" />

@@ -95,7 +95,7 @@ export default function IconCarousel({
         const near = Math.max(0, 1 - d); // 1 at dead centre, 0 a slot out
         el.style.transform = `translate3d(${p * sp}px,0,0) scale(${at(SCALE, d)})`;
         el.style.opacity = `${at(ALPHA, d)}`;
-        el.style.filter = `drop-shadow(0 0 ${16 + near * 18}px rgba(46,214,196,${0.35 + near * 0.25}))`;
+        el.style.filter = `drop-shadow(0 0 ${16 + near * 18}px rgba(7,164,207,${0.35 + near * 0.25}))`;
       }
 
       // The caption belongs to whichever icon is nearest the centre, and
@@ -202,7 +202,7 @@ export default function IconCarousel({
               // renders.
               transform: `translate3d(${slot(i, 0, icons.length) * (compact ? spacing * 0.62 : spacing)}px,0,0) scale(${at(SCALE, Math.abs(slot(i, 0, icons.length)))})`,
               opacity: at(ALPHA, Math.abs(slot(i, 0, icons.length))),
-              filter: `drop-shadow(0 0 ${i === 0 ? 34 : 16}px rgba(46,214,196,${i === 0 ? 0.6 : 0.35}))`,
+              filter: `drop-shadow(0 0 ${i === 0 ? 34 : 16}px rgba(7,164,207,${i === 0 ? 0.6 : 0.35}))`,
             }}
           />
         ))}

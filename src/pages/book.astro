@@ -101,8 +101,8 @@ const referringPage = Astro.request.headers.get("referer") ?? undefined;
     <div class="container-narrow flex h-16 items-center justify-between px-5">
       <a href="/" class="flex items-center gap-2.5">
         <svg width="26" height="24" viewBox="0 0 26 24" fill="none" aria-hidden="true">
-          <path d="M1 7h24" stroke="#12544A" stroke-width="2" stroke-linecap="round" />
-          <path d="M12 7v16" stroke="#12544A" stroke-width="2" stroke-linecap="round" />
+          <path d="M1 7h24" stroke="#123A6B" stroke-width="2" stroke-linecap="round" />
+          <path d="M12 7v16" stroke="#123A6B" stroke-width="2" stroke-linecap="round" />
           <circle cx="20" cy="7" r="4" fill="#C9962F" />
         </svg>
         <span class="font-display text-[15px] font-bold text-ink-900">{site.name}</span>
@@ -110,7 +110,7 @@ const referringPage = Astro.request.headers.get("referer") ?? undefined;
 
       <div class="flex items-center gap-4">
         {phoneHref && (
-          <a href={phoneHref} class="hidden text-small font-bold text-teal-600 sm:block">{phoneDisplay}</a>
+          <a href={phoneHref} class="hidden text-small font-bold text-navy-600 sm:block">{phoneDisplay}</a>
         )}
         <a href="/" class="min-h-11 text-small font-bold text-warm-500 hover:text-warm-900 flex items-center">Exit</a>
       </div>
@@ -155,13 +155,13 @@ const referringPage = Astro.request.headers.get("referer") ?? undefined;
           <dl class="mt-5 space-y-3 border-t border-warm-200 pt-5">
             <div class="flex items-baseline justify-between gap-3">
               <dt class="text-small text-warm-700">Experience</dt>
-              <dd class="font-display text-h4 font-extrabold tabular text-teal-600">
+              <dd class="font-display text-h4 font-extrabold tabular text-navy-600">
                 {num("years_experience", site.credentials.yearsExperience)} yrs
               </dd>
             </div>
             <div class="flex items-baseline justify-between gap-3">
               <dt class="text-small text-warm-700">MDRT</dt>
-              <dd class="font-display text-h4 font-extrabold tabular text-teal-600">
+              <dd class="font-display text-h4 font-extrabold tabular text-navy-600">
                 {num("mdrt_years", site.credentials.mdrtYears)}×
               </dd>
             </div>

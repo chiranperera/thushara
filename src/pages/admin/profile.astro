@@ -36,7 +36,7 @@ const pending = (k: string) => settings.get(k) === "PENDING";
     <h1 class="font-display text-h1 font-extrabold text-ink-900">My details</h1>
     <p class="mt-1.5 text-body text-warm-500">These appear across the website.</p>
 
-    {saved && <p class="mt-5 rounded-lg border border-teal-200 bg-teal-50 px-4 py-3 text-body text-teal-600">Saved.</p>}
+    {saved && <p class="mt-5 rounded-lg border border-navy-200 bg-navy-50 px-4 py-3 text-body text-navy-600">Saved.</p>}
 
     <form method="POST" action="/api/admin/settings" class="mt-8 max-w-[520px]">
       <input type="hidden" name="_section" value="profile" />
@@ -52,7 +52,7 @@ const pending = (k: string) => settings.get(k) === "PENDING";
             <label for={f.name} class="text-small font-bold text-warm-800">{f.label}</label>
             <input
               id={f.name} name={f.name} type={f.type} value={val(f.name)} placeholder={f.placeholder}
-              class="mt-2 h-14 w-full rounded-md border border-warm-200 bg-white px-4 text-body focus:border-teal-400"
+              class="mt-2 h-14 w-full rounded-md border border-warm-200 bg-white px-4 text-body focus:border-navy-400"
             />
             {pending(f.name) && (
               <p class="mt-1.5 text-small text-gold-600">Not set yet — the website hides this until you fill it in.</p>
@@ -85,7 +85,7 @@ const pending = (k: string) => settings.get(k) === "PENDING";
         </p>
       </div>
 
-      <button type="submit" class="mt-8 flex min-h-14 w-full items-center justify-center rounded-full bg-teal-600 text-h4 font-bold text-cream-50 hover:bg-teal-500 sm:w-auto sm:px-12">
+      <button type="submit" class="mt-8 flex min-h-14 w-full items-center justify-center rounded-full bg-navy-600 text-h4 font-bold text-cream-50 hover:bg-navy-500 sm:w-auto sm:px-12">
         Save
       </button>
     </form>

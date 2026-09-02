@@ -88,16 +88,16 @@ export const POST: APIRoute = async ({ request }) => {
         subject: `New review from ${t.name}`,
         html: `<!doctype html><html><body style="margin:0;background:#F4F1E9;padding:24px 12px">
 <table role="presentation" width="100%"><tr><td align="center">
-<table role="presentation" style="max-width:520px;background:#FBFAF6;border:1px solid #DCDFDC;border-radius:16px">
-<tr><td style="background:#06231F;padding:20px 28px">
+<table role="presentation" style="max-width:520px;background:#FBFAF6;border:1px solid #DCDEDF;border-radius:16px">
+<tr><td style="background:#071A2E;padding:20px 28px">
   <div style="font:700 12px/1.4 -apple-system,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#C9962F">New review</div>
 </td></tr>
 <tr><td style="padding:28px">
-  <div style="font:700 22px/1.2 -apple-system,sans-serif;color:#06231F">${esc(t.name)}</div>
-  <div style="font:400 16px/1.4 -apple-system,sans-serif;color:#737C79;margin-top:3px">${esc(t.profession)}${t.rating ? ` · ${t.rating}/5` : ""}</div>
-  <div style="margin-top:18px;padding:18px;background:#F4F1E9;border-radius:12px;font:400 17px/1.6 -apple-system,sans-serif;color:#161A19">${esc(t.body)}</div>
-  <a href="${base}/admin/testimonials/approve?token=${approveToken}" style="display:block;margin-top:22px;text-align:center;padding:16px;background:#12544A;color:#FBFAF6;text-decoration:none;border-radius:999px;font:700 17px/1 -apple-system,sans-serif">Approve &amp; publish</a>
-  <a href="${base}/admin/testimonials" style="display:block;margin-top:10px;text-align:center;padding:14px;border:1.5px solid #DCDFDC;color:#12544A;text-decoration:none;border-radius:999px;font:700 16px/1 -apple-system,sans-serif">Edit or reject first</a>
+  <div style="font:700 22px/1.2 -apple-system,sans-serif;color:#071A2E">${esc(t.name)}</div>
+  <div style="font:400 16px/1.4 -apple-system,sans-serif;color:#6E7377;margin-top:3px">${esc(t.profession)}${t.rating ? ` · ${t.rating}/5` : ""}</div>
+  <div style="margin-top:18px;padding:18px;background:#F4F1E9;border-radius:12px;font:400 17px/1.6 -apple-system,sans-serif;color:#16181A">${esc(t.body)}</div>
+  <a href="${base}/admin/testimonials/approve?token=${approveToken}" style="display:block;margin-top:22px;text-align:center;padding:16px;background:#123A6B;color:#FBFAF6;text-decoration:none;border-radius:999px;font:700 17px/1 -apple-system,sans-serif">Approve &amp; publish</a>
+  <a href="${base}/admin/testimonials" style="display:block;margin-top:10px;text-align:center;padding:14px;border:1.5px solid #DCDEDF;color:#123A6B;text-decoration:none;border-radius:999px;font:700 16px/1 -apple-system,sans-serif">Edit or reject first</a>
 </td></tr></table></td></tr></table></body></html>`,
       });
     } catch (err) {

@@ -25,8 +25,8 @@ const byslug = (s: string) => services.find((x) => x.slug === s)!;
   <div class="container-default flex h-16 items-center justify-between gap-6 px-5 lg:h-20">
     <a href="/" class="flex shrink-0 items-center gap-2.5" aria-label={`${site.name} — home`}>
       <svg width="26" height="24" viewBox="0 0 26 24" fill="none" aria-hidden="true" class="shrink-0">
-        <path d="M1 7h24" stroke="#12544A" stroke-width="2" stroke-linecap="round" />
-        <path d="M12 7v16" stroke="#12544A" stroke-width="2" stroke-linecap="round" />
+        <path d="M1 7h24" stroke="#123A6B" stroke-width="2" stroke-linecap="round" />
+        <path d="M12 7v16" stroke="#123A6B" stroke-width="2" stroke-linecap="round" />
         <circle cx="20" cy="7" r="4" fill="#C9962F" />
       </svg>
       <span class="leading-tight">
@@ -36,10 +36,10 @@ const byslug = (s: string) => services.find((x) => x.slug === s)!;
     </a>
 
     <nav class="hidden items-center gap-7 lg:flex" aria-label="Main">
-      <a href="/about" class={`text-body font-medium hover:text-teal-400 ${isActive("/about") ? "text-teal-600" : "text-warm-700"}`}>About</a>
+      <a href="/about" class={`text-body font-medium hover:text-navy-400 ${isActive("/about") ? "text-navy-600" : "text-warm-700"}`}>About</a>
 
       <div class="group relative">
-        <a href="/services" class={`flex items-center gap-1.5 text-body font-medium hover:text-teal-400 ${isActive("/services") ? "text-teal-600" : "text-warm-700"}`}>
+        <a href="/services" class={`flex items-center gap-1.5 text-body font-medium hover:text-navy-400 ${isActive("/services") ? "text-navy-600" : "text-warm-700"}`}>
           Services
           <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         </a>
@@ -53,11 +53,11 @@ const byslug = (s: string) => services.find((x) => x.slug === s)!;
           <div class="grid grid-cols-[auto_auto_auto_auto] gap-x-6 rounded-xl border border-warm-200 bg-cream-50 px-6 py-7 shadow-lg xl:gap-x-10 xl:px-8">
             {groups.map((g) => (
               <div>
-                <p class="overline mb-3.5 whitespace-nowrap text-teal-400">{g.label}</p>
+                <p class="overline mb-3.5 whitespace-nowrap text-navy-400">{g.label}</p>
                 <ul class="flex flex-col gap-2.5">
                   {g.slugs.map((slug) => (
                     <li>
-                      <a href={`/services/${slug}`} class="block whitespace-nowrap text-caption font-medium text-warm-700 hover:text-teal-600">
+                      <a href={`/services/${slug}`} class="block whitespace-nowrap text-caption font-medium text-warm-700 hover:text-navy-600">
                         {byslug(slug).title}
                       </a>
                     </li>
@@ -68,26 +68,26 @@ const byslug = (s: string) => services.find((x) => x.slug === s)!;
             <div class="border-l border-warm-200 pl-6 xl:pl-10">
               <p class="overline mb-3.5 whitespace-nowrap text-gold-600">For your profession</p>
               <ul class="flex flex-col gap-2.5">
-                <li><a href="/for/doctors" class="block whitespace-nowrap text-caption font-bold text-teal-600 hover:text-teal-400">For Doctors →</a></li>
-                <li><a href="/for/engineers" class="block whitespace-nowrap text-caption font-bold text-teal-600 hover:text-teal-400">For Engineers →</a></li>
+                <li><a href="/for/doctors" class="block whitespace-nowrap text-caption font-bold text-navy-600 hover:text-navy-400">For Doctors →</a></li>
+                <li><a href="/for/engineers" class="block whitespace-nowrap text-caption font-bold text-navy-600 hover:text-navy-400">For Engineers →</a></li>
               </ul>
             </div>
           </div>
         </div>
       </div>
 
-      <a href="/process" class={`text-body font-medium hover:text-teal-400 ${isActive("/process") ? "text-teal-600" : "text-warm-700"}`}>Process</a>
-      <a href="/testimonials" class={`text-body font-medium hover:text-teal-400 ${isActive("/testimonials") ? "text-teal-600" : "text-warm-700"}`}>Testimonials</a>
-      <a href="/resources" class={`text-body font-medium hover:text-teal-400 ${isActive("/resources") ? "text-teal-600" : "text-warm-700"}`}>Resources</a>
+      <a href="/process" class={`text-body font-medium hover:text-navy-400 ${isActive("/process") ? "text-navy-600" : "text-warm-700"}`}>Process</a>
+      <a href="/testimonials" class={`text-body font-medium hover:text-navy-400 ${isActive("/testimonials") ? "text-navy-600" : "text-warm-700"}`}>Testimonials</a>
+      <a href="/resources" class={`text-body font-medium hover:text-navy-400 ${isActive("/resources") ? "text-navy-600" : "text-warm-700"}`}>Resources</a>
     </nav>
 
     <div class="flex shrink-0 items-center gap-4">
       {settings.phoneHref && (
-        <a href={settings.phoneHref} class="hidden text-small font-bold text-teal-600 hover:text-teal-400 xl:block">
+        <a href={settings.phoneHref} class="hidden text-small font-bold text-navy-600 hover:text-navy-400 xl:block">
           {settings.phone}
         </a>
       )}
-      <a href="/book" class="hidden min-h-11 items-center rounded-full bg-teal-600 px-5 text-small font-bold text-cream-50 hover:bg-teal-500 lg:flex">
+      <a href="/book" class="hidden min-h-11 items-center rounded-full bg-navy-600 px-5 text-small font-bold text-cream-50 hover:bg-navy-500 lg:flex">
         Book a consultation
       </a>
 
@@ -118,7 +118,7 @@ const byslug = (s: string) => services.find((x) => x.slug === s)!;
         <li><a href="/about" class="flex min-h-13 items-center text-h4 font-bold text-ink-900">About</a></li>
       </ul>
 
-      <p class="overline mt-6 mb-3 text-teal-400">Services</p>
+      <p class="overline mt-6 mb-3 text-navy-400">Services</p>
       <ul class="flex flex-col gap-1">
         {services.map((s) => (
           <li><a href={`/services/${s.slug}`} class="flex min-h-12 items-center text-body text-warm-700">{s.title}</a></li>
@@ -127,8 +127,8 @@ const byslug = (s: string) => services.find((x) => x.slug === s)!;
 
       <p class="overline mt-6 mb-3 text-gold-600">For your profession</p>
       <ul class="flex flex-col gap-1">
-        <li><a href="/for/doctors" class="flex min-h-12 items-center text-body font-bold text-teal-600">For Doctors →</a></li>
-        <li><a href="/for/engineers" class="flex min-h-12 items-center text-body font-bold text-teal-600">For Engineers →</a></li>
+        <li><a href="/for/doctors" class="flex min-h-12 items-center text-body font-bold text-navy-600">For Doctors →</a></li>
+        <li><a href="/for/engineers" class="flex min-h-12 items-center text-body font-bold text-navy-600">For Engineers →</a></li>
       </ul>
 
       <ul class="mt-6 flex flex-col gap-1 border-t border-warm-200 pt-6">
@@ -140,9 +140,9 @@ const byslug = (s: string) => services.find((x) => x.slug === s)!;
 
     <div class="border-t border-warm-200 p-5">
       {settings.phoneHref && (
-        <a href={settings.phoneHref} class="mb-3 block text-center text-body font-bold text-teal-600">{settings.phone}</a>
+        <a href={settings.phoneHref} class="mb-3 block text-center text-body font-bold text-navy-600">{settings.phone}</a>
       )}
-      <a href="/book" class="flex min-h-14 w-full items-center justify-center rounded-full bg-teal-600 text-body font-bold text-cream-50">
+      <a href="/book" class="flex min-h-14 w-full items-center justify-center rounded-full bg-navy-600 text-body font-bold text-cream-50">
         Book a consultation
       </a>
     </div>

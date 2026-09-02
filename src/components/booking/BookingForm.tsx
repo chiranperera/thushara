@@ -214,7 +214,7 @@ export default function BookingForm({
       {/* Progress — reuses the Milestone Line language: a rule with nodes. */}
       <div className="mb-8">
         <div className="flex items-baseline justify-between mb-3">
-          <span className="overline text-teal-400">
+          <span className="overline text-navy-400">
             Step {step + 1} of {TOTAL}
           </span>
           <span className="text-caption text-warm-500">About 90 seconds</span>
@@ -224,7 +224,7 @@ export default function BookingForm({
             <div
               key={i}
               className={`h-1 flex-1 rounded-full transition-colors duration-200 ${
-                i < step ? "bg-gold-500" : i === step ? "bg-teal-600" : "bg-warm-200"
+                i < step ? "bg-gold-500" : i === step ? "bg-navy-600" : "bg-warm-200"
               }`}
             />
           ))}
@@ -254,7 +254,7 @@ export default function BookingForm({
         <button
           type="button"
           onClick={back}
-          className="mb-5 inline-flex min-h-11 items-center gap-2 text-body font-bold text-teal-600 hover:text-teal-400"
+          className="mb-5 inline-flex min-h-11 items-center gap-2 text-body font-bold text-navy-600 hover:text-navy-400"
         >
           <span aria-hidden="true">←</span> Back
         </button>
@@ -303,7 +303,7 @@ export default function BookingForm({
             <button
               type="submit"
               disabled={status === "sending"}
-              className="flex min-h-14 w-full items-center justify-center rounded-full bg-teal-600 px-8 text-[17px] font-bold text-cream-50 transition-colors hover:bg-teal-500 disabled:opacity-70"
+              className="flex min-h-14 w-full items-center justify-center rounded-full bg-navy-600 px-8 text-[17px] font-bold text-cream-50 transition-colors hover:bg-navy-500 disabled:opacity-70"
             >
               {status === "sending" ? (
                 <span className="inline-flex items-center gap-3">
@@ -327,7 +327,7 @@ export default function BookingForm({
             {step === 0 && whatsappNumber && (
               <a target="_blank" rel="noopener noreferrer"
                 href={`https://wa.me/${whatsappNumber.replace(/\D/g, "")}`}
-                className="mt-5 block text-center text-body font-bold text-teal-600 underline underline-offset-4 hover:text-teal-400"
+                className="mt-5 block text-center text-body font-bold text-navy-600 underline underline-offset-4 hover:text-navy-400"
               >
                 Or just message me on WhatsApp
               </a>
@@ -419,7 +419,7 @@ function Step1({ values, errors, set }: { values: Values; errors: Errors; set: (
             value={values.profession_other ?? ""}
             onChange={(e) => set({ profession_other: e.target.value })}
             placeholder="Your line of work"
-            className="h-13 w-full rounded-md border border-warm-200 bg-warm-100 px-4 text-body text-warm-900 placeholder:text-warm-500 focus:border-teal-400 focus:bg-white"
+            className="h-13 w-full rounded-md border border-warm-200 bg-warm-100 px-4 text-body text-warm-900 placeholder:text-warm-500 focus:border-navy-400 focus:bg-white"
           />
         </Reveal>
       )}
@@ -458,8 +458,8 @@ function Step2({
             onClick={() => toggle(opt.id)}
             className={`flex w-full min-h-14 flex-col justify-center rounded-lg border-[1.5px] px-5 py-3 text-left transition-colors ${
               selected.includes(opt.id)
-                ? "border-teal-400 bg-teal-50"
-                : "border-warm-200 bg-white hover:border-teal-300"
+                ? "border-navy-400 bg-navy-50"
+                : "border-warm-200 bg-white hover:border-navy-300"
             }`}
           >
             <span className="text-body font-bold text-ink-900">{opt.label}</span>
@@ -552,9 +552,9 @@ function Step3({
               onClick={() => set({ preferred_date: d.date, preferred_time: "" })}
               className={`flex min-w-[74px] shrink-0 flex-col items-center rounded-lg border-[1.5px] px-3 py-3 transition-colors ${
                 active
-                  ? "border-teal-400 bg-teal-600 text-cream-50"
+                  ? "border-navy-400 bg-navy-600 text-cream-50"
                   : d.hasSlots
-                    ? "border-warm-200 bg-white text-warm-900 hover:border-teal-300"
+                    ? "border-warm-200 bg-white text-warm-900 hover:border-navy-300"
                     : "border-warm-100 bg-warm-100 text-warm-400 line-through"
               }`}
             >
@@ -585,7 +585,7 @@ function Step3({
               <button
                 type="button"
                 onClick={() => set({ preferred_date: nextFree.date, preferred_time: "" })}
-                className="mt-4 inline-flex min-h-12 items-center rounded-full bg-teal-600 px-6 text-body font-bold text-cream-50"
+                className="mt-4 inline-flex min-h-12 items-center rounded-full bg-navy-600 px-6 text-body font-bold text-cream-50"
               >
                 Show {formatLongDayLabel(nextFree.date)}
               </button>
@@ -596,7 +596,7 @@ function Step3({
           {whatsappNumber && (
             <a target="_blank" rel="noopener noreferrer"
               href={`https://wa.me/${whatsappNumber.replace(/\D/g, "")}`}
-              className="mt-3 block text-body font-bold text-teal-600 underline underline-offset-4"
+              className="mt-3 block text-body font-bold text-navy-600 underline underline-offset-4"
             >
               Ask me on WhatsApp instead
             </a>
@@ -635,7 +635,7 @@ function Step3({
             <button
               type="button"
               onClick={() => setShowAltTime(true)}
-              className="mt-4 min-h-11 text-body font-bold text-teal-600 hover:text-teal-400"
+              className="mt-4 min-h-11 text-body font-bold text-navy-600 hover:text-navy-400"
             >
               + Add an alternative time
             </button>
@@ -647,7 +647,7 @@ function Step3({
                 value={values.alt_time ?? ""}
                 onChange={(e) => set({ alt_time: e.target.value })}
                 placeholder="e.g. Thursday evening would also work"
-                className="h-13 w-full rounded-md border border-warm-200 bg-warm-100 px-4 text-body placeholder:text-warm-500 focus:border-teal-400 focus:bg-white"
+                className="h-13 w-full rounded-md border border-warm-200 bg-warm-100 px-4 text-body placeholder:text-warm-500 focus:border-navy-400 focus:bg-white"
               />
             </div>
           )}
@@ -760,11 +760,11 @@ function Step4({ values, errors, set }: { values: Values; errors: Errors; set: (
               data-field="consent"
               checked={Boolean(values.consent)}
               onChange={(e) => set({ consent: e.target.checked })}
-              className="mt-0.5 size-6 shrink-0 rounded border-[1.5px] border-warm-300 accent-teal-600"
+              className="mt-0.5 size-6 shrink-0 rounded border-[1.5px] border-warm-300 accent-navy-600"
             />
             <span className="text-body text-warm-900">
               I'm happy for Thushara to contact me about this enquiry.{" "}
-              <a href="/privacy" className="text-teal-600 underline underline-offset-2">
+              <a href="/privacy" className="text-navy-600 underline underline-offset-2">
                 Privacy
               </a>
             </span>
@@ -827,7 +827,7 @@ function SubmissionFailed({
       <button
         type="button"
         onClick={onRetry}
-        className="mt-5 flex min-h-14 w-full items-center justify-center rounded-full bg-teal-600 text-[17px] font-bold text-cream-50 hover:bg-teal-500"
+        className="mt-5 flex min-h-14 w-full items-center justify-center rounded-full bg-navy-600 text-[17px] font-bold text-cream-50 hover:bg-navy-500"
       >
         Try again
       </button>
@@ -856,7 +856,7 @@ function SubmissionFailed({
       {phoneHref && (
         <p className="mt-4 text-small text-warm-700">
           Or call me directly —{" "}
-          <a href={phoneHref} className="font-bold text-teal-600 underline underline-offset-2">
+          <a href={phoneHref} className="font-bold text-navy-600 underline underline-offset-2">
             {phoneDisplay}
           </a>
         </p>
@@ -885,7 +885,7 @@ function Confirmed({
 
   return (
     <div ref={topRef} className="scroll-mt-20">
-      <span aria-hidden="true" className="mb-5 flex size-14 items-center justify-center rounded-full bg-teal-600 text-h2 text-cream-50">
+      <span aria-hidden="true" className="mb-5 flex size-14 items-center justify-center rounded-full bg-navy-600 text-h2 text-cream-50">
         ✓
       </span>
       <h1 className="font-display text-h1 font-extrabold text-ink-900">
@@ -895,7 +895,7 @@ function Confirmed({
         {when} at {formatTime(values.preferred_time)}, by {method}.
       </p>
 
-      <h2 className="overline mt-9 text-teal-400">What happens next</h2>
+      <h2 className="overline mt-9 text-navy-400">What happens next</h2>
       <ol className="mt-4 space-y-4">
         {[
           "A confirmation reaches you by email within a few minutes.",
@@ -903,7 +903,7 @@ function Confirmed({
           `We talk on ${when} at ${formatTime(values.preferred_time)}.`,
         ].map((t, i) => (
           <li key={i} className="flex gap-4">
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-teal-50 font-display font-extrabold text-teal-600">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-navy-50 font-display font-extrabold text-navy-600">
               {i + 1}
             </span>
             <span className="text-body text-warm-900">{t}</span>
@@ -922,7 +922,7 @@ function Confirmed({
       {phoneHref && (
         <p className="mt-4 text-center text-small text-warm-500">
           Anything urgent before then?{" "}
-          <a href={phoneHref} className="font-bold text-teal-600">
+          <a href={phoneHref} className="font-bold text-navy-600">
             {phoneDisplay}
           </a>
         </p>
@@ -957,7 +957,7 @@ function Paused({
       {phoneHref && (
         <p className="mt-4 text-small text-warm-700">
           Or call —{" "}
-          <a href={phoneHref} className="font-bold text-teal-600">
+          <a href={phoneHref} className="font-bold text-navy-600">
             {phoneDisplay}
           </a>
         </p>
@@ -970,7 +970,7 @@ function Paused({
 
 const inputClass = (error?: string) =>
   `h-13 w-full rounded-md border bg-warm-100 px-4 text-body text-warm-900 placeholder:text-warm-500 transition-colors focus:bg-white ${
-    error ? "border-[1.5px] border-danger" : "border-warm-200 focus:border-teal-400"
+    error ? "border-[1.5px] border-danger" : "border-warm-200 focus:border-navy-400"
   }`;
 
 function Label({ children }: { children: any }) {
@@ -1055,8 +1055,8 @@ function ChoiceCard({
         compact ? "min-h-13 px-3 text-small" : "min-h-[104px] px-4 text-body"
       } ${
         selected
-          ? "border-teal-400 bg-teal-600 text-cream-50"
-          : "border-warm-200 bg-white text-warm-900 hover:border-teal-300"
+          ? "border-navy-400 bg-navy-600 text-cream-50"
+          : "border-warm-200 bg-white text-warm-900 hover:border-navy-300"
       }`}
     >
       {label}
@@ -1085,8 +1085,8 @@ function Chip({
         disabled
           ? "cursor-not-allowed border-warm-100 bg-warm-100 text-warm-400 line-through"
           : selected
-            ? "border-teal-400 bg-teal-600 text-cream-50"
-            : "border-warm-200 bg-white text-warm-900 hover:border-teal-300"
+            ? "border-navy-400 bg-navy-600 text-cream-50"
+            : "border-warm-200 bg-white text-warm-900 hover:border-navy-300"
       }`}
     >
       {label}

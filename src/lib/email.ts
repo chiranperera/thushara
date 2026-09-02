@@ -11,15 +11,15 @@ import { site, whatsappLink } from "./site";
 import type { LeadData } from "./lead-schema";
 
 const C = {
-  ink: "#06231F",
-  teal: "#12544A",
-  tealLight: "#EBF7F3",
+  ink: "#071A2E",
+  navy: "#123A6B",
+  navyLight: "#EAF1F9",
   gold: "#C9962F",
   cream: "#FBFAF6",
   cream100: "#F4F1E9",
-  border: "#DCDFDC",
-  text: "#161A19",
-  muted: "#737C79",
+  border: "#DCDEDF",
+  text: "#16181A",
+  muted: "#6E7377",
   whatsapp: "#25D366",
 } as const;
 
@@ -103,9 +103,9 @@ ${
 
 <tr><td style="padding:10px 28px 0">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-    <td width="49%"><a href="tel:${esc(lead.phone_whatsapp)}" style="display:block;text-align:center;padding:14px;border:1.5px solid ${C.teal};border-radius:999px;color:${C.teal};text-decoration:none;font:700 15px/1 -apple-system,sans-serif">Call</a></td>
+    <td width="49%"><a href="tel:${esc(lead.phone_whatsapp)}" style="display:block;text-align:center;padding:14px;border:1.5px solid ${C.navy};border-radius:999px;color:${C.navy};text-decoration:none;font:700 15px/1 -apple-system,sans-serif">Call</a></td>
     <td width="2%"></td>
-    <td width="49%"><a href="mailto:${esc(lead.email)}" style="display:block;text-align:center;padding:14px;border:1.5px solid ${C.teal};border-radius:999px;color:${C.teal};text-decoration:none;font:700 15px/1 -apple-system,sans-serif">Email</a></td>
+    <td width="49%"><a href="mailto:${esc(lead.email)}" style="display:block;text-align:center;padding:14px;border:1.5px solid ${C.navy};border-radius:999px;color:${C.navy};text-decoration:none;font:700 15px/1 -apple-system,sans-serif">Email</a></td>
   </tr></table>
 </td></tr>
 
@@ -124,7 +124,7 @@ ${
 </td></tr>
 
 <tr><td style="padding:0 28px 28px">
-  <a href="${siteUrl}/admin/leads/${leadId}" style="display:block;text-align:center;padding:15px;background:${C.teal};color:${C.cream};text-decoration:none;border-radius:999px;font:700 16px/1 -apple-system,sans-serif">View in admin</a>
+  <a href="${siteUrl}/admin/leads/${leadId}" style="display:block;text-align:center;padding:15px;background:${C.navy};color:${C.cream};text-decoration:none;border-radius:999px;font:700 16px/1 -apple-system,sans-serif">View in admin</a>
 </td></tr>`);
 }
 
@@ -145,9 +145,9 @@ export function leadConfirmationEmail(lead: LeadData, siteUrl: string, mdrtYears
 </td></tr>
 
 <tr><td style="padding:6px 28px 0">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.tealLight};border-radius:14px">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.navyLight};border-radius:14px">
     <tr><td style="padding:22px 24px">
-      <div style="font:700 12px/1.4 -apple-system,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:${C.teal}">Your request</div>
+      <div style="font:700 12px/1.4 -apple-system,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:${C.navy}">Your request</div>
       <div style="font:700 19px/1.4 -apple-system,sans-serif;color:${C.ink};margin-top:8px">${esc(when)}</div>
       <div style="font:400 16px/1.4 -apple-system,sans-serif;color:${C.text};margin-top:4px">${esc(METHOD_LABEL[lead.meeting_method] ?? lead.meeting_method)}</div>
     </td></tr>

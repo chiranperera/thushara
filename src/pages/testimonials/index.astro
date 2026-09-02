@@ -75,7 +75,7 @@ const sparse = shown.length > 0 && shown.length <= 3;
           <a
             href={f.id === "all" ? "/testimonials" : `/testimonials?filter=${f.id}`}
             class={`shrink-0 rounded-full px-5 py-2.5 text-small transition-colors ${
-              filter === f.id ? "bg-teal-600 font-bold text-cream-50" : "border border-warm-200 text-warm-700 hover:border-teal-300"
+              filter === f.id ? "bg-navy-600 font-bold text-cream-50" : "border border-warm-200 text-warm-700 hover:border-navy-300"
             }`}
           >{f.label}</a>
         ))}
@@ -95,7 +95,7 @@ const sparse = shown.length > 0 && shown.length <= 3;
                 {t.body}
               </p>
               <div class="mt-7 flex items-center gap-3.5">
-                <span aria-hidden="true" class="flex size-11 shrink-0 items-center justify-center rounded-full border border-warm-200 bg-cream-100 font-display text-body font-bold text-teal-600">
+                <span aria-hidden="true" class="flex size-11 shrink-0 items-center justify-center rounded-full border border-warm-200 bg-cream-100 font-display text-body font-bold text-navy-600">
                   {t.name.trim().charAt(0)}
                 </span>
                 <span>
@@ -114,7 +114,7 @@ const sparse = shown.length > 0 && shown.length <= 3;
     <section class="bg-cream-50 py-16">
       <div class="container-default px-5">
         <p class="text-body-lg text-warm-700">No reviews in that category yet.
-          <a href="/testimonials" class="ml-1 font-bold text-teal-600 underline underline-offset-4">Show all</a>
+          <a href="/testimonials" class="ml-1 font-bold text-navy-600 underline underline-offset-4">Show all</a>
         </p>
       </div>
     </section>
@@ -123,7 +123,7 @@ const sparse = shown.length > 0 && shown.length <= 3;
   <section class="bg-cream-100 py-16 md:py-20">
     <div class="container-default grid gap-8 px-5 lg:grid-cols-[1.4fr_1fr] lg:items-center">
       <div>
-        <h2 class="max-w-[22ch] font-display text-h2 font-extrabold text-teal-600">
+        <h2 class="max-w-[22ch] font-display text-h2 font-extrabold text-navy-600">
           Worked with me? I'd be grateful if you'd share your experience.
         </h2>
         <p class="mt-4 text-body-lg leading-relaxed text-warm-700">
@@ -131,7 +131,7 @@ const sparse = shown.length > 0 && shown.length <= 3;
         </p>
       </div>
       <div class="lg:justify-self-end">
-        <a href="/testimonials/share" class="flex min-h-15 items-center justify-center rounded-full bg-teal-600 px-9 text-h4 font-bold text-cream-50 hover:bg-teal-500">
+        <a href="/testimonials/share" class="flex min-h-15 items-center justify-center rounded-full bg-navy-600 px-9 text-h4 font-bold text-cream-50 hover:bg-navy-500">
           Share your experience
         </a>
       </div>

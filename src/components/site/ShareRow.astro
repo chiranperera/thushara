@@ -12,19 +12,19 @@ const mailto = `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURICom
 
 <section class="border-y border-warm-200 bg-cream-100">
   <div class="container-default flex flex-wrap items-center justify-between gap-6 px-5 py-8">
-    <p class="font-serif text-h3 italic text-teal-600">Know someone who needs this?</p>
+    <p class="font-serif text-h3 italic text-navy-600">Know someone who needs this?</p>
 
     <div class="flex flex-wrap gap-3">
       <a href={waShare} target="_blank" rel="noopener"
-         class="flex min-h-12 items-center gap-2.5 rounded-full border-[1.5px] border-warm-300 px-6 text-body font-bold text-ink-900 hover:border-teal-600">
+         class="flex min-h-12 items-center gap-2.5 rounded-full border-[1.5px] border-warm-300 px-6 text-body font-bold text-ink-900 hover:border-navy-600">
         <span aria-hidden="true" class="size-2.5 rounded-full bg-whatsapp"></span>WhatsApp
       </a>
       <button type="button" data-copy={url}
-              class="flex min-h-12 items-center rounded-full border-[1.5px] border-warm-300 px-6 text-body font-bold text-ink-900 hover:border-teal-600">
+              class="flex min-h-12 items-center rounded-full border-[1.5px] border-warm-300 px-6 text-body font-bold text-ink-900 hover:border-navy-600">
         <span data-copy-label>Copy link</span>
       </button>
       <a href={mailto}
-         class="flex min-h-12 items-center rounded-full border-[1.5px] border-warm-300 px-6 text-body font-bold text-ink-900 hover:border-teal-600">
+         class="flex min-h-12 items-center rounded-full border-[1.5px] border-warm-300 px-6 text-body font-bold text-ink-900 hover:border-navy-600">
         Email
       </a>
     </div>

@@ -48,7 +48,7 @@ const isKey = (w: any) => Number(w.start_time.split(":")[0]) >= 17 || w.day_of_w
     <h1 class="font-display text-h1 font-extrabold text-ink-900">When I'm available</h1>
     <p class="mt-1.5 text-body text-warm-500">This controls the times people can pick when they book.</p>
 
-    {saved && <p class="mt-5 rounded-lg border border-teal-200 bg-teal-50 px-4 py-3 text-body text-teal-600">Saved.</p>}
+    {saved && <p class="mt-5 rounded-lg border border-navy-200 bg-navy-50 px-4 py-3 text-body text-navy-600">Saved.</p>}
 
     <form method="POST" action="/api/admin/settings" class="mt-8 max-w-[760px]">
       <input type="hidden" name="_section" value="availability" />
@@ -56,7 +56,7 @@ const isKey = (w: any) => Number(w.start_time.split(":")[0]) >= 17 || w.day_of_w
       <div class="overflow-hidden rounded-[18px] border border-warm-200 bg-white">
         <div class="grid grid-cols-[1fr_1.4fr_auto] border-b border-warm-200 bg-cream-100">
           {["Day","Hours","On"].map((h)=>(
-            <div class="px-5 py-3.5 text-caption font-bold tracking-[.06em] uppercase text-teal-600/80">{h}</div>
+            <div class="px-5 py-3.5 text-caption font-bold tracking-[.06em] uppercase text-navy-600/80">{h}</div>
           ))}
         </div>
         {windows.map((w)=>(
@@ -67,7 +67,7 @@ const isKey = (w: any) => Number(w.start_time.split(":")[0]) >= 17 || w.day_of_w
             <div class="px-5 py-4 text-body text-warm-700">{fmt(w.start_time)} – {fmt(w.end_time)}</div>
             <div class="px-5 py-4">
               <label class="flex cursor-pointer items-center gap-2">
-                <input type="checkbox" name={`window_${w.id}`} checked={w.active===1} class="size-6 accent-teal-600" />
+                <input type="checkbox" name={`window_${w.id}`} checked={w.active===1} class="size-6 accent-navy-600" />
                 <span class="sr-only">Enable {w.label ?? DAY[w.day_of_week]}</span>
               </label>
             </div>
@@ -90,7 +90,7 @@ const isKey = (w: any) => Number(w.start_time.split(":")[0]) >= 17 || w.day_of_w
             <label for={f.name} class="text-small font-bold text-warm-800">{f.label}</label>
             <div class="mt-2 flex items-center gap-3">
               <input id={f.name} name={f.name} type="number" min="1" value={f.value}
-                class="h-14 w-28 rounded-md border border-warm-200 bg-white px-4 text-h4 tabular focus:border-teal-400" />
+                class="h-14 w-28 rounded-md border border-warm-200 bg-white px-4 text-h4 tabular focus:border-navy-400" />
               {f.suffix && <span class="text-body text-warm-500">{f.suffix}</span>}
             </div>
           </div>
@@ -104,7 +104,7 @@ const isKey = (w: any) => Number(w.start_time.split(":")[0]) >= 17 || w.day_of_w
             For when you're away. People see a short message and your WhatsApp number instead of the calendar.
           </p>
         </div>
-        <input type="checkbox" name="bookings_paused" checked={paused} class="size-7 shrink-0 accent-teal-600" />
+        <input type="checkbox" name="bookings_paused" checked={paused} class="size-7 shrink-0 accent-navy-600" />
       </div>
 
       {blocked.length > 0 && (
@@ -120,7 +120,7 @@ const isKey = (w: any) => Number(w.start_time.split(":")[0]) >= 17 || w.day_of_w
         </div>
       )}
 
-      <button type="submit" class="mt-8 flex min-h-14 w-full items-center justify-center rounded-full bg-teal-600 text-h4 font-bold text-cream-50 hover:bg-teal-500 sm:w-auto sm:px-12">
+      <button type="submit" class="mt-8 flex min-h-14 w-full items-center justify-center rounded-full bg-navy-600 text-h4 font-bold text-cream-50 hover:bg-navy-500 sm:w-auto sm:px-12">
         Save
       </button>
     </form>

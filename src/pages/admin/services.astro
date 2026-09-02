@@ -70,7 +70,7 @@ const list = siteServices.map((s) => {
   };
 });
 
-const field = "w-full rounded-md border border-warm-200 bg-white px-3.5 py-3 text-body text-ink-900 focus:border-teal-400";
+const field = "w-full rounded-md border border-warm-200 bg-white px-3.5 py-3 text-body text-ink-900 focus:border-navy-400";
 ---
 
 <AdminLayout title="Service pages" newLeads={counts.newLeads} pendingReviews={counts.pendingReviews}>
@@ -82,7 +82,7 @@ const field = "w-full rounded-md border border-warm-200 bg-white px-3.5 py-3 tex
       wrong word matters most.
     </p>
 
-    {saved && <p class="mt-5 rounded-lg border border-teal-200 bg-teal-50 px-4 py-3 text-body text-teal-600">Saved.</p>}
+    {saved && <p class="mt-5 rounded-lg border border-navy-200 bg-navy-50 px-4 py-3 text-body text-navy-600">Saved.</p>}
     {error && <p class="mt-5 rounded-lg border border-error/30 bg-error/8 px-4 py-3 text-body text-error">That didn't save. Please try again.</p>}
 
     <ul class="mt-8 flex max-w-[900px] flex-col gap-5">
@@ -93,7 +93,7 @@ const field = "w-full rounded-md border border-warm-200 bg-white px-3.5 py-3 tex
 
             <div class="flex flex-wrap items-baseline justify-between gap-3">
               <a href={`/services/${s.slug}`} target="_blank" rel="noopener"
-                 class="font-display text-h3 font-extrabold text-teal-600 underline">{s.title}</a>
+                 class="font-display text-h3 font-extrabold text-navy-600 underline">{s.title}</a>
               <span class="font-mono text-caption text-warm-500">
                 /services/{s.slug}{s.edited ? "" : " · not edited yet"}
               </span>
@@ -125,11 +125,11 @@ const field = "w-full rounded-md border border-warm-200 bg-white px-3.5 py-3 tex
 
             <div class="flex flex-wrap items-center gap-2">
               <button type="submit" name="_action" value="save"
-                class="flex min-h-12 items-center rounded-full bg-teal-600 px-7 text-body font-bold text-cream-50 hover:bg-teal-500">Save</button>
+                class="flex min-h-12 items-center rounded-full bg-navy-600 px-7 text-body font-bold text-cream-50 hover:bg-navy-500">Save</button>
               {s.edited && (
                 <>
                   <button type="submit" name="_action" value="toggle" formnovalidate
-                    class="flex min-h-12 items-center rounded-full border-[1.5px] border-warm-300 px-5 text-body font-bold text-warm-700 hover:border-teal-400">
+                    class="flex min-h-12 items-center rounded-full border-[1.5px] border-warm-300 px-5 text-body font-bold text-warm-700 hover:border-navy-400">
                     {s.published ? "Take off the site" : "Put on the site"}
                   </button>
                   <button type="submit" name="_action" value="revert" formnovalidate
