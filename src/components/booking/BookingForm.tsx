@@ -325,7 +325,7 @@ export default function BookingForm({
             </p>
 
             {step === 0 && whatsappNumber && (
-              <a
+              <a target="_blank" rel="noopener noreferrer"
                 href={`https://wa.me/${whatsappNumber.replace(/\D/g, "")}`}
                 className="mt-5 block text-center text-body font-bold text-teal-600 underline underline-offset-4 hover:text-teal-400"
               >
@@ -594,7 +594,7 @@ function Step3({
             <p className="mt-1 text-body text-warm-700">Nothing free in the next few weeks.</p>
           )}
           {whatsappNumber && (
-            <a
+            <a target="_blank" rel="noopener noreferrer"
               href={`https://wa.me/${whatsappNumber.replace(/\D/g, "")}`}
               className="mt-3 block text-body font-bold text-teal-600 underline underline-offset-4"
             >
@@ -834,7 +834,7 @@ function SubmissionFailed({
 
       {whatsappNumber && (
         <>
-          <a
+          <a target="_blank" rel="noopener noreferrer"
             href={`https://wa.me/${whatsappNumber.replace(/\D/g, "")}?text=${waText}`}
             className="mt-3 flex min-h-14 w-full items-center justify-center rounded-full bg-whatsapp text-[17px] font-bold text-white"
           >
@@ -912,7 +912,7 @@ function Confirmed({
       </ol>
 
       {whatsappNumber && (
-        <a
+        <a target="_blank" rel="noopener noreferrer"
           href={`https://wa.me/${whatsappNumber.replace(/\D/g, "")}`}
           className="mt-8 flex min-h-14 w-full items-center justify-center rounded-full bg-whatsapp text-[17px] font-bold text-white"
         >
@@ -947,7 +947,7 @@ function Paused({
         Online booking is paused, but do send me a message — I'll get back to you as soon as I'm back.
       </p>
       {whatsappNumber && (
-        <a
+        <a target="_blank" rel="noopener noreferrer"
           href={`https://wa.me/${whatsappNumber.replace(/\D/g, "")}`}
           className="mt-6 inline-flex min-h-14 items-center justify-center rounded-full bg-whatsapp px-8 text-[17px] font-bold text-white"
         >

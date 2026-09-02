@@ -42,7 +42,7 @@ const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask abou
 
           <div class="mt-7 flex flex-col gap-3">
             {wa && (
-              <a href={wa} class="flex min-h-14 items-center justify-center rounded-full bg-whatsapp text-h4 font-bold text-white">WhatsApp</a>
+              <a target="_blank" rel="noopener noreferrer" href={wa} class="flex min-h-14 items-center justify-center rounded-full bg-whatsapp text-h4 font-bold text-white">WhatsApp</a>
             )}
             {settings.emailHref && (
               <a href={settings.emailHref} class="flex min-h-14 items-center justify-center rounded-full border border-cream-50/35 text-h4 font-bold text-cream-50 hover:border-cream-50">Email</a>

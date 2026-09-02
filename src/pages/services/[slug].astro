@@ -144,7 +144,7 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
           Book a consultation
         </a>
         {wa && (
-          <a href={wa} class="flex min-h-14 items-center gap-2.5 rounded-full border-[1.5px] border-warm-300 px-7 text-h4 font-bold text-ink-900 transition-colors hover:border-teal-600">
+          <a target="_blank" rel="noopener noreferrer" href={wa} class="flex min-h-14 items-center gap-2.5 rounded-full border-[1.5px] border-warm-300 px-7 text-h4 font-bold text-ink-900 transition-colors hover:border-teal-600">
             <span aria-hidden="true" class="size-2.5 rounded-full bg-whatsapp"></span>WhatsApp about this
           </a>
         )}
@@ -510,7 +510,7 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
           Book a consultation
         </a>
         {wa && (
-          <a href={wa} class="flex min-h-15 items-center justify-center gap-2.5 rounded-lg border border-cream-50/35 px-8 text-h4 font-bold text-cream-50 hover:border-cream-50">
+          <a target="_blank" rel="noopener noreferrer" href={wa} class="flex min-h-15 items-center justify-center gap-2.5 rounded-lg border border-cream-50/35 px-8 text-h4 font-bold text-cream-50 hover:border-cream-50">
             <span aria-hidden="true" class="size-2.5 rounded-full bg-whatsapp"></span>WhatsApp
           </a>
         )}

@@ -50,7 +50,7 @@ const more = [["/about","About"],["/process","Process"],["/testimonials","Testim
             ? <li><a href={settings.phoneHref} class="font-bold text-cream-50 hover:text-teal-300">{settings.phone}</a></li>
             : <li class="text-cream-50/40">Phone — pending</li>}
           {settings.whatsappHref
-            ? <li><a href={settings.whatsappHref} class="hover:text-cream-50">WhatsApp · {settings.whatsapp}</a></li>
+            ? <li><a target="_blank" rel="noopener noreferrer" href={settings.whatsappHref} class="hover:text-cream-50">WhatsApp · {settings.whatsapp}</a></li>
             : <li class="text-cream-50/40">WhatsApp — pending</li>}
           {settings.emailHref
             ? <li><a href={settings.emailHref} class="hover:text-cream-50">{settings.email}</a></li>
