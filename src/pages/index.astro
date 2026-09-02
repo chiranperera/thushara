@@ -174,7 +174,7 @@ const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask abou
         muted loop playsinline preload="none" disableRemotePlayback
         data-webm="/video/thushara.webm"
         data-mp4="/video/thushara.mp4"
-        class="absolute bottom-0 left-0 hidden h-full w-full object-contain opacity-0 transition-opacity duration-700 lg:block lg:[object-position:left_bottom]"
+        class="absolute bottom-0 left-0 hidden h-[108%] w-full object-contain opacity-0 transition-opacity duration-700 lg:block lg:[object-position:left_bottom]"
       ></video>
     </div>
   </section>
@@ -233,12 +233,21 @@ const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask abou
       const start = () => {
         v.src = src;
         v.load();
+        const still = document.querySelector("picture");
+        const restore = () => {
+          v.style.opacity = "0";
+          if (still) still.style.opacity = "1";
+        };
         const show = () => {
           v.style.opacity = "1";
-          v.play().catch(() => { v.style.opacity = "0"; });
+          if (still) {
+            still.style.transition = "opacity 700ms ease";
+            still.style.opacity = "0";
+          }
+          v.play().catch(restore);
         };
         v.addEventListener("loadeddata", show, { once: true });
-        v.addEventListener("error", () => { v.style.opacity = "0"; }, { once: true });
+        v.addEventListener("error", restore, { once: true });
       };
 
       const idle = () =>
