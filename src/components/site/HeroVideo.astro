@@ -1,0 +1,109 @@
+---
+/**
+ * Hero background loop — a particle network drifting behind the
+ * portrait.
+ *
+ * The source is white particles on pure black, so it is composited with
+ * `screen`: black goes to nothing and only the light lands on the
+ * gradient. No black box, no cutout needed, and it sits inside the
+ * navy rather than on top of it.
+ *
+ * Masked to the right-hand side so it stays behind Thushara and never
+ * reaches the headline — moving texture under running text is hard to
+ * read, and that half of the hero was the empty one.
+ *
+ * The file is 393KB, which is half the page budget on its own, so it is
+ * never part of the initial load: no preload, no src in the markup, and
+ * it is only fetched once the page has finished loading. Anyone on
+ * Save-Data, a 2G connection, or reduced-motion never downloads it at
+ * all and simply keeps the gradient.
+ */
+---
+
+<div
+  aria-hidden="true"
+  class="hero-video pointer-events-none absolute inset-y-0 right-0 z-[1] hidden w-[62%] overflow-hidden lg:block"
+>
+  <video
+    id="hero-loop"
+    data-src="/video/hero-loop.mp4"
+    muted
+    loop
+    playsinline
+    preload="none"
+    disableRemotePlayback
+    class="h-full w-full object-cover transition-opacity duration-[1200ms]"
+    style="opacity:0;mix-blend-mode:screen"
+  ></video>
+</div>
+
+<style>
+  /* Fades out toward the copy on the left and softly at the edges, so
+     there is no rectangle — it reads as light in the gradient. */
+  .hero-video {
+    -webkit-mask-image: linear-gradient(100deg, transparent 0%, rgba(0, 0, 0, 0.35) 26%, #000 58%, #000 100%),
+      linear-gradient(180deg, transparent 0%, #000 18%, #000 82%, transparent 100%);
+    mask-image: linear-gradient(100deg, transparent 0%, rgba(0, 0, 0, 0.35) 26%, #000 58%, #000 100%),
+      linear-gradient(180deg, transparent 0%, #000 18%, #000 82%, transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+  }
+</style>
+
+<script>
+  const video = document.getElementById("hero-loop") as HTMLVideoElement | null;
+
+  if (video) {
+    const nav = navigator as any;
+    const conn = nav.connection;
+    const cheap =
+      conn?.saveData === true || /(^|-)2g$/.test(conn?.effectiveType ?? "");
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (!cheap && !still) {
+      const load = () => {
+        video.src = video.dataset.src!;
+        // preload="none" means assigning src fetches nothing on its own —
+        // the browser waits to be asked.
+        video.load();
+        // Fade in only once there are frames to show, so it never
+        // flashes a black rectangle over the gradient. Opacity is set
+        // directly rather than by class — the value would otherwise
+        // only exist inside this script, where Tailwind may not see it.
+        const reveal = () => {
+          video.style.opacity = "0.32";
+          video.play().catch(() => {
+            /* a browser that refuses autoplay just keeps the gradient */
+          });
+        };
+        video.addEventListener("loadeddata", reveal, { once: true });
+        // A tab that starts in the background decodes nothing, so
+        // `loadeddata` may not arrive until it is looked at.
+        video.addEventListener("playing", reveal, { once: true });
+      };
+
+      // After load, and only while it is actually on screen.
+      const whenIdle = () =>
+        "requestIdleCallback" in window
+          ? (window as any).requestIdleCallback(load, { timeout: 2500 })
+          : setTimeout(load, 900);
+
+      if (document.readyState === "complete") whenIdle();
+      else window.addEventListener("load", whenIdle, { once: true });
+
+      // Decoding a video nobody is looking at is wasted battery.
+      const io = new IntersectionObserver(([e]) => {
+        if (!video.src) return;
+        if (e.isIntersecting) video.play().catch(() => {});
+        else video.pause();
+      });
+      io.observe(video);
+
+      document.addEventListener("visibilitychange", () => {
+        if (!video.src) return;
+        if (document.hidden) video.pause();
+        else video.play().catch(() => {});
+      });
+    }
+  }
+</script>
