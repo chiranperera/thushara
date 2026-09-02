@@ -12,11 +12,24 @@
  * reaches the headline — moving texture under running text is hard to
  * read, and that half of the hero was the empty one.
  *
- * The file is 393KB, which is half the page budget on its own, so it is
- * never part of the initial load: no preload, no src in the markup, and
- * it is only fetched once the page has finished loading. Anyone on
- * Save-Data, a 2G connection, or reduced-motion never downloads it at
- * all and simply keeps the gradient.
+ * The first cut of this was encoded at crf38 to keep it under 400KB and
+ * it showed: 28dB, with 6.4% of the black field picking up mosquito
+ * noise that `screen` then lifted straight into view. Thin bright lines
+ * on flat black is the worst case for H.264, and blending on top
+ * amplifies exactly the artefacts it produces. This one is crf27 at
+ * 37.7dB with 0.4% — four times the file for sixteen times less noise,
+ * which is the right way round when the whole point is that it looks
+ * clean.
+ *
+ * Cropped to 4:3 before encoding, because the panel is roughly 6:5 and
+ * object-cover was throwing the sides of a 16:9 frame away — no reason
+ * to spend bits on pixels nobody sees.
+ *
+ * 1.6MB is twice the page budget on its own, so it is never part of the
+ * initial load: no preload, no src in the markup, and it is only
+ * fetched once the page has finished loading. Anyone on Save-Data, a 2G
+ * connection, or reduced-motion never downloads it at all and simply
+ * keeps the gradient.
  */
 ---
 
@@ -26,7 +39,7 @@
 >
   <video
     id="hero-loop"
-    data-src="/video/hero-loop.mp4"
+    data-src="/video/hero-loop-v3.mp4"
     muted
     loop
     playsinline
