@@ -20,6 +20,7 @@ import StickyBar from "../components/site/StickyBar.astro";
 import MilestoneLine from "../components/site/MilestoneLine.tsx";
 import LifeStageServices from "../components/site/LifeStageServices.tsx";
 import IconCarousel from "../components/site/IconCarousel.tsx";
+import HeroNetwork from "../components/site/HeroNetwork.astro";
 import { getSiteSettings, EDGE_CACHE, whatsappHref } from "../lib/settings";
 import { services, lifeStages, site } from "../lib/site";
 
@@ -92,14 +93,15 @@ const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask abou
   title={site.name}
   description={`${site.title} in Sri Lanka. ${settings.yearsExperience} years, ${settings.mdrtYears}× MDRT Lifetime Member. Insurance and financial planning explained in plain language.`}
 >
-  <Header slot="header" settings={settings} />
+  <Header slot="header" settings={settings} overHero />
 
   <!-- ============ HERO ============ -->
-  <section class="hero-bg relative flex min-h-[640px] flex-col overflow-hidden lg:min-h-[calc(100vh-80px)] lg:max-h-[960px] lg:flex-row">
+  <section class="hero-bg relative -mt-16 flex min-h-[720px] flex-col overflow-hidden pt-16 lg:-mt-20 lg:min-h-screen lg:max-h-[980px] lg:flex-row lg:pt-20">
     <span aria-hidden="true" class="hero-scrim pointer-events-none absolute inset-0 z-[1]"></span>
+    <HeroNetwork />
 
     <!-- copy -->
-    <div class="relative z-[2] flex flex-1 flex-col justify-center px-5 pb-8 pt-12 lg:max-w-[60%] lg:flex-none lg:basis-[60%] lg:px-18 lg:pb-0 lg:pt-14">
+    <div class="relative z-[3] flex flex-1 flex-col justify-center px-5 pb-8 pt-12 lg:max-w-[60%] lg:flex-none lg:basis-[60%] lg:px-18 lg:pb-0 lg:pt-14">
       <p class="inline-flex items-center gap-2.5 self-start rounded-full border border-cyan-300/28 bg-ink-900/60 py-1.5 pl-2.5 pr-3.5 lg:hidden">
         <span aria-hidden="true" class="size-[7px] rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(125,221,247,0.9)]"></span>
         <span class="overline text-cyan-300">{site.title} · Sri Lanka</span>
@@ -137,18 +139,18 @@ const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask abou
     </div>
 
     <!-- portrait -->
-    <div class="relative z-[2] min-h-[340px] flex-1 overflow-hidden lg:max-w-[40%] lg:flex-none lg:basis-[40%]">
+    <div class="relative z-[3] min-h-[420px] flex-1 overflow-hidden lg:max-w-[40%] lg:flex-none lg:basis-[40%]">
       <picture>
         <source media="(max-width: 767px)" srcset="/img/hero-thushara-award@0.5x.webp" />
         <img
           src="/img/hero-thushara-award.webp"
           alt={`${site.name} receiving a Sri Lanka Insurance Star Award`}
-          width="1000" height="1613" fetchpriority="high" decoding="async"
-          {/* On desktop the portrait sits at 85% height, anchored left,
+          width="1100" height="2066" fetchpriority="high" decoding="async"
+          {/* On desktop the portrait stands on the bottom edge at 90%
               which leaves clear space above, below and to its right.
               Mobile keeps the full-bleed bottom-anchored crop — there
               is no room to inset it on a phone. */}
-          class="absolute bottom-0 left-1/2 h-full w-full -translate-x-1/2 object-contain object-bottom lg:bottom-[7%] lg:left-0 lg:h-[85%] lg:translate-x-0 lg:[object-position:left_bottom]"
+          class="absolute bottom-0 left-1/2 h-full w-full -translate-x-1/2 object-contain object-bottom lg:bottom-0 lg:left-0 lg:h-[90%] lg:translate-x-0 lg:[object-position:left_bottom]"
         />
       </picture>
     </div>

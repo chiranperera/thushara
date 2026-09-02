@@ -1,0 +1,135 @@
+---
+/**
+ * Hero background texture — a slow-drifting network of points and the
+ * lines between them.
+ *
+ * The motif is the argument the site makes: individual points that only
+ * mean something once they are connected. It sits at very low opacity
+ * behind the portrait and must never compete with him or with the
+ * headline.
+ *
+ * Canvas rather than SVG because the lines are recomputed every frame
+ * from distance, which is a loop, not a path.
+ */
+---
+
+<canvas
+  id="hero-net"
+  aria-hidden="true"
+  class="pointer-events-none absolute inset-0 z-[1] h-full w-full"
+></canvas>
+
+<script>
+  const canvas = document.getElementById("hero-net") as HTMLCanvasElement | null;
+  if (canvas) {
+    const ctx = canvas.getContext("2d", { alpha: true })!;
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // Capped at 1.5 — a network of hairlines gains nothing from a full
+    // 3x buffer and it costs fill rate on exactly the phones this site
+    // is built for.
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    let w = 0;
+    let h = 0;
+    let points: { x: number; y: number; vx: number; vy: number }[] = [];
+
+    /** Density scales with area so a phone doesn't get a desktop's worth. */
+    const build = () => {
+      const rect = canvas.getBoundingClientRect();
+      w = rect.width;
+      h = rect.height;
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const count = Math.min(58, Math.round((w * h) / 17000));
+      points = Array.from({ length: count }, () => ({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.16,
+        vy: (Math.random() - 0.5) * 0.16,
+      }));
+    };
+
+    const LINK = 132; // px — beyond this, two points are unrelated
+
+    const draw = () => {
+      ctx.clearRect(0, 0, w, h);
+
+      for (let i = 0; i < points.length; i++) {
+        const a = points[i];
+        for (let j = i + 1; j < points.length; j++) {
+          const b = points[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const d = Math.hypot(dx, dy);
+          if (d > LINK) continue;
+          // Fades out as the pair drifts apart, so links appear and
+          // dissolve rather than blinking on and off.
+          ctx.strokeStyle = `rgba(125,221,247,${(1 - d / LINK) * 0.16})`;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
+      }
+
+      ctx.fillStyle = "rgba(125,221,247,0.34)";
+      for (const p of points) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 1.4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    };
+
+    const step = () => {
+      for (const p of points) {
+        p.x += p.vx;
+        p.y += p.vy;
+        // Wrap rather than bounce — bouncing makes the edges legible.
+        if (p.x < -20) p.x = w + 20;
+        if (p.x > w + 20) p.x = -20;
+        if (p.y < -20) p.y = h + 20;
+        if (p.y > h + 20) p.y = -20;
+      }
+      draw();
+      raf = requestAnimationFrame(step);
+    };
+
+    let raf = 0;
+    let onscreen = true;
+    const start = () => {
+      if (!raf && !still) raf = requestAnimationFrame(step);
+    };
+    const stop = () => {
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
+    };
+    const evaluate = () => (onscreen && !document.hidden ? start() : stop());
+
+    build();
+    draw(); // reduced-motion and first-paint both get a static field
+
+    const io = new IntersectionObserver(
+      ([e]) => {
+        onscreen = e.isIntersecting;
+        evaluate();
+      },
+      { threshold: 0 },
+    );
+    io.observe(canvas);
+    document.addEventListener("visibilitychange", evaluate);
+
+    let resizeTimer: ReturnType<typeof setTimeout>;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        build();
+        draw();
+      }, 180);
+    });
+
+    evaluate();
+  }
+</script>

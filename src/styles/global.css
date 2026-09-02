@@ -326,7 +326,7 @@
 @utility hero-bg {
   /* Mobile: copy on top, portrait below — light the lower half. */
   background:
-    radial-gradient(96% 46% at 56% 80%, #4A80BC 0%, #37699F 38%, #23497B 66%, rgba(9,26,48,0) 88%),
+    radial-gradient(96% 46% at 56% 80%, #104f95 0%, #14457a 38%, #12386b 66%, rgba(9, 26, 48, 0) 88%),
     linear-gradient(168deg, #10305A 0%, #0B2444 46%, #061426 100%);
 }
 
@@ -337,11 +337,67 @@
 @media (min-width: 1024px) {
   .hero-bg {
     background:
-      radial-gradient(66% 90% at 74% 46%, #4A80BC 0%, #37699F 36%, #23497B 64%, rgba(9,26,48,0) 86%),
+      radial-gradient(66% 90% at 74% 46%, #104f95 0%, #14457a 36%, #12386b 64%, rgba(9, 26, 48, 0) 86%),
       linear-gradient(155deg, #10305A 0%, #0B2444 48%, #061426 100%);
   }
   /* Side by side, so the scrim runs across rather than down. */
   .hero-scrim {
     background: linear-gradient(102deg, rgba(4,16,31,0.62) 0%, rgba(4,16,31,0.30) 42%, rgba(4,16,31,0) 68%);
   }
+}
+
+/* ============================================================
+   Header over the hero.
+
+   The homepage header sits inside the hero band rather than on a white
+   stripe above it. Everything inverts to read on dark, and reverts the
+   moment you scroll past the hero — cream-on-cream would be invisible.
+
+   Scoped to [data-over-hero] so every other page keeps the solid
+   header, and to :not([data-scrolled]) so it is only the top of the
+   page that inverts.
+   ============================================================ */
+
+#site-header[data-over-hero] {
+  transition: background-color 220ms ease, border-color 220ms ease;
+}
+
+#site-header[data-over-hero]:not([data-scrolled]) {
+  background-color: transparent;
+  border-color: transparent;
+  backdrop-filter: none;
+}
+
+#site-header[data-over-hero]:not([data-scrolled]) {
+  --hdr-fg: var(--color-cream-50);
+  --hdr-dim: color-mix(in srgb, var(--color-cream-50) 78%, transparent);
+}
+
+/* Only the bar itself inverts. Targeted at the top-level links rather
+   than `nav a`, because the mega-menu panel is its own light surface
+   hanging below and its links must keep their own colours. */
+#site-header[data-over-hero]:not([data-scrolled]) nav[aria-label="Main"] > a,
+#site-header[data-over-hero]:not([data-scrolled]) nav[aria-label="Main"] > .group > a,
+#site-header[data-over-hero]:not([data-scrolled]) a[href^="tel:"],
+#site-header[data-over-hero]:not([data-scrolled]) > div > a > span > span {
+  color: var(--hdr-fg);
+}
+#site-header[data-over-hero]:not([data-scrolled]) > div > a > span > span:last-child {
+  color: var(--hdr-dim);
+}
+#site-header[data-over-hero]:not([data-scrolled]) .mark {
+  stroke: var(--color-cream-50);
+}
+#site-header[data-over-hero]:not([data-scrolled]) #menu-open span span {
+  background: var(--color-cream-50);
+}
+
+/* The CTA inverts to a solid cream pill — it has to stay the loudest
+   thing in the bar, and navy on navy would not be. */
+#site-header[data-over-hero]:not([data-scrolled]) a[href="/book"] {
+  background: var(--color-cream-50);
+  color: var(--color-navy-600);
+}
+#site-header[data-over-hero]:not([data-scrolled]) a[href="/book"]:hover {
+  background: #fff;
 }
