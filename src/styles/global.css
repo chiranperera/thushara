@@ -305,3 +305,43 @@
   from { opacity: 0; transform: translateY(-6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* ============================================================
+   Hero background.
+
+   Thushara wears a navy blazer. Measured off his portrait it sits at
+   L=0.021 — against the old gradient's darkest corner (L=0.003) that
+   was 1.35:1, and he simply disappeared. Worse, the old radial put its
+   one bright point behind the headline and its darkest behind him.
+
+   So the light now falls where a studio backdrop light would: a pool
+   behind the figure, falling off toward the copy. That gives roughly
+   3:1 at his head and shoulders, and the left-biased scrim keeps the
+   headline above 15:1 rather than relying on the ground being black.
+
+   The two layouts need the pool in different places: side-by-side on
+   desktop, stacked with the portrait underneath on mobile.
+   ============================================================ */
+
+@utility hero-bg {
+  /* Mobile: copy on top, portrait below — light the lower half. */
+  background:
+    radial-gradient(96% 46% at 56% 80%, #4A80BC 0%, #37699F 38%, #23497B 66%, rgba(9,26,48,0) 88%),
+    linear-gradient(168deg, #10305A 0%, #0B2444 46%, #061426 100%);
+}
+
+@utility hero-scrim {
+  background: linear-gradient(180deg, rgba(4,16,31,0.55) 0%, rgba(4,16,31,0.22) 34%, rgba(4,16,31,0) 62%);
+}
+
+@media (min-width: 1024px) {
+  .hero-bg {
+    background:
+      radial-gradient(66% 90% at 74% 46%, #4A80BC 0%, #37699F 36%, #23497B 64%, rgba(9,26,48,0) 86%),
+      linear-gradient(155deg, #10305A 0%, #0B2444 48%, #061426 100%);
+  }
+  /* Side by side, so the scrim runs across rather than down. */
+  .hero-scrim {
+    background: linear-gradient(102deg, rgba(4,16,31,0.62) 0%, rgba(4,16,31,0.30) 42%, rgba(4,16,31,0) 68%);
+  }
+}

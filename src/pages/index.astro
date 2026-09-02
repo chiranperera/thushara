@@ -95,14 +95,8 @@ const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask abou
   <Header slot="header" settings={settings} />
 
   <!-- ============ HERO ============ -->
-  <section
-    class="relative flex min-h-[640px] flex-col overflow-hidden lg:min-h-[calc(100vh-80px)] lg:max-h-[960px] lg:flex-row"
-    style="background:radial-gradient(120% 110% at 5% 12%,#0C2747 0%,#071829 42%,#020913 100%)"
-  >
-    <span
-      aria-hidden="true" class="pointer-events-none absolute inset-0 z-[1]"
-      style="background:linear-gradient(180deg,rgba(3,19,15,0.6) 0%,rgba(3,19,15,0.22) 46%,rgba(3,19,15,0.7) 100%)"
-    ></span>
+  <section class="hero-bg relative flex min-h-[640px] flex-col overflow-hidden lg:min-h-[calc(100vh-80px)] lg:max-h-[960px] lg:flex-row">
+    <span aria-hidden="true" class="hero-scrim pointer-events-none absolute inset-0 z-[1]"></span>
 
     <!-- copy -->
     <div class="relative z-[2] flex flex-1 flex-col justify-center px-5 pb-8 pt-12 lg:max-w-[60%] lg:flex-none lg:basis-[60%] lg:px-18 lg:pb-0 lg:pt-14">
