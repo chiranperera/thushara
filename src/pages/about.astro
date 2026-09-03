@@ -111,7 +111,7 @@ try {
     <span aria-hidden="true" class="pointer-events-none absolute inset-0 z-[1]"
       style="background:linear-gradient(180deg,rgba(4,16,31,0.55) 0%,rgba(4,16,31,0.2) 46%,rgba(4,16,31,0.65) 100%)"></span>
 
-    <div class="relative z-[2] flex flex-1 flex-col justify-center px-5 pb-10 pt-12 lg:max-w-[62%] lg:flex-none lg:basis-[62%] lg:px-18 lg:pb-0">
+    <div class="pl-gutter relative z-[2] flex flex-1 flex-col justify-center px-5 pb-10 pt-12 lg:max-w-[62%] lg:flex-none lg:basis-[62%] lg:pr-18 lg:pb-0">
       <p class="overline text-cyan-300">{site.title} · {site.employer}</p>
       <h1 class="mt-5 font-display text-display font-extrabold leading-[1.04] tracking-[-0.03em] text-cream-50">
         {site.name}
@@ -134,15 +134,15 @@ try {
       </div>
     </div>
 
-    <div class="relative z-[2] min-h-[300px] flex-1 overflow-hidden lg:max-w-[38%] lg:flex-none lg:basis-[38%]">
-      <picture>
-        <source media="(max-width: 767px)" srcset="/img/hero-thushara@0.5x.webp" />
-        <img
-          src="/img/hero-thushara.webp" alt={`${site.name}, ${site.title}`}
-          width="594" height="960" fetchpriority="high" decoding="async"
-          class="absolute bottom-0 left-1/2 h-full w-full -translate-x-1/2 object-contain object-bottom"
-        />
-      </picture>
+    {/* Filled panel rather than a floating cut-out, matching the
+        doctors and engineers heroes. object-position sits high so the
+        crop takes the shoulders rather than the top of his head. */}
+    <div class="relative z-[2] min-h-[320px] flex-1 overflow-hidden border-t border-cyan-300/12 lg:min-h-0 lg:max-w-[38%] lg:flex-none lg:basis-[38%] lg:border-l lg:border-t-0">
+      <img
+        src="/img/about-portrait.webp" alt={`${site.name}, ${site.title}`}
+        width="1200" height="1608" fetchpriority="high" decoding="async"
+        class="absolute inset-0 h-full w-full object-cover [object-position:50%_22%]"
+      />
     </div>
   </section>
 

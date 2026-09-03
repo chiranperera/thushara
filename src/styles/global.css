@@ -422,3 +422,22 @@
   padding-top: 7px;
   font-weight: 600;
 }
+
+/* ============================================================
+   Hero gutter.
+
+   Full-bleed hero bands cannot use `container-default` — their copy
+   column is a flex child, so centring a container inside it would put
+   the text in the middle of the column rather than on the site's left
+   edge. The result was the homepage and About starting 72px from the
+   viewport while the logo above them started at 176px, and the service
+   pages (which do use the container) lining up correctly.
+
+   This reproduces the container's own left edge: half the leftover
+   width, plus the same 20px gutter. Below 1200px it collapses to the
+   20px, exactly as the container does.
+   ============================================================ */
+
+@utility pl-gutter {
+  padding-left: max(1.25rem, calc((100vw - var(--container-default)) / 2 + 1.25rem));
+}

@@ -37,6 +37,12 @@ export interface ServiceContent {
   slug: string;
   /** Life-stage line above the H1. */
   overline: string;
+  /**
+   * Hero photograph, 4:5, filling the right-hand panel. Until one
+   * exists the hero stays single-column with the icon watermark — an
+   * empty panel would look worse than no panel.
+   */
+  heroImage?: { src: string; alt: string };
   title: string;
   /** Serif italic line under the H1, from the client's copy. */
   promise: string;

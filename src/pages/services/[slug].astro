@@ -114,14 +114,22 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
 >
   <Header slot="header" settings={settings} />
 
-  <!-- ============ HERO ============ -->
-  <section class="relative overflow-hidden bg-cream-100">
-    <img
-      src={`/icons/cut-${meta.icon}.png`} alt="" aria-hidden="true"
-      width="280" height="280" loading="eager" decoding="async"
-      class="pointer-events-none absolute -right-10 top-6 hidden w-[300px] opacity-[0.07] lg:block xl:right-16 xl:w-[340px]"
-    />
-    <div class="container-default relative px-5 py-12 md:py-16">
+  <!-- ============ HERO ============
+       Two columns once a photograph exists, matching the About and
+       profession pages. Without one it stays single-column with the
+       icon watermark rather than showing an empty panel. -->
+  <section class={`relative overflow-hidden bg-cream-100 ${content.heroImage ? "flex flex-col lg:flex-row" : ""}`}>
+    {!content.heroImage && (
+      <img
+        src={`/icons/cut-${meta.icon}.png`} alt="" aria-hidden="true"
+        width="280" height="280" loading="eager" decoding="async"
+        class="pointer-events-none absolute -right-10 top-6 hidden w-[300px] opacity-[0.07] lg:block xl:right-16 xl:w-[340px]"
+      />
+    )}
+
+    <div class={content.heroImage
+      ? "pl-gutter relative flex flex-1 flex-col justify-center px-5 py-12 md:py-16 lg:max-w-[60%] lg:flex-none lg:basis-[60%] lg:pr-18"
+      : "container-default relative px-5 py-12 md:py-16"}>
       <nav aria-label="Breadcrumb" class="text-small text-warm-500">
         <a href="/" class="hover:text-navy-600">Home</a>
         <span aria-hidden="true" class="mx-2">/</span>
@@ -150,6 +158,16 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
         )}
       </div>
     </div>
+
+    {content.heroImage && (
+      <div class="relative min-h-[300px] flex-1 overflow-hidden lg:min-h-0 lg:max-w-[40%] lg:flex-none lg:basis-[40%]">
+        <img
+          src={content.heroImage.src} alt={content.heroImage.alt}
+          width="1200" height="1500" fetchpriority="high" decoding="async"
+          class="absolute inset-0 h-full w-full object-cover"
+        />
+      </div>
+    )}
   </section>
 
   <!-- ============ CREDENTIALS STRIP ============
