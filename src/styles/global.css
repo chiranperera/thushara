@@ -402,3 +402,14 @@
 #site-header[data-over-hero]:not([data-scrolled]) a[href="/book"]:hover {
   background: #fff;
 }
+
+/* The strapline sits under the wordmark and is stretched to exactly its
+   width, so the two read as one locked-up mark rather than a line of
+   text that happens to sit below a logo. Justifying the last (only)
+   line is what does it — no hand-tuned letter-spacing to re-tune every
+   time the logo size changes. */
+.logo-sub {
+  text-align: justify;
+  text-align-last: justify;
+  -moz-text-align-last: justify;
+}
