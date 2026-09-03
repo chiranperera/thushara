@@ -419,16 +419,15 @@
    pads itself back down by exactly this much, so the two numbers must
    never drift apart. One variable, referenced by both.
 
-   124px on desktop is not arbitrary: it is what the lockup measures.
-   40px top margin + 40px mark + 6px gap + a 34px two-line strapline is
-   120, and 124 keeps 2px of air top and bottom.
+   104px on desktop is what the lockup measures: a 40px top margin, the
+   40px mark, a 6px gap and a single-line strapline come to 103.
    ------------------------------------------------------------------ */
 :root {
   --header-h: 80px;
 }
 @media (width >= 64rem) {
   :root {
-    --header-h: 124px;
+    --header-h: 104px;
   }
 }
 
@@ -463,17 +462,7 @@
 
 .logo-sub {
   width: var(--logo-w);
-
-  /* Two lines, not one. Measured: at the mark's 128px width a single
-     line of SENIOR FINANCIAL CONSULTANT caps out at 7.4px, which is a
-     smudge rather than a word. Broken over two, the longest line
-     (SENIOR FINANCIAL) fits at 12.8px, so 10px leaves headroom and
-     keeps the strapline clearly subordinate to the wordmark.
-
-     It wraps on its own — 10px type needs about 100px for the first
-     line, so CONSULTANT cannot follow it inside 128px. No <br> to go
-     stale if the height or the title ever changes. */
-  font-size: calc(var(--logo-w) / 12.8);
+  font-size: calc(var(--logo-w) / 18);
   line-height: 1.35;
   letter-spacing: 0.045em;
   text-align: center;

@@ -14,6 +14,13 @@ export default defineConfig({
   // data that is a real difference, not a micro-optimisation.
   integrations: [preact({ compat: true })],
 
+  // The floating pill at the bottom of the window is Astro's dev
+  // toolbar. It is stripped from every production build and never
+  // reaches a visitor, but it sits over the hero while previewing the
+  // site locally, which makes it hard to judge what the page actually
+  // looks like. Off.
+  devToolbar: { enabled: false },
+
   vite: {
     plugins: [tailwindcss()],
   },
