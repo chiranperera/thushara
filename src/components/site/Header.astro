@@ -33,16 +33,18 @@ const byslug = (s: string) => services.find((x) => x.slug === s)!;
 <header id="site-header" data-over-hero={overHero ? "" : null}
   class="sticky top-0 z-50 bg-cream-50/95 shadow-[inset_0_-1px_0_var(--color-warm-200)] backdrop-blur">
   <div class="container-default flex h-16 items-center justify-between gap-6 px-5 lg:h-20">
-    <a href="/" class="flex shrink-0 items-center gap-2.5" aria-label={`${site.name} — home`}>
-      <svg width="26" height="24" viewBox="0 0 26 24" fill="none" aria-hidden="true" class="shrink-0">
-        <path class="mark" d="M1 7h24" stroke="#123A6B" stroke-width="2" stroke-linecap="round" />
-        <path class="mark" d="M12 7v16" stroke="#123A6B" stroke-width="2" stroke-linecap="round" />
-        <circle cx="20" cy="7" r="4" fill="#C9962F" />
-      </svg>
-      <span class="leading-tight">
-        <span class="block font-display text-[15px] font-bold text-ink-900">{site.name}</span>
-        <span class="hidden text-caption text-warm-500 lg:block">{site.title}</span>
-      </span>
+    {/* Two files rather than a CSS filter: the wordmark is two-tone,
+        and inverting it would collapse that. The light one shows only
+        while the header is transparent over the hero. */}
+    <a href="/" class="flex shrink-0 items-center" aria-label={`${site.name} — home`}>
+      <img
+        src="/img/logo-dark.webp" alt={site.name} width="640" height="206"
+        class="logo-dark h-8 w-auto lg:h-10" fetchpriority="high" decoding="async"
+      />
+      <img
+        src="/img/logo-light.webp" alt="" aria-hidden="true" width="640" height="206"
+        class="logo-light hidden h-8 w-auto lg:h-10" decoding="async"
+      />
     </a>
 
     <nav class="hidden items-center gap-7 lg:flex" aria-label="Main">

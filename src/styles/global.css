@@ -385,9 +385,10 @@
 #site-header[data-over-hero]:not([data-scrolled]) > div > a > span > span:last-child {
   color: var(--hdr-dim);
 }
-#site-header[data-over-hero]:not([data-scrolled]) .mark {
-  stroke: var(--color-cream-50);
-}
+/* Swap the wordmark rather than recolour it — it is two-tone, and a
+   filter would flatten THUSHARA and RATHNAYAKE into one shade. */
+#site-header[data-over-hero]:not([data-scrolled]) .logo-dark { display: none; }
+#site-header[data-over-hero]:not([data-scrolled]) .logo-light { display: block; }
 #site-header[data-over-hero]:not([data-scrolled]) #menu-open span span {
   background: var(--color-cream-50);
 }
