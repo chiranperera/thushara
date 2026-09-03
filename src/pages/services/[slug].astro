@@ -369,13 +369,11 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
   <section class="bg-cream-50 py-16 md:py-20">
     <div class="container-default grid gap-12 px-5 lg:grid-cols-[0.75fr_1fr] lg:items-center lg:gap-16">
       <div class="relative">
-        <div class="flex aspect-4/5 flex-col items-center justify-center gap-2 rounded-xl border border-mist-200 bg-mist-100 p-9 text-center" data-slot="IMG-ABOUT-01">
-          <span aria-hidden="true" class="size-3.5 rotate-45 bg-mist-400"></span>
-          <span class="font-mono text-caption font-bold tracking-wider text-mist-600">IMG-ABOUT-01 · 4:5</span>
-          <span class="max-w-[26ch] font-mono text-caption leading-relaxed text-mist-500">
-            Reused across service pages. Warm, candid, mid-conversation.
-          </span>
-        </div>
+        <img
+          src="/img/shot-consulting.webp" alt="Thushara Rathnayake in conversation with a client at his desk"
+          width="1200" height="1500" loading="lazy" decoding="async"
+          class="aspect-4/5 w-full rounded-xl object-cover"
+        />
         <div class="absolute -left-4 bottom-12 rounded-lg bg-ink-900 px-6 py-5 sm:-left-8">
           <span class="block font-display text-h2 font-extrabold tabular text-gold-400">{settings.mdrtYears}×</span>
           <span class="mt-1 block text-small text-cream-50/70">MDRT {settings.mdrtStatus}</span>

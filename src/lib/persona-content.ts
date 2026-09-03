@@ -37,7 +37,7 @@ export interface Persona {
   intro: string;
   /** Pre-selects this profession in the booking form, skipping step 1. */
   bookingProfession: string;
-  imageSlot: { id: string; note: string };
+  imageSlot: { id: string; src: string; alt: string; note: string };
   careerLineLabel: string;
   careerLineHeading: string;
   stages: CareerStage[];
@@ -65,6 +65,8 @@ export const personas: Record<string, Persona> = {
     bookingProfession: "doctor",
     imageSlot: {
       id: "IMG-DOCTORS-01",
+      src: "/img/shot-doctor.webp",
+      alt: "A doctor in a Sri Lankan consulting room",
       note: "A healthcare professional in a real Sri Lankan clinical setting. Must be authentic and locally shot — never stock. A visitor should recognise the room.",
     },
     careerLineLabel: "The medical career line",
@@ -126,6 +128,8 @@ export const personas: Record<string, Persona> = {
     bookingProfession: "engineer",
     imageSlot: {
       id: "IMG-ENGINEERS-01",
+      src: "/img/shot-engineer.webp",
+      alt: "An engineer reviewing drawings on a Sri Lankan site",
       note: "On site or with drawings, in a real Sri Lankan setting. Locally shot, never stock.",
     },
     careerLineLabel: "The engineering career line",

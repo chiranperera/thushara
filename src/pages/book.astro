@@ -136,14 +136,11 @@ const referringPage = Astro.request.headers.get("referer") ?? undefined;
           about to meet before you hand over your number. */}
       <aside class="mt-14 hidden md:mt-0 md:block">
         <div class="rounded-xl border border-warm-200 bg-cream-100 p-6">
-          <div
-            class="mb-4 flex aspect-[3/4] items-center justify-center rounded-lg border border-warm-200 bg-warm-100 text-center"
-            data-slot="IMG-HERO-01"
-          >
-            <span class="px-4 text-caption text-warm-500">
-              IMG-HERO-01<br />Portrait · 3:4<br />pending
-            </span>
-          </div>
+          <img
+            src="/img/shot-portrait.webp" alt={site.name}
+            width="900" height="1200" loading="lazy" decoding="async"
+            class="mb-4 aspect-[3/4] w-full rounded-lg object-cover"
+          />
           <p class="font-display text-h4 font-bold text-ink-900">{site.name}</p>
           <p class="mt-0.5 text-small text-warm-500">{site.title}</p>
 

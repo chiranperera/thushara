@@ -88,15 +88,12 @@ const bookHref = `/book?profession=${p.bookingProfession}`;
     </div>
 
     <!-- Locally shot, never stock — a visitor should recognise the room. -->
-    <div
-      class="relative z-[2] flex min-h-[260px] flex-1 items-center justify-center border-t border-cyan-300/12 p-9 lg:min-h-0 lg:max-w-[40%] lg:flex-none lg:basis-[40%] lg:border-l lg:border-t-0"
-      data-slot={p.imageSlot.id}
-    >
-      <span class="max-w-[30ch] text-center">
-        <span aria-hidden="true" class="mx-auto mb-3 block size-3.5 rotate-45 bg-navy-300/60"></span>
-        <span class="block font-mono text-caption font-bold tracking-wider text-navy-300">{p.imageSlot.id} · full bleed</span>
-        <span class="mt-2 block font-mono text-caption leading-relaxed text-cream-50/45">{p.imageSlot.note}</span>
-      </span>
+    <div class="relative z-[2] min-h-[260px] flex-1 overflow-hidden border-t border-cyan-300/12 lg:min-h-0 lg:max-w-[40%] lg:flex-none lg:basis-[40%] lg:border-l lg:border-t-0">
+      <img
+        src={p.imageSlot.src} alt={p.imageSlot.alt}
+        width="1600" height="1200" fetchpriority="high" decoding="async"
+        class="absolute inset-0 h-full w-full object-cover"
+      />
     </div>
   </section>
 
