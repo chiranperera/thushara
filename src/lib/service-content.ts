@@ -92,6 +92,7 @@ export const serviceContent: Record<string, ServiceContent> = {
   "professional-indemnity": {
     slug: "professional-indemnity",
     overline: "For newly qualified professionals",
+    heroImage: { src: "/img/hero-indemnity.webp", alt: "A doctor in her consulting room in Sri Lanka" },
     title: "Professional Indemnity Insurance",
     promise: "Protect Your Profession. Secure Your Reputation.",
     intro:
@@ -156,6 +157,7 @@ export const serviceContent: Record<string, ServiceContent> = {
   "motor-insurance": {
     slug: "motor-insurance",
     overline: "For your first vehicle",
+    heroImage: { src: "/img/hero-motor.webp", alt: "A young man with the keys to his first car on a Colombo street" },
     title: "Motor Insurance",
     promise: "Protect Your Journey with Sri Lanka Insurance Motor Insurance",
     intro:
@@ -216,6 +218,7 @@ export const serviceContent: Record<string, ServiceContent> = {
   "life-income-protection": {
     slug: "life-income-protection",
     overline: "For building a family",
+    heroImage: { src: "/img/hero-life.webp", alt: "A father and his daughter at breakfast before school" },
     title: "Life Insurance — Income Protection",
     promise: "Protect Your Family's Income. Secure Their Future.",
     intro:
@@ -272,6 +275,7 @@ export const serviceContent: Record<string, ServiceContent> = {
   "health-insurance": {
     slug: "health-insurance",
     overline: "For your family's wellbeing",
+    heroImage: { src: "/img/hero-health.webp", alt: "A mother and her adult daughter talking over tea at home" },
     title: "Health Insurance",
     promise: "Protect Your Health. Protect Your Future.",
     intro:
@@ -329,6 +333,7 @@ export const serviceContent: Record<string, ServiceContent> = {
   "children-education": {
     slug: "children-education",
     overline: "For your children's future",
+    heroImage: { src: "/img/hero-education.webp", alt: "A girl doing her homework at home while her mother helps" },
     title: "Children's Education Fund",
     promise: "Secure Your Child's Future Today",
     intro:
@@ -383,6 +388,7 @@ export const serviceContent: Record<string, ServiceContent> = {
   "retirement-plan": {
     slug: "retirement-plan",
     overline: "For planning ahead — and for starting early",
+    heroImage: { src: "/img/hero-retirement.webp", alt: "A couple in their sixties having tea on their verandah" },
     title: "Retirement Plan",
     promise: "Plan Today for a Comfortable Tomorrow",
     intro:
@@ -442,6 +448,7 @@ export const serviceContent: Record<string, ServiceContent> = {
   "house-property": {
     slug: "house-property",
     overline: "For protecting what you've built",
+    heroImage: { src: "/img/hero-property.webp", alt: "A couple outside their family home in suburban Colombo" },
     title: "House & Property Insurance",
     promise: "Protect Your Home. Secure Your Future.",
     intro:
@@ -501,6 +508,7 @@ export const serviceContent: Record<string, ServiceContent> = {
   "travel-insurance": {
     slug: "travel-insurance",
     overline: "For travelling with confidence",
+    heroImage: { src: "/img/hero-travel.webp", alt: "A student with her luggage in an airport departure hall" },
     title: "Travel Insurance",
     promise: "Protect Your Journey. Travel with Confidence.",
     intro:
