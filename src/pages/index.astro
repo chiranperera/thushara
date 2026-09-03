@@ -22,6 +22,7 @@ import LifeStageServices from "../components/site/LifeStageServices.tsx";
 import HeroVideo from "../components/site/HeroVideo.astro";
 import { getSiteSettings, EDGE_CACHE, whatsappHref } from "../lib/settings";
 import { services, lifeStages, site } from "../lib/site";
+import { serviceContent } from "../lib/service-content";
 
 const bindings = env as unknown as Record<string, any>;
 const db = bindings.DB;
@@ -89,6 +90,24 @@ const HERO_LINES: [string, string][] = [
 ];
 
 const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask about insurance.");
+/**
+ * Square crop of a service's hero photograph for the card tile.
+ *
+ * Derived from the hero's own filename, not from the service's icon
+ * name — those two disagree for exactly two services (the retirement
+ * plan's icon is "pension", the house one is "house"), which would
+ * have left two cards pointing at files that do not exist.
+ *
+ * The alt text is reused from the hero rather than rewritten, so the
+ * two can never drift apart. Returns undefined when a service has no
+ * photograph yet, and the card falls back to its icon.
+ */
+function serviceThumb(slug: string) {
+  const hero = serviceContent[slug]?.heroImage;
+  if (!hero) return undefined;
+  return { src: hero.src.replace("/hero-", "/thumb-"), alt: hero.alt };
+}
+
 ---
 
 <Layout
@@ -337,7 +356,10 @@ const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask abou
   <LifeStageServices
     client:visible
     stages={lifeStages.map(({ id, label, ageRange, description }) => ({ id, label, ageRange, description, icon: stageIcons[id] }))}
-    services={services.map(({ slug, title, short, lifeStage, icon }) => ({ slug, title, short, lifeStage, icon }))}
+    services={services.map(({ slug, title, short, lifeStage, icon }) => ({
+      slug, title, short, lifeStage, icon,
+      image: serviceThumb(slug),
+    }))}
   />
 
   <!-- ============ MILESTONE LINE ============ -->

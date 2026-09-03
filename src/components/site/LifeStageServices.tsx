@@ -18,6 +18,8 @@ export interface ServiceCard {
   short: string;
   lifeStage: string;
   icon: string;
+  /** Square crop of the service's own hero photograph, 120x120. */
+  image?: { src: string; alt: string };
 }
 
 export interface Stage {
@@ -164,13 +166,36 @@ export default function LifeStageServices({ stages, services }: Props) {
                       dim ? "border-warm-200 opacity-55 hover:opacity-100" : "border-warm-200"
                     }`}
                   >
-                    <span className="flex size-11 items-center justify-center rounded-[10px] bg-cream-100">
+                    {/* The photograph, where there is one. A face does
+                        more work than a line-art umbrella at telling
+                        someone this card is about them — the icon stays
+                        as the fallback so a service without a picture
+                        still looks finished rather than broken.
+
+                        60px served at 120 for retina; these are 4-5KB
+                        square crops, not the 100-200KB page heroes. */}
+                    {s.image ? (
                       <img
-                        src={`/icons/cut-${s.icon}.png`}
-                        alt="" width="28" height="28" loading="lazy" decoding="async"
-                        className="size-7 object-contain"
+                        src={s.image.src}
+                        /* Decorative. The card is a link whose own text
+                           names the service and describes it, so a
+                           screen reader announcing "a doctor in her
+                           consulting room" first would delay the thing
+                           the listener is actually navigating by. The
+                           photograph illustrates; it does not inform. */
+                        alt=""
+                        width="120" height="120" loading="lazy" decoding="async"
+                        className="size-15 rounded-[12px] object-cover"
                       />
-                    </span>
+                    ) : (
+                      <span className="flex size-15 items-center justify-center rounded-[12px] bg-cream-100">
+                        <img
+                          src={`/icons/cut-${s.icon}.png`}
+                          alt="" width="28" height="28" loading="lazy" decoding="async"
+                          className="size-8 object-contain"
+                        />
+                      </span>
+                    )}
                     <span className="mt-5 font-display text-h4 font-bold leading-snug text-ink-900">{s.title}</span>
                     <span className="mt-2.5 flex-1 text-small leading-relaxed text-warm-700">{s.short}</span>
                     <span className="mt-6 flex items-center justify-between gap-3">
