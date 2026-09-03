@@ -144,6 +144,27 @@ export const POST: APIRoute = async ({ request }) => {
       values.push(v);
     }
 
+    // The seeded questions arrive with no answer and unpublished, so
+    // that a blank never shows on a service page. The moment he writes
+    // the answer he expects it to be live — asking him to press a
+    // second, differently-named button for that is a trap, and the one
+    // most likely to end with "I typed it and nothing happened". So
+    // filling in a blank answer publishes it; anything he has already
+    // chosen to hide stays hidden.
+    if (spec.table === "faqs") {
+      const answer = String(form.get("answer") ?? "").trim();
+      if (answer) {
+        const cur = await db
+          .prepare(`SELECT answer FROM faqs WHERE id = ?`)
+          .bind(id)
+          .first<{ answer: string | null }>();
+        if (!cur?.answer?.trim()) {
+          sets.push("published = ?");
+          values.push(1);
+        }
+      }
+    }
+
     // `gated` is a checkbox: absent means off, so set it explicitly.
     if (spec.table === "resources" && !form.has("gated")) {
       sets.push("gated = ?");

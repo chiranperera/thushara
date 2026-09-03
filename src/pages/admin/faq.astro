@@ -12,8 +12,9 @@ export const prerender = false;
 import { env } from "cloudflare:workers";
 import AdminLayout from "../../layouts/AdminLayout.astro";
 import { requireAdmin } from "../../lib/auth";
-import { getCounts, SERVICE_LABEL } from "../../lib/admin-data";
-import { faqs as fileFaqs, faqCategories } from "../../lib/faq-content";
+import { getCounts } from "../../lib/admin-data";
+import { faqCategories } from "../../lib/faq-content";
+import { services } from "../../lib/site";
 
 const bindings = env as unknown as Record<string, any>;
 const db = bindings.DB;
@@ -38,17 +39,26 @@ if (db) {
 }
 
 /**
- * The questions written into the site that still have no real answer.
- * Matching on the question text means one he has already answered here
- * drops off this list by itself.
+ * Grouped by the page each question appears on, because that is how he
+ * thinks about them: "the motor page needs answers", not "row 14".
+ * Site-wide questions come first, then one group per service.
  */
-const answered = new Set(rows.map((r) => r.question.trim().toLowerCase()));
-const awaiting = fileFaqs
-  .filter((f) => !f.ready && !answered.has(f.q.trim().toLowerCase()))
-  .map((f) => ({ q: f.q, category: f.category }));
+const GROUPS = [
+  { key: null as string | null, label: "Site-wide", where: "Shown on your Questions page" },
+  ...services.map((sv) => ({
+    key: sv.slug as string | null,
+    label: sv.title,
+    where: `Shown on the ${sv.title} page`,
+  })),
+];
+
+const grouped = GROUPS.map((g) => {
+  const items = rows.filter((r) => (g.key ? r.service === g.key : !r.service));
+  return { ...g, items, unanswered: items.filter((r) => !r.answer?.trim()).length };
+});
+const totalUnanswered = rows.filter((r) => !r.answer?.trim()).length;
 
 const field = "w-full rounded-md border border-warm-200 bg-white px-3.5 py-3 text-body text-ink-900 focus:border-navy-400";
-const services = Object.entries(SERVICE_LABEL).filter(([k]) => !["not-sure", "reviewing-cover"].includes(k));
 ---
 
 <AdminLayout title="Questions" newLeads={counts.newLeads} pendingReviews={counts.pendingReviews}>
@@ -63,131 +73,135 @@ const services = Object.entries(SERVICE_LABEL).filter(([k]) => !["not-sure", "re
     {deleted && <p class="mt-5 rounded-lg border border-warm-200 bg-cream-100 px-4 py-3 text-body text-warm-700">Question removed.</p>}
     {error && <p class="mt-5 rounded-lg border border-error/30 bg-error/8 px-4 py-3 text-body text-error">A question and an answer are both needed.</p>}
 
-    {awaiting.length > 0 && (
+    {totalUnanswered > 0 && (
       <div class="mt-8 max-w-[860px] rounded-[18px] border-l-[3px] border-gold-500 bg-gold-100/50 p-6">
         <p class="text-h4 font-bold text-ink-900">
-          {awaiting.length} questions are on the site with no answer yet
+          {totalUnanswered} questions are waiting for an answer
         </p>
-        <p class="mt-2 max-w-[60ch] text-body leading-relaxed text-warm-800">
-          These were written from your own copy but need your words, not mine — most are about
-          policy terms I shouldn't guess at. Tap one to answer it. Until then the site says the
-          answer is coming rather than inventing one.
+        <p class="mt-2 max-w-[62ch] text-body leading-relaxed text-warm-800">
+          These were written from your own copy, but the answers need your words — most are about
+          policy terms nobody should guess at. Until you answer one it stays off the website
+          entirely, so nothing half-finished is on show. Fill in the box and press Save.
         </p>
-        <ul class="mt-5 flex flex-wrap gap-2">
-          {awaiting.slice(0, 12).map((a) => (
-            <li>
-              <button type="button" data-question={a.q} data-category={a.category}
-                class="js-prefill rounded-full border border-warm-300 bg-white px-4 py-2.5 text-left text-small text-warm-800 hover:border-navy-500 hover:text-navy-600">
-                {a.q}
-              </button>
-            </li>
-          ))}
-        </ul>
-        {awaiting.length > 12 && (
-          <p class="mt-3 text-small text-warm-600">…and {awaiting.length - 12} more, which appear as you work through these.</p>
-        )}
       </div>
     )}
 
     <!-- ============ ADD ============ -->
-    <form method="POST" action="/api/admin/content" id="add-faq" class="mt-8 max-w-[860px] rounded-[18px] border border-warm-200 bg-white p-6 md:p-7">
-      <input type="hidden" name="_kind" value="faq" />
-      <input type="hidden" name="_action" value="create" />
-
-      <h2 class="font-display text-h3 font-extrabold text-ink-900">Add a question</h2>
-
-      <div class="mt-5 flex flex-col gap-4">
-        <div>
-          <label for="question" class="text-small font-bold text-warm-800">The question, as someone would ask it</label>
-          <input id="question" name="question" required class={`${field} mt-2 h-13`}
-            placeholder="What happens if my claim is rejected?" />
-        </div>
-        <div>
-          <label for="answer" class="text-small font-bold text-warm-800">Your answer</label>
-          <textarea id="answer" name="answer" required rows="5" class={`${field} mt-2 leading-relaxed`}
-            placeholder="Say it the way you would on the phone. Plain, honest, and short."></textarea>
-        </div>
-        <div class="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label for="category" class="text-small font-bold text-warm-800">Group it under</label>
-            <select id="category" name="category" class={`${field} mt-2 h-13`}>
-              {faqCategories.map((c) => <option value={c}>{c}</option>)}
-            </select>
+    <!-- ============ GROUPED BY PAGE ============ -->
+    <div class="mt-14 flex max-w-[980px] flex-col gap-12">
+      {grouped.map((g) => (
+        <section>
+          <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-warm-200 pb-3">
+            <h2 class="font-display text-h3 font-extrabold text-ink-900">{g.label}</h2>
+            <span class="text-small text-warm-500">{g.where}</span>
+            <span class="ml-auto text-small text-warm-500">
+              {g.items.length} question{g.items.length === 1 ? "" : "s"}
+              {g.unanswered > 0 && <span class="font-bold text-gold-600"> · {g.unanswered} need an answer</span>}
+            </span>
           </div>
-          <div>
-            <label for="service" class="text-small font-bold text-warm-800">
-              Also show on <span class="font-normal text-warm-500">— optional</span>
-            </label>
-            <select id="service" name="service" class={`${field} mt-2 h-13`}>
-              <option value="">No particular service page</option>
-              {services.map(([slug, label]) => <option value={slug}>{label}</option>)}
-            </select>
-          </div>
-        </div>
-      </div>
 
-      <button type="submit" class="mt-6 flex min-h-14 items-center justify-center rounded-full bg-navy-600 px-10 text-h4 font-bold text-cream-50 hover:bg-navy-500">
-        Add this question
-      </button>
-    </form>
+          {g.items.length === 0 ? (
+            <p class="mt-4 text-body text-warm-500">
+              Nothing here yet. Add one below and choose “{g.label}”.
+            </p>
+          ) : (
+            <ul class="mt-5 flex flex-col gap-4">
+              {g.items.map((r, i) => (
+                <li class={`rounded-[18px] border bg-white p-5 ${!r.answer?.trim() ? "border-gold-300 bg-gold-100/30" : r.published ? "border-warm-200" : "border-warm-200 bg-cream-100 opacity-70"}`}>
+                  <form method="POST" action="/api/admin/content" class="flex flex-col gap-3">
+                    <input type="hidden" name="_kind" value="faq" />
+                    <input type="hidden" name="id" value={r.id} />
+                    <input type="hidden" name="dir" value="down" />
+                    <input type="hidden" name="service" value={r.service ?? ""} />
 
-    <!-- ============ EXISTING ============ -->
-    <h2 class="mt-12 font-display text-h2 font-extrabold text-ink-900">
-      On the site <span class="tabular text-warm-400">{rows.length}</span>
-    </h2>
+                    <input name="question" value={r.question} required class={`${field} h-13 font-bold`} />
 
-    {rows.length === 0 ? (
-      <p class="mt-4 max-w-[60ch] text-body leading-relaxed text-warm-600">
-        Nothing added here yet. The Questions page is currently showing the eight answers written
-        from your copy.
-      </p>
-    ) : (
-      <ul class="mt-6 flex max-w-[980px] flex-col gap-4">
-        {rows.map((r, i) => (
-          <li class={`rounded-[18px] border border-warm-200 bg-white p-5 ${r.published ? "" : "bg-cream-100 opacity-70"}`}>
-            <form method="POST" action="/api/admin/content" class="flex flex-col gap-3">
+                    {!r.answer?.trim() && (
+                      <p class="text-small font-bold text-gold-600">Needs your answer — it is not on the website until you write one.</p>
+                    )}
+                    <textarea
+                      name="answer" rows="4" class={`${field} leading-relaxed`}
+                      placeholder="Answer it the way you would on the phone. Plain, honest and short."
+                    >{r.answer}</textarea>
+
+                    {/* The category only does anything on the site-wide
+                        Questions page, where it splits the list into
+                        headed groups. On a service page the questions
+                        are already grouped by being on that page, so
+                        showing the dropdown there is a control that
+                        does nothing. */}
+                    {!g.key && (
+                      <select name="category" class={`${field} h-12 max-w-[280px]`}>
+                        <option value="">No group</option>
+                        {faqCategories.map((c) => <option value={c} selected={c === r.category}>{c}</option>)}
+                      </select>
+                    )}
+
+                    <div class="flex flex-wrap items-center gap-2">
+                      <button type="submit" name="_action" value="save"
+                        class="flex min-h-12 items-center rounded-full bg-navy-600 px-6 text-body font-bold text-cream-50 hover:bg-navy-500">Save</button>
+                      {r.answer?.trim() && (
+                        <button type="submit" name="_action" value="toggle" formnovalidate
+                          class="flex min-h-12 items-center rounded-full border-[1.5px] border-warm-300 px-5 text-body font-bold text-warm-700 hover:border-navy-400">
+                          {r.published ? "Hide from the site" : "Put on the site"}
+                        </button>
+                      )}
+                      {i > 0 && (
+                        <button type="submit" name="_action" value="move" formnovalidate aria-label="Move up" onclick="this.form.dir.value='up'"
+                          class="flex size-12 items-center justify-center rounded-full border-[1.5px] border-warm-300 text-h4 text-warm-700 hover:border-navy-400">↑</button>
+                      )}
+                      {i < g.items.length - 1 && (
+                        <button type="submit" name="_action" value="move" formnovalidate aria-label="Move down" onclick="this.form.dir.value='down'"
+                          class="flex size-12 items-center justify-center rounded-full border-[1.5px] border-warm-300 text-h4 text-warm-700 hover:border-navy-400">↓</button>
+                      )}
+                      <button type="submit" name="_action" value="delete" formnovalidate
+                        data-confirm="Delete this question?"
+                        class="ml-auto flex min-h-12 items-center px-3 text-body font-bold text-error hover:underline">Delete</button>
+                    </div>
+                  </form>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <details class="group mt-5">
+            <summary class="inline-flex min-h-12 cursor-pointer list-none items-center rounded-full border-[1.5px] border-dashed border-warm-300 px-5 text-body font-bold text-warm-700 hover:border-navy-400 hover:text-navy-600">
+              + Add a question to {g.label}
+            </summary>
+            <form method="POST" action="/api/admin/content" class="mt-4 flex flex-col gap-3 rounded-[18px] border border-warm-200 bg-cream-100 p-5">
               <input type="hidden" name="_kind" value="faq" />
-              <input type="hidden" name="id" value={r.id} />
-              <input type="hidden" name="dir" value="down" />
+              <input type="hidden" name="_action" value="create" />
+              <input type="hidden" name="service" value={g.key ?? ""} />
 
-              <input name="question" value={r.question} required class={`${field} h-13 font-bold`} />
-              <textarea name="answer" required rows="4" class={`${field} leading-relaxed`}>{r.answer}</textarea>
-
-              <div class="grid gap-3 sm:grid-cols-2">
-                <select name="category" class={`${field} h-12`}>
-                  <option value="">No group</option>
-                  {faqCategories.map((c) => <option value={c} selected={c === r.category}>{c}</option>)}
-                </select>
-                <select name="service" class={`${field} h-12`}>
-                  <option value="">No particular service page</option>
-                  {services.map(([slug, label]) => <option value={slug} selected={slug === r.service}>{label}</option>)}
-                </select>
+              <div>
+                <label class="text-small font-bold text-warm-800" for={`nq-${g.key ?? "site"}`}>
+                  The question, as someone would ask it
+                </label>
+                <input id={`nq-${g.key ?? "site"}`} name="question" required class={`${field} mt-2 h-13`}
+                  placeholder="What happens if my claim is rejected?" />
               </div>
-
-              <div class="flex flex-wrap items-center gap-2">
-                <button type="submit" name="_action" value="save"
-                  class="flex min-h-12 items-center rounded-full bg-navy-600 px-6 text-body font-bold text-cream-50 hover:bg-navy-500">Save</button>
-                <button type="submit" name="_action" value="toggle" formnovalidate
-                  class="flex min-h-12 items-center rounded-full border-[1.5px] border-warm-300 px-5 text-body font-bold text-warm-700 hover:border-navy-400">
-                  {r.published ? "Hide" : "Show"}
-                </button>
-                {i > 0 && (
-                  <button type="submit" name="_action" value="move" formnovalidate aria-label="Move up" onclick="this.form.dir.value='up'"
-                    class="flex size-12 items-center justify-center rounded-full border-[1.5px] border-warm-300 text-h4 text-warm-700 hover:border-navy-400">↑</button>
-                )}
-                {i < rows.length - 1 && (
-                  <button type="submit" name="_action" value="move" formnovalidate aria-label="Move down" onclick="this.form.dir.value='down'"
-                    class="flex size-12 items-center justify-center rounded-full border-[1.5px] border-warm-300 text-h4 text-warm-700 hover:border-navy-400">↓</button>
-                )}
-                <button type="submit" name="_action" value="delete" formnovalidate
-                  data-confirm="Delete this question?"
-                  class="ml-auto flex min-h-12 items-center px-3 text-body font-bold text-error hover:underline">Delete</button>
+              <div>
+                <label class="text-small font-bold text-warm-800" for={`na-${g.key ?? "site"}`}>Your answer</label>
+                <textarea id={`na-${g.key ?? "site"}`} name="answer" required rows="4" class={`${field} mt-2 leading-relaxed`}
+                  placeholder="Say it the way you would on the phone. Plain, honest, and short."></textarea>
               </div>
+              {!g.key && (
+                <div>
+                  <label class="text-small font-bold text-warm-800" for="new-category">Group it under</label>
+                  <select id="new-category" name="category" class={`${field} mt-2 h-13 max-w-[280px]`}>
+                    {faqCategories.map((c) => <option value={c}>{c}</option>)}
+                  </select>
+                </div>
+              )}
+
+              <button type="submit" class="mt-1 flex min-h-13 w-fit items-center rounded-full bg-navy-600 px-8 text-body font-bold text-cream-50 hover:bg-navy-500">
+                Add it to {g.label}
+              </button>
             </form>
-          </li>
-        ))}
-      </ul>
-    )}
+          </details>
+        </section>
+      ))}
+    </div>
   </div>
 </AdminLayout>
 

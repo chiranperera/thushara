@@ -31,29 +31,31 @@ let live: any[] = [];
 try {
   if (bindings.DB) {
     const res = await bindings.DB.prepare(
-      `SELECT question, answer, category FROM faqs WHERE published = 1 ORDER BY sort_order, id`,
+      `SELECT question, answer, category, service FROM faqs WHERE published = 1 ORDER BY sort_order, id`,
     ).all();
     live = res.results ?? [];
   }
 } catch (e) { console.error("[faq] query failed", e); }
 
 const key = (s: string) => s.trim().toLowerCase();
-const byQuestion = new Map(live.map((r) => [key(r.question), r]));
 
-const merged = [
-  ...faqs.map((f) => {
-    const r = byQuestion.get(key(f.q));
-    return r ? { ...f, a: r.answer, ready: true } : f;
-  }),
-  ...live
-    .filter((r) => !faqs.some((f) => key(f.q) === key(r.question)))
-    .map((r) => ({ q: r.question, a: r.answer, category: r.category ?? "Getting started", ready: true })),
-];
+/**
+ * The database owns these. Site-wide questions are the ones with no
+ * service attached; anything tied to a service belongs on that service
+ * page. Only published rows appear, so a question he has not answered
+ * yet is on his list rather than on the site.
+ */
+const merged = live
+  .filter((r) => !r.service)
+  .map((r) => ({ q: r.question, a: r.answer, category: r.category ?? "Getting started", ready: true }));
 
 const categories = [...faqCategories, ...merged.map((f) => f.category)].filter(
   (c, i, all) => all.indexOf(c) === i,
 );
-const grouped = categories.map((c) => ({ name: c, items: merged.filter((f) => f.category === c) })).filter((g) => g.items.length);
+const grouped = categories
+  .map((c) => ({ name: c, items: merged.filter((f) => f.category === c) }))
+  .filter((g) => g.items.length);
+
 const anchor = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 ---
 

@@ -77,16 +77,12 @@ try {
   console.error("[service] overrides failed", e);
 }
 
-// Real answers he has written replace the placeholders for the same
-// question, and anything new is added underneath.
-const faqs = faqOverrides.length
-  ? [
-      ...content.faqs.map((f) => faqOverrides.find((o) => o.q.trim().toLowerCase() === f.q.trim().toLowerCase()) ?? f),
-      ...faqOverrides.filter(
-        (o) => !content.faqs.some((f) => f.q.trim().toLowerCase() === o.q.trim().toLowerCase()),
-      ),
-    ]
-  : content.faqs;
+// The database owns these now — every question was seeded from the copy
+// that used to live in this file, so Thushara can edit, reorder, add and
+// remove them from /admin/faq. Unanswered ones are unpublished and
+// simply do not appear; the whole section hides rather than showing a
+// heading with nothing under it.
+const faqs = faqOverrides;
 
 const wa = whatsappHref(
   settings.whatsapp,
@@ -448,6 +444,7 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
   </section>
 
   <!-- ============ FAQ ============ -->
+  {faqs.length > 0 && (
   <section class="bg-cream-50 py-16 md:py-20">
     <div class="container-default px-5">
       <h2 class="font-display text-h2 font-extrabold text-navy-600">Questions people actually ask</h2>
@@ -472,6 +469,7 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
       </a>
     </div>
   </section>
+  )}
 
   <!-- ============ SHARE ============
        This site's growth mechanism is forwarding, so this is a
