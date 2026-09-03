@@ -32,22 +32,23 @@ const byslug = (s: string) => services.find((x) => x.slug === s)!;
 
 <header id="site-header" data-over-hero={overHero ? "" : null}
   class="sticky top-0 z-50 bg-cream-50/95 shadow-[inset_0_-1px_0_var(--color-warm-200)] backdrop-blur">
-  <div class="container-default flex h-20 items-center justify-between gap-6 px-5 lg:h-[104px]">
+  <div class="container-default flex h-[var(--header-h)] items-center justify-between gap-6 px-5">
     {/* Two files rather than a CSS filter: the wordmark is two-tone,
         and inverting it would collapse that. The light one shows only
         while the header is transparent over the hero. */}
-    <a href="/" class="flex shrink-0 flex-col items-stretch" aria-label={`${site.name} — home`}>
+    <a href="/" class="logo-lockup flex shrink-0 flex-col items-start" aria-label={`${site.name} — home`}>
       <img
         src="/img/logo-dark.webp" alt={site.name} width="640" height="200"
-        class="logo-dark h-10 w-auto lg:h-10" fetchpriority="high" decoding="async"
+        class="logo-dark" fetchpriority="high" decoding="async"
       />
       <img
         src="/img/logo-light.webp" alt="" aria-hidden="true" width="640" height="200"
-        class="logo-light hidden h-10 w-auto lg:h-10" decoding="async"
+        class="logo-light hidden" decoding="async"
       />
-      {/* Justified to both edges so it measures exactly the wordmark's
-          width, whatever height the logo is set to. */}
-      <span class="logo-sub mt-1.5 hidden text-[10px] font-medium uppercase leading-none text-warm-500 lg:block">
+      {/* Sized from the same custom property as the wordmark above it,
+          so the rule is exactly as wide as the mark at any logo height
+          rather than the two fighting over the lockup's width. */}
+      <span class="logo-sub mt-1.5 hidden font-medium uppercase leading-none lg:block">
         {site.title}
       </span>
     </a>

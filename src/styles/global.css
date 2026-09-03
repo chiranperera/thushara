@@ -412,14 +412,76 @@
    text-align-last is `auto` in both properties deliberately: leaving
    the -moz- one at `justify` would have stretched the words edge to
    edge in Firefox while every other browser centred them. */
+/* ------------------------------------------------------------------
+   Header height.
+
+   The homepage hero pulls itself up under the transparent header and
+   pads itself back down by exactly this much, so the two numbers must
+   never drift apart. One variable, referenced by both.
+
+   124px on desktop is not arbitrary: it is what the lockup measures.
+   40px top margin + 40px mark + 6px gap + a 34px two-line strapline is
+   120, and 124 keeps 2px of air top and bottom.
+   ------------------------------------------------------------------ */
+:root {
+  --header-h: 80px;
+}
+@media (width >= 64rem) {
+  :root {
+    --header-h: 124px;
+  }
+}
+
+/* ------------------------------------------------------------------
+   The logo lockup.
+
+   One number drives both parts. The wordmark is 640x200, so its width
+   is always height x 3.2 — and the strapline is given that same width
+   rather than being allowed to set it.
+
+   That direction matters. The lockup used to be `items-stretch`, which
+   made the img's `width: auto` fill the column, and the column was as
+   wide as its widest child: the strapline. So the strapline was sizing
+   the wordmark. At a 56px height nobody noticed, because 56 x 3.2 is
+   179px and the strapline happened to measure 175px. Reduce the height
+   and the width stayed put — the mark rendered at a 4.375 ratio on a
+   3.2 image, squashed top to bottom.
+   ------------------------------------------------------------------ */
+.logo-lockup {
+  --logo-h: 40px;
+  --logo-w: calc(var(--logo-h) * 3.2);
+}
+.logo-lockup img {
+  height: var(--logo-h);
+  width: var(--logo-w);
+  /* Belt and braces: even if a future flex change reintroduces a
+     stretch, the intrinsic ratio is declared, so the mark can only
+     ever scale — never distort. */
+  aspect-ratio: 640 / 200;
+  object-fit: contain;
+}
+
 .logo-sub {
+  width: var(--logo-w);
+
+  /* Two lines, not one. Measured: at the mark's 128px width a single
+     line of SENIOR FINANCIAL CONSULTANT caps out at 7.4px, which is a
+     smudge rather than a word. Broken over two, the longest line
+     (SENIOR FINANCIAL) fits at 12.8px, so 10px leaves headroom and
+     keeps the strapline clearly subordinate to the wordmark.
+
+     It wraps on its own — 10px type needs about 100px for the first
+     line, so CONSULTANT cannot follow it inside 128px. No <br> to go
+     stale if the height or the title ever changes. */
+  font-size: calc(var(--logo-w) / 12.8);
+  line-height: 1.35;
+  letter-spacing: 0.045em;
   text-align: center;
-  text-align-last: auto;
-  -moz-text-align-last: auto;
+  text-align-last: center;
+  -moz-text-align-last: center;
   color: #c9962f;
-  letter-spacing: 0.5px;
   border-top: 1px solid #919191;
-  padding-top: 7px;
+  padding-top: 6px;
   font-weight: 600;
 }
 
