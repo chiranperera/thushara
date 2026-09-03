@@ -388,7 +388,10 @@
 /* Swap the wordmark rather than recolour it — it is two-tone, and a
    filter would flatten THUSHARA and RATHNAYAKE into one shade. */
 #site-header[data-over-hero]:not([data-scrolled]) .logo-dark { display: none; }
-#site-header[data-over-hero]:not([data-scrolled]) .logo-light { display: block; }
+#site-header[data-over-hero]:not([data-scrolled]) .logo-light {
+  display: block;
+  margin-top: 40px;
+}
 #site-header[data-over-hero]:not([data-scrolled]) #menu-open span span {
   background: var(--color-cream-50);
 }
@@ -403,13 +406,19 @@
   background: #fff;
 }
 
-/* The strapline sits under the wordmark and is stretched to exactly its
-   width, so the two read as one locked-up mark rather than a line of
-   text that happens to sit below a logo. Justifying the last (only)
-   line is what does it — no hand-tuned letter-spacing to re-tune every
-   time the logo size changes. */
+/* Strapline, centred under the wordmark with a rule above it. The
+   block is still the logo's width, so the rule measures the mark.
+
+   text-align-last is `auto` in both properties deliberately: leaving
+   the -moz- one at `justify` would have stretched the words edge to
+   edge in Firefox while every other browser centred them. */
 .logo-sub {
-  text-align: justify;
-  text-align-last: justify;
-  -moz-text-align-last: justify;
+  text-align: center;
+  text-align-last: auto;
+  -moz-text-align-last: auto;
+  color: #c9962f;
+  letter-spacing: 0.5px;
+  border-top: 1px solid #919191;
+  padding-top: 7px;
+  font-weight: 600;
 }
