@@ -19,7 +19,7 @@
 		{
 			"binding": "DB",
 			"database_name": "thushara-db",
-			"database_id": "PLACEHOLDER_RUN_WRANGLER_D1_CREATE",
+			"database_id": "20ba0e75-75fa-4eae-a513-81f43daa32a2",
 			"migrations_dir": "migrations"
 		}
 	],
@@ -33,13 +33,18 @@
 		}
 	],
 
-	"vars": {
-		"SITE_URL": "https://example.com",
-		"ADMIN_EMAIL": "PENDING",
-		"FROM_EMAIL": "PENDING"
-	}
+	// No "vars" block. Plain vars and secrets share one namespace, and a
+	// var declared here silently overwrites a secret of the same name on
+	// every deploy — the first deploy did exactly that, replacing the
+	// real ADMIN_EMAIL and FROM_EMAIL with the literal "PENDING" and
+	// pointing SITE_URL at example.com. Anything that differs between
+	// environments, or that should not sit in the repository, is a
+	// secret and only a secret.
 
 	// Secrets — set with `npx wrangler secret put <NAME>`, never committed:
+	//   SITE_URL         canonical origin; magic links are built from it
+	//   ADMIN_EMAIL      where login links and booking alerts are sent
+	//   FROM_EMAIL       the address they are sent from
 	//   RESEND_API_KEY   transactional email
 	//   AUTH_SECRET      signs admin magic-link + session tokens
 }
