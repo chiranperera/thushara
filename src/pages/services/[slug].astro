@@ -134,7 +134,7 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
         <span class="text-warm-900">{content.title}</span>
       </nav>
 
-      <p class="overline mt-7 text-navy-600">{content.overline}</p>
+      <p class="eyebrow mt-7 text-navy-600">{content.overline}</p>
       <h1 class="mt-4 max-w-[17ch] font-display text-display font-extrabold leading-[1.04] tracking-[-0.03em] text-ink-900">
         {content.title}
       </h1>
@@ -279,7 +279,7 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
   {content.table && (
     <section class="bg-cream-50 py-16 md:py-20">
       <div class="container-default px-5">
-        <p class="overline text-navy-600">{content.table.caption}</p>
+        <p class="eyebrow text-navy-600">{content.table.caption}</p>
         <h2 class="mt-4 max-w-[20ch] font-display text-h2 font-extrabold text-navy-600">{content.table.heading}</h2>
 
         <div class="mt-9 overflow-x-auto">
@@ -321,7 +321,7 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
   <!-- ============ WHERE THIS SITS ============ -->
   <section class="bg-ink-900 py-16 md:py-20">
     <div class="container-default px-5">
-      <p class="overline text-gold-400">Where this sits</p>
+      <p class="eyebrow text-gold-400">Where this sits</p>
       <h2 class="mt-4 max-w-[26ch] font-display text-h2 font-bold leading-snug text-cream-50">
         Most people come to me for this at around {content.milestoneAge}.
       </h2>
@@ -361,7 +361,7 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
       <div class="mt-10 flex flex-wrap gap-x-16 gap-y-6">
         {content.before && (
           <div>
-            <p class="overline text-cream-50/50">Usually before this</p>
+            <p class="eyebrow text-cream-50/50">Usually before this</p>
             <a href={content.before.href} class="mt-2 block text-h4 font-bold text-cream-50 hover:text-gold-400">
               {content.before.label} →
             </a>
@@ -369,7 +369,7 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
         )}
         {content.after && (
           <div>
-            <p class="overline text-cream-50/50">Usually after this</p>
+            <p class="eyebrow text-cream-50/50">Usually after this</p>
             <a href={content.after.href} class="mt-2 block text-h4 font-bold text-cream-50 hover:text-gold-400">
               {content.after.label} →
             </a>
@@ -395,7 +395,7 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
       </div>
 
       <div>
-        <p class="overline text-navy-600">Why work with me</p>
+        <p class="eyebrow text-navy-600">Why work with me</p>
         <h2 class="mt-4 max-w-[18ch] font-display text-h2 font-extrabold text-navy-600">
           {settings.yearsExperience} years of the same straight answer.
         </h2>

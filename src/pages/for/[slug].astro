@@ -67,7 +67,7 @@ const bookHref = `/book?profession=${p.bookingProfession}`;
     <div class="pl-gutter relative z-[2] flex flex-1 flex-col justify-center px-5 py-14 lg:max-w-[60%] lg:flex-none lg:basis-[60%] lg:pr-18">
       <p class="inline-flex items-center gap-2.5 self-start rounded-full border border-cyan-300/28 bg-ink-900/60 py-1.5 pl-2.5 pr-3.5">
         <span aria-hidden="true" class="size-[7px] rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(125,221,247,0.9)]"></span>
-        <span class="overline text-cyan-300">{p.eyebrow}</span>
+        <span class="eyebrow text-cyan-300">{p.eyebrow}</span>
       </p>
 
       <h1 class="mt-7 max-w-[15ch] font-display text-display font-extrabold leading-[1.04] tracking-[-0.03em] text-cream-50">
@@ -113,7 +113,7 @@ const bookHref = `/book?profession=${p.bookingProfession}`;
   <!-- ============ CAREER LINE ============ -->
   <section class="bg-cream-100 py-16 md:py-20">
     <div class="container-default px-5">
-      <p class="overline text-navy-600">{p.careerLineLabel}</p>
+      <p class="eyebrow text-navy-600">{p.careerLineLabel}</p>
       <h2 class="mt-4 max-w-[20ch] font-display text-h2 font-extrabold text-navy-600">{p.careerLineHeading}</h2>
 
       {/* Both literals are written out so Tailwind actually generates
@@ -145,7 +145,7 @@ const bookHref = `/book?profession=${p.bookingProfession}`;
   <section class="bg-cream-50 py-16 md:py-20">
     <div class="container-default grid gap-10 px-5 lg:grid-cols-[0.8fr_1fr] lg:gap-16">
       <div>
-        <p class="overline text-navy-600">The anchor</p>
+        <p class="eyebrow text-navy-600">The anchor</p>
         <h2 class="mt-4 max-w-[12ch] font-display text-h2 font-extrabold text-navy-600">{p.anchorHeading}</h2>
       </div>
 
@@ -167,7 +167,7 @@ const bookHref = `/book?profession=${p.bookingProfession}`;
        The empathy proof — it shows he actually knows this audience. -->
   <section class="bg-ink-900 py-16 md:py-20">
     <div class="container-default px-5">
-      <p class="overline text-gold-400">{p.practicalLabel}</p>
+      <p class="eyebrow text-gold-400">{p.practicalLabel}</p>
       <h2 class="mt-4 font-display text-h2 font-extrabold text-cream-50">{p.practicalHeading}</h2>
 
       <ul class="mt-11 grid gap-x-6 gap-y-9 sm:grid-cols-2 lg:grid-cols-4">

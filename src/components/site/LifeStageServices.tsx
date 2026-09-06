@@ -72,7 +72,7 @@ export default function LifeStageServices({ stages, services }: Props) {
         <div className="container-default px-5">
           <div className="grid gap-6 lg:grid-cols-[1.3fr_1fr] lg:items-end">
             <div>
-              <p className="overline text-navy-600">Where are you right now?</p>
+              <p className="eyebrow text-navy-600">Where are you right now?</p>
               <h2 className="mt-4 max-w-[20ch] font-display text-h2 font-extrabold text-navy-600">
                 Everyone needs something different. Let's start with you.
               </h2>
@@ -140,7 +140,7 @@ export default function LifeStageServices({ stages, services }: Props) {
         <div className="container-default px-5">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="overline text-navy-600">What I help with</p>
+              <p className="eyebrow text-navy-600">What I help with</p>
               <h2 className="mt-4 font-display text-h2 font-extrabold text-navy-600">
                 Eight ways to protect what you're building
               </h2>

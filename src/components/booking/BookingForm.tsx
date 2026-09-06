@@ -214,7 +214,7 @@ export default function BookingForm({
       {/* Progress — reuses the Milestone Line language: a rule with nodes. */}
       <div className="mb-8">
         <div className="flex items-baseline justify-between mb-3">
-          <span className="overline text-navy-400">
+          <span className="eyebrow text-navy-400">
             Step {step + 1} of {TOTAL}
           </span>
           <span className="text-caption text-warm-500">About 90 seconds</span>
@@ -613,7 +613,7 @@ function Step3({
               if (!slots.length) return null;
               return (
                 <div key={period}>
-                  <p className="overline mb-2 text-warm-500 capitalize">{period}</p>
+                  <p className="eyebrow mb-2 text-warm-500 capitalize">{period}</p>
                   <div className="flex flex-wrap gap-2">
                     {slots.map((s) => (
                       <Chip
@@ -848,7 +848,7 @@ function SubmissionFailed({
 
       {summary && (
         <div className="mt-5 rounded-lg bg-cream-50/70 p-4">
-          <p className="overline text-warm-500">Your answers, saved</p>
+          <p className="eyebrow text-warm-500">Your answers, saved</p>
           <p className="mt-1 text-small text-warm-900">{summary}</p>
         </div>
       )}
@@ -895,7 +895,7 @@ function Confirmed({
         {when} at {formatTime(values.preferred_time)}, by {method}.
       </p>
 
-      <h2 className="overline mt-9 text-navy-400">What happens next</h2>
+      <h2 className="eyebrow mt-9 text-navy-400">What happens next</h2>
       <ol className="mt-4 space-y-4">
         {[
           "A confirmation reaches you by email within a few minutes.",

@@ -276,8 +276,16 @@
 @utility container-narrow { max-width: var(--container-narrow); margin-inline: auto; }
 @utility container-prose { max-width: var(--container-prose); margin-inline: auto; }
 
-/* Section label: small, uppercase, wide-tracked. */
-@utility overline {
+/* Section label: small, uppercase, wide-tracked.
+
+   Named `eyebrow`, not `overline`. Tailwind ships its own `overline`
+   utility that sets text-decoration-line: overline, and it wins over a
+   same-named custom one — so all 43 labels on the site were drawn with
+   a rule above the text, which read as a stray border rather than a
+   typographic choice. Cancelling the decoration inside the utility did
+   not beat it either. Renaming removes the collision instead of
+   fighting it. */
+@utility eyebrow {
   font-size: var(--text-overline);
   font-weight: 700;
   letter-spacing: 0.1em;

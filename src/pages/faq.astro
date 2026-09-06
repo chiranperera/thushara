@@ -97,7 +97,7 @@ const anchor = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replac
       <div id="list" class="min-w-0">
         {grouped.map((g) => (
           <section id={anchor(g.name)} class="faq-group mb-12 scroll-mt-28 last:mb-0">
-            <p class="overline text-navy-600">{g.name}</p>
+            <p class="eyebrow text-navy-600">{g.name}</p>
             <div class="mt-4">
               {g.items.map((f, i) => (
                 <details class="faq-item group border-t border-warm-200 last:border-b" open={i === 0}>

@@ -131,7 +131,10 @@ function serviceThumb(slug: string) {
     <div class="pl-gutter relative z-[3] flex flex-1 flex-col justify-center px-5 pb-8 pt-12 lg:max-w-[60%] lg:flex-none lg:basis-[60%] lg:pr-18 lg:pb-[var(--header-h)] lg:pt-0">
       <p class="inline-flex items-center gap-2.5 self-start rounded-full border border-cyan-300/28 bg-ink-900/60 py-1.5 pl-2.5 pr-3.5 lg:hidden">
         <span aria-hidden="true" class="size-[7px] rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(125,221,247,0.9)]"></span>
-        <span class="overline text-cyan-300">{site.title} · Sri Lanka</span>
+        {/* "Sri Lanka" dropped: the whole page is in Sri Lankan English,
+            quotes rupees and names Colombo — saying it here told the
+            reader nothing they had not already worked out. */}
+        <span class="eyebrow text-cyan-300">{site.title}</span>
       </p>
 
       {/* Curated pairs rather than a cross-product: every line has to
@@ -169,17 +172,22 @@ function serviceThumb(slug: string) {
 
     <!-- portrait -->
     <div class="relative z-[3] min-h-[420px] flex-1 overflow-hidden lg:max-w-[40%] lg:flex-none lg:basis-[40%]">
-      <picture>
+      {/* The photograph is the fallback, not the first thing shown.
+
+          It used to paint immediately and then cross-fade to the video,
+          which read as the page loading twice — a picture appearing and
+          being replaced a second later. So it starts hidden and is only
+          revealed if the video cannot play: an engine whose alpha
+          support we cannot name, a decode error, reduced-motion, or a
+          connection we should not spend a megabyte on. In every one of
+          those cases it is the hero again, unchanged. */}
+      <picture id="hero-portrait-still">
         <source media="(max-width: 767px)" srcset="/img/hero-thushara-award@0.5x.webp" />
         <img
           src="/img/hero-thushara-award.webp"
           alt={`${site.name} receiving a Sri Lanka Insurance Star Award`}
-          width="1100" height="2066" fetchpriority="high" decoding="async"
-          {/* On desktop the portrait stands on the bottom edge at full height
-              which leaves clear space above, below and to its right.
-              Mobile keeps the full-bleed bottom-anchored crop — there
-              is no room to inset it on a phone. */}
-          class="absolute bottom-0 left-1/2 h-full w-full -translate-x-1/2 object-contain object-bottom lg:bottom-0 lg:left-0 lg:h-full lg:translate-x-0 lg:[object-position:left_bottom]"
+          width="1100" height="2066" decoding="async"
+          class="absolute bottom-0 left-1/2 h-full w-full -translate-x-1/2 object-contain object-bottom opacity-0 transition-opacity duration-500 lg:bottom-0 lg:left-0 lg:h-full lg:translate-x-0 lg:[object-position:left_bottom]"
         />
       </picture>
 
@@ -199,7 +207,7 @@ function serviceThumb(slug: string) {
         muted loop playsinline preload="none" disableRemotePlayback
         data-webm="/video/thushara.webm"
         data-mp4="/video/thushara.mp4"
-        class="absolute bottom-0 left-0 hidden h-[113%] w-full object-contain opacity-0 transition-opacity duration-700 lg:block lg:[object-position:left_bottom]"
+        class="absolute bottom-0 left-1/2 h-[113%] w-full -translate-x-1/2 object-contain object-bottom opacity-0 transition-opacity duration-700 lg:left-0 lg:translate-x-0 lg:[object-position:left_bottom]"
       ></video>
     </div>
   </section>
@@ -245,42 +253,46 @@ function serviceThumb(slug: string) {
       const v = document.getElementById("hero-portrait-video");
       if (!v) return;
 
+      const stillImg = document.querySelector("#hero-portrait-still img");
+      // The photograph is the fallback now, so every early return has to
+      // put it back — otherwise the portrait panel is simply empty.
+      const usePhoto = () => {
+        v.style.opacity = "0";
+        if (stillImg) stillImg.style.opacity = "1";
+      };
+
       const conn = navigator.connection;
-      if (conn?.saveData || /(^|-)2g$/.test(conn?.effectiveType ?? "")) return;
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-      if (!window.matchMedia("(min-width: 1024px)").matches) return;
+      // A megabyte of video is not a fair trade on a metered or 2G
+      // connection, and reduced-motion is a request, not a preference.
+      if (conn?.saveData || /(^|-)2g$/.test(conn?.effectiveType ?? "")) return usePhoto();
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return usePhoto();
 
       const ua = navigator.userAgent;
       const isSafari = /Safari/.test(ua) && !/Chrome|Chromium|CriOS|FxiOS|Edg|Android/.test(ua);
       const src = isSafari ? v.dataset.mp4 : /Chrome|Chromium|Firefox|Edg/.test(ua) ? v.dataset.webm : null;
-      if (!src) return;
+      if (!src) return usePhoto();
 
       const start = () => {
-        v.src = src;
-        v.load();
-        const still = document.querySelector("picture");
-        const restore = () => {
-          v.style.opacity = "0";
-          if (still) still.style.opacity = "1";
-        };
+        // If the video has not produced a frame in four seconds, stop
+        // waiting and show the photograph. An empty panel while a slow
+        // connection grinds is worse than the still it replaced.
+        const timeout = setTimeout(usePhoto, 4000);
         const show = () => {
+          clearTimeout(timeout);
+          if (stillImg) stillImg.style.opacity = "0";
           v.style.opacity = "1";
-          if (still) {
-            still.style.transition = "opacity 700ms ease";
-            still.style.opacity = "0";
-          }
-          v.play().catch(restore);
+          v.play().catch(() => { clearTimeout(timeout); usePhoto(); });
         };
         v.addEventListener("loadeddata", show, { once: true });
-        v.addEventListener("error", restore, { once: true });
+        v.addEventListener("error", () => { clearTimeout(timeout); usePhoto(); }, { once: true });
+        v.src = src;
+        v.load();
       };
 
-      const idle = () =>
-        "requestIdleCallback" in window
-          ? requestIdleCallback(start, { timeout: 3000 })
-          : setTimeout(start, 1200);
-      if (document.readyState === "complete") idle();
-      else window.addEventListener("load", idle, { once: true });
+      // Started immediately rather than on idle. The whole point of
+      // hiding the photograph is that the video is the first thing seen,
+      // and waiting for an idle callback guaranteed a visible gap.
+      start();
 
       document.addEventListener("visibilitychange", () => {
         if (!v.src) return;
@@ -301,7 +313,7 @@ function serviceThumb(slug: string) {
 
         <!-- floating MDRT card -->
         <div class="absolute -left-4 top-14 w-[214px] rounded-lg border border-warm-200 bg-white p-5 shadow-[0_18px_40px_rgba(9,20,34,0.16)] sm:-left-8">
-          <p class="overline text-warm-500">MDRT qualification</p>
+          <p class="eyebrow text-warm-500">MDRT qualification</p>
           <div class="mt-3 flex items-end gap-1" aria-hidden="true">
             {Array.from({ length: 8 }, (_, i) => (
               <span
@@ -319,7 +331,7 @@ function serviceThumb(slug: string) {
       </div>
 
       <div>
-        <p class="overline text-navy-600">Why people stay</p>
+        <p class="eyebrow text-navy-600">Why people stay</p>
         <h2 class="mt-4 max-w-[18ch] font-display text-h2 font-extrabold text-navy-600">
           {settings.yearsExperience} years of the same straight answer.
         </h2>
@@ -365,7 +377,7 @@ function serviceThumb(slug: string) {
   <!-- ============ MILESTONE LINE ============ -->
   <section class="bg-ink-900 py-16 md:py-24">
     <div class="container-default px-5">
-      <p class="overline text-gold-400">The long view</p>
+      <p class="eyebrow text-gold-400">The long view</p>
       <h2 class="mt-4 max-w-[26ch] font-display text-h2 font-bold leading-snug text-cream-50">
         Insurance isn't one decision. It's six, across thirty years.
       </h2>
@@ -383,7 +395,7 @@ function serviceThumb(slug: string) {
   <section class="bg-cream-100 py-16 md:py-24">
     <div class="container-default grid gap-12 px-5 lg:grid-cols-2 lg:items-center lg:gap-20">
       <div>
-        <p class="overline text-navy-600">For your profession</p>
+        <p class="eyebrow text-navy-600">For your profession</p>
         <h2 class="mt-4 max-w-[14ch] font-display text-h2 font-extrabold text-navy-600">
           Built around how you actually earn.
         </h2>
@@ -475,7 +487,7 @@ function serviceThumb(slug: string) {
   <section class="bg-ink-900 py-16 md:py-24">
     <div class="container-default px-5">
       <div class="flex items-baseline justify-between gap-6">
-        <p class="overline text-gold-400">In their words</p>
+        <p class="eyebrow text-gold-400">In their words</p>
         {testimonials.length > 0 && (
           <a href="/testimonials" class="text-body font-bold text-cream-50 hover:text-gold-400">Read all testimonials →</a>
         )}

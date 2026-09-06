@@ -22,7 +22,7 @@ const more = [["/about","About"],["/process","Process"],["/testimonials","Testim
       </div>
 
       <div>
-        <p class="overline mb-4 text-gold-400">Services</p>
+        <p class="eyebrow mb-4 text-gold-400">Services</p>
         <ul class="flex flex-col gap-2.5">
           {services.map((s) => (
             <li><a href={`/services/${s.slug}`} class="text-small hover:text-cream-50">{s.title}</a></li>
@@ -31,7 +31,7 @@ const more = [["/about","About"],["/process","Process"],["/testimonials","Testim
       </div>
 
       <div>
-        <p class="overline mb-4 text-gold-400">More</p>
+        <p class="eyebrow mb-4 text-gold-400">More</p>
         <ul class="flex flex-col gap-2.5">
           {more.map(([href,label]) => (
             <li><a href={href} class="text-small hover:text-cream-50">{label}</a></li>
@@ -40,7 +40,7 @@ const more = [["/about","About"],["/process","Process"],["/testimonials","Testim
       </div>
 
       <div>
-        <p class="overline mb-4 text-gold-400">Get in touch</p>
+        <p class="eyebrow mb-4 text-gold-400">Get in touch</p>
         <ul class="flex flex-col gap-2.5 text-small">
           {settings.phoneHref
             ? <li><a href={settings.phoneHref} class="font-bold text-cream-50 hover:text-navy-300">{settings.phone}</a></li>

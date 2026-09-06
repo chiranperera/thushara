@@ -35,7 +35,7 @@
 
 <div
   aria-hidden="true"
-  class="hero-video pointer-events-none absolute inset-y-0 right-0 z-[1] hidden w-[62%] overflow-hidden lg:block"
+  class="hero-video pointer-events-none absolute inset-y-0 right-0 z-[1] w-full overflow-hidden lg:w-[62%]"
 >
   <video
     id="hero-loop"
@@ -51,15 +51,29 @@
 </div>
 
 <style>
-  /* Fades out toward the copy on the left and softly at the edges, so
-     there is no rectangle — it reads as light in the gradient. */
+  /* Phone first: the copy sits above the portrait rather than beside
+     it, so the fade runs vertically instead of across — a
+     left-to-right fade would be masking the wrong edge entirely.
+
+     It stays fully clear through the top half, which is where the
+     headline, the paragraph and both buttons are. Moving texture
+     behind running text is the one thing this effect must not do, and
+     on a phone the text occupies the space the desktop layout leaves
+     empty. It only comes up in the lower portion, behind him. */
   .hero-video {
-    -webkit-mask-image: linear-gradient(100deg, transparent 0%, rgba(0, 0, 0, 0.35) 26%, #000 58%, #000 100%),
-      linear-gradient(180deg, transparent 0%, #000 18%, #000 82%, transparent 100%);
-    mask-image: linear-gradient(100deg, transparent 0%, rgba(0, 0, 0, 0.35) 26%, #000 58%, #000 100%),
-      linear-gradient(180deg, transparent 0%, #000 18%, #000 82%, transparent 100%);
-    -webkit-mask-composite: source-in;
-    mask-composite: intersect;
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, transparent 46%, rgba(0, 0, 0, 0.3) 64%, #000 84%, #000 100%);
+    mask-image: linear-gradient(180deg, transparent 0%, transparent 46%, rgba(0, 0, 0, 0.3) 64%, #000 84%, #000 100%);
+  }
+
+  @media (width >= 64rem) {
+    .hero-video {
+      -webkit-mask-image: linear-gradient(100deg, transparent 0%, rgba(0, 0, 0, 0.35) 26%, #000 58%, #000 100%),
+        linear-gradient(180deg, transparent 0%, #000 18%, #000 82%, transparent 100%);
+      mask-image: linear-gradient(100deg, transparent 0%, rgba(0, 0, 0, 0.35) 26%, #000 58%, #000 100%),
+        linear-gradient(180deg, transparent 0%, #000 18%, #000 82%, transparent 100%);
+      -webkit-mask-composite: source-in;
+      mask-composite: intersect;
+    }
   }
 </style>
 
@@ -75,24 +89,41 @@
 
     if (!cheap && !still) {
       const load = () => {
-        video.src = video.dataset.src!;
-        // preload="none" means assigning src fetches nothing on its own —
-        // the browser waits to be asked.
-        video.load();
         // Fade in only once there are frames to show, so it never
         // flashes a black rectangle over the gradient. Opacity is set
         // directly rather than by class — the value would otherwise
         // only exist inside this script, where Tailwind may not see it.
+        let shown = false;
         const reveal = () => {
+          if (shown) return;
+          shown = true;
           video.style.opacity = "0.22";
           video.play().catch(() => {
             /* a browser that refuses autoplay just keeps the gradient */
           });
         };
+
+        // Listeners first, src second. The other way round loses the
+        // race whenever the file is already in cache: `loadeddata` had
+        // fired before anything was listening, so the loop sat fully
+        // decoded at readyState 4 and opacity 0 — invisible on every
+        // repeat visit and on any connection fast enough to beat the
+        // next line of script.
         video.addEventListener("loadeddata", reveal, { once: true });
         // A tab that starts in the background decodes nothing, so
         // `loadeddata` may not arrive until it is looked at.
         video.addEventListener("playing", reveal, { once: true });
+
+        video.src = video.dataset.src!;
+        // preload="none" means assigning src fetches nothing on its own —
+        // the browser waits to be asked.
+        video.load();
+
+        // And if it was already ready before any of that — a cached file
+        // can reach readyState 2 synchronously — nothing will fire at
+        // all, so ask directly rather than wait for an event that has
+        // already been and gone.
+        if (video.readyState >= 2) reveal();
       };
 
       // After load, and only while it is actually on screen.

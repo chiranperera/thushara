@@ -128,7 +128,7 @@ export default function MilestoneLine({ nodes, initialActive = 1 }: Props) {
             className="rounded-[20px] border border-cyan-300/14 bg-cream-50/5 p-7"
             style={{ gridColumn: `${Math.min(active + 1, n - 1)} / span 2` }}
           >
-            <p className="overline text-gold-400">
+            <p className="eyebrow text-gold-400">
               Age {activeNode.age} · Active
             </p>
             <p className="mt-2 font-display text-h4 font-bold text-cream-50">{activeNode.milestone}</p>
