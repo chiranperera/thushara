@@ -22,6 +22,7 @@ import LifeStageServices from "../components/site/LifeStageServices.tsx";
 import HeroVideo from "../components/site/HeroVideo.astro";
 import { getSiteSettings, EDGE_CACHE, whatsappHref } from "../lib/settings";
 import { services, lifeStages, site } from "../lib/site";
+import TestimonialCarousel from "../components/site/TestimonialCarousel.astro";
 import { serviceContent } from "../lib/service-content";
 
 const bindings = env as unknown as Record<string, any>;
@@ -32,11 +33,21 @@ let testimonials: any[] = [];
 try {
   if (db) {
     const res = await db
-      .prepare(`SELECT name, profession, body, rating FROM testimonials WHERE status='published' ORDER BY featured DESC, sort_order, created_at DESC LIMIT 2`)
+      .prepare(`SELECT id, name, profession, body, photo_key FROM testimonials WHERE status='published' ORDER BY featured DESC, sort_order, created_at DESC LIMIT 24`)
       .all();
     testimonials = res.results ?? [];
   }
 } catch (e) { console.error("[home] testimonials query failed", e); }
+
+// The line above the carousel — his claim about who he serves, in his
+// own words and editable by him. Read straight from settings rather
+// than through getSiteSettings: it is a paragraph, not a credential.
+let testimonialsIntro: string | null = null;
+try {
+  const r = await db?.prepare(`SELECT value FROM settings WHERE key = 'testimonials_intro'`).first<{ value: string }>();
+  const v = (r?.value ?? "").trim();
+  testimonialsIntro = v && v !== "PENDING" ? v : null;
+} catch (e) { console.error("[home] testimonials intro failed", e); }
 
 Astro.response.headers.set("cache-control", EDGE_CACHE);
 
@@ -495,22 +506,16 @@ function serviceThumb(slug: string) {
 
       <div class="mt-8 border-t border-cream-50/20 pt-10">
         {testimonials.length > 0 ? (
-          <ul class="grid gap-10 md:grid-cols-2 md:divide-x md:divide-cream-50/12">
-            {testimonials.map((t, i) => (
-              <li class={i > 0 ? "md:pl-10" : ""}>
-                <span aria-hidden="true" class="block font-serif text-[42px] leading-none text-gold-400">“</span>
-                <p class={`mt-4 font-serif italic leading-relaxed text-cream-50 ${i === 0 ? "text-[26px] md:text-[34px]" : "text-quote"}`}>
-                  {t.body}
-                </p>
-                <p class="mt-7 text-small font-bold text-cream-50">{t.name}</p>
-                <p class="text-small text-cream-50/60">{t.profession}</p>
-              </li>
-            ))}
-          </ul>
+          <TestimonialCarousel reviews={testimonials} intro={testimonialsIntro} settings={settings} />
         ) : (
-          <p class="max-w-[56ch] font-serif text-quote italic leading-relaxed text-cream-50/70">
-            Reviews are being collected. Real client words only — nothing invented.
-          </p>
+          <>
+            {testimonialsIntro && (
+              <p class="max-w-[68ch] text-body leading-relaxed text-cream-50/80 md:text-[19px]">{testimonialsIntro}</p>
+            )}
+            <p class="mt-6 max-w-[56ch] font-serif text-quote italic leading-relaxed text-cream-50/70">
+              Reviews are being collected. Real client words only — nothing invented.
+            </p>
+          </>
         )}
       </div>
 

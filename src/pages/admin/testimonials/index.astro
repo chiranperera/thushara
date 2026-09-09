@@ -12,6 +12,8 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
 import { requireAdmin } from "../../../lib/auth";
 import { getCounts, relativeTime, type TestimonialRow } from "../../../lib/admin-data";
 
+const field = "h-13 w-full rounded-md border border-warm-200 bg-white px-3.5 text-body text-ink-900 focus:border-navy-400";
+
 const bindings = env as unknown as Record<string, any>;
 const db = bindings.DB;
 
@@ -36,6 +38,15 @@ if (db) {
   }
 }
 
+let intro = "";
+if (db) {
+  try {
+    const r = await db.prepare(`SELECT value FROM settings WHERE key='testimonials_intro'`).first<{ value: string }>();
+    intro = r?.value && r.value !== "PENDING" ? r.value : "";
+  } catch (e) { console.error("[admin] intro read failed", e); }
+}
+
+const saved = Astro.url.searchParams.get("saved");
 const notices: Record<string, string> = {
   published: "Published. It's live on the website now.",
   already: "That one was already published.",
@@ -43,6 +54,12 @@ const notices: Record<string, string> = {
 const problems: Record<string, string> = {
   invalid: "That approval link is no longer valid. You can publish it from here instead.",
   failed: "Something went wrong publishing that. Please try again.",
+  empty: "Please fill in the name, the title and what they said.",
+  consent: "Please tick the box confirming you have their permission.",
+  filetype: "That photo needs to be a JPG, PNG or WebP.",
+  filesize: "That photo is too large. The limit is 6 MB.",
+  upload: "The photo didn't upload. Please try again.",
+  save: "That didn't save. Please try again.",
 };
 ---
 
@@ -57,6 +74,86 @@ const problems: Record<string, string> = {
     {err && problems[err] && (
       <p class="mt-5 rounded-lg border border-gold-300 bg-gold-100 px-4 py-3 text-body text-warm-900">{problems[err]}</p>
     )}
+    {Astro.url.searchParams.get("error") && problems[Astro.url.searchParams.get("error")!] && (
+      <p class="mt-5 rounded-lg border border-gold-300 bg-gold-100 px-4 py-3 text-body text-warm-900">
+        {problems[Astro.url.searchParams.get("error")!]}
+      </p>
+    )}
+    {saved && (
+      <p class="mt-5 rounded-lg border border-navy-200 bg-navy-50 px-4 py-3 text-body text-navy-600">Saved.</p>
+    )}
+
+    <!-- ============ THE LINE ABOVE THE CAROUSEL ============ -->
+    <form method="POST" action="/api/admin/settings" class="mt-8 max-w-[860px] rounded-[18px] border border-warm-200 bg-white p-6">
+      <input type="hidden" name="_section" value="testimonials" />
+      <h2 class="font-display text-h3 font-extrabold text-ink-900">The line above the reviews</h2>
+      <p class="mt-1.5 max-w-[64ch] text-small leading-relaxed text-warm-600">
+        This sits on the homepage just above the moving reviews. Say who you look after and what
+        kind of work they do. Only claim numbers you could stand behind if asked.
+      </p>
+      <textarea name="testimonials_intro" rows="3" maxlength="600"
+        class="mt-4 w-full rounded-md border border-warm-200 bg-white px-3.5 py-3 text-body leading-relaxed text-ink-900 focus:border-navy-400"
+        placeholder="More than 1,000 professionals trust me with their cover — among them consultant cardiac surgeons, orthopaedic surgeons and neurosurgeons.">{intro}</textarea>
+      <button type="submit" class="mt-4 flex min-h-12 items-center rounded-full bg-navy-600 px-7 text-body font-bold text-cream-50 hover:bg-navy-500">
+        Save this line
+      </button>
+    </form>
+
+    <!-- ============ ADD ONE YOURSELF ============ -->
+    <details class="group mt-6 max-w-[860px] rounded-[18px] border border-warm-200 bg-cream-100 p-6">
+      <summary class="cursor-pointer list-none font-display text-h3 font-extrabold text-ink-900">
+        + Add a review yourself
+      </summary>
+      <p class="mt-2 max-w-[64ch] text-small leading-relaxed text-warm-600">
+        For reviews you collect in person. These go straight onto the website, so only add words
+        the person actually said.
+      </p>
+
+      <form method="POST" action="/api/admin/testimonials/create" enctype="multipart/form-data" class="mt-5 flex flex-col gap-4">
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label for="t-name" class="text-small font-bold text-warm-800">Their name</label>
+            <input id="t-name" name="name" required maxlength="120" class={`${field} mt-2`} placeholder="Dr Nimal Perera" />
+          </div>
+          <div>
+            <label for="t-prof" class="text-small font-bold text-warm-800">Their title</label>
+            <input id="t-prof" name="profession" required maxlength="160" class={`${field} mt-2`} placeholder="Consultant Cardiac Surgeon" />
+          </div>
+        </div>
+
+        <div>
+          <label for="t-body" class="text-small font-bold text-warm-800">What they said</label>
+          <textarea id="t-body" name="body" required rows="4" maxlength="2000"
+            class="mt-2 w-full rounded-md border border-warm-200 bg-white px-3.5 py-3 text-body leading-relaxed text-ink-900 focus:border-navy-400"
+            placeholder="Their own words. Keep it as they said it."></textarea>
+        </div>
+
+        <div>
+          <label for="t-photo" class="text-small font-bold text-warm-800">
+            Their photo <span class="font-normal text-warm-500">— optional</span>
+          </label>
+          <input id="t-photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp"
+            class="mt-2 w-full rounded-md border border-warm-200 bg-white p-3 text-body text-warm-700 file:mr-3 file:rounded-full file:border-0 file:bg-navy-600 file:px-5 file:py-2.5 file:text-body file:font-bold file:text-cream-50" />
+          <p class="mt-1.5 text-small text-warm-500">
+            JPG, PNG or WebP, up to 6 MB. Without one the card shows their initials instead.
+          </p>
+        </div>
+
+        {/* A real doctor's name, face and words go on a public page.
+            There is no email round-trip here to prove they agreed, so
+            the least this can do is record that he said they did. */}
+        <label class="flex items-start gap-3 rounded-lg border border-gold-300 bg-gold-100/50 p-4">
+          <input type="checkbox" name="consent" value="1" required class="mt-0.5 size-6 shrink-0 accent-navy-600" />
+          <span class="text-body leading-relaxed text-warm-800">
+            I have their permission to publish their name, photo and words on this website.
+          </span>
+        </label>
+
+        <button type="submit" class="flex min-h-13 w-fit items-center rounded-full bg-navy-600 px-8 text-body font-bold text-cream-50 hover:bg-navy-500">
+          Add to the website
+        </button>
+      </form>
+    </details>
 
     <div class="mt-6 flex gap-2">
       <a

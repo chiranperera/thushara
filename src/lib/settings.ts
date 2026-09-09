@@ -8,9 +8,12 @@
  */
 
 import { site, PENDING } from "./site";
+import { yearsSince } from "./clock";
 
 export interface SiteSettings {
+  /** Derived from `experience_since`, not stored. Grows on 1 January. */
   yearsExperience: number;
+  /** Derived from `mdrt_since`, not stored. Grows on 1 January. */
   mdrtYears: number;
   mdrtStatus: string;
   /** Court of the Table years. 0 hides it rather than printing a zero. */
@@ -74,8 +77,22 @@ export async function getSiteSettings(db: any): Promise<SiteSettings> {
   const email = val("email");
 
   return {
-    yearsExperience: num("years_experience", FALLBACK.yearsExperience),
-    mdrtYears: num("mdrt_years", FALLBACK.mdrtYears),
+    // Both counts are computed from the year each thing began rather
+    // than stored. A stored count is only right until the first New
+    // Year nobody remembers it — and these two appear in the hero, the
+    // credentials band and the footer of every page, so going stale is
+    // visible everywhere at once.
+    //
+    // `years_experience` and `mdrt_years` are still read if present, as
+    // a manual override: MDRT counts qualifications, and if a year were
+    // ever missed the derived figure would overstate it. Nothing sets
+    // them by default.
+    yearsExperience:
+      num("years_experience", 0) ||
+      yearsSince(num("experience_since", site.credentials.experienceSince)),
+    mdrtYears:
+      num("mdrt_years", 0) ||
+      yearsSince(num("mdrt_since", site.credentials.mdrtSince), { inclusive: true }),
     cotYears: Number(map.get("cot_years") ?? FALLBACK.cotYears) || 0,
     mdrtStatus: val("mdrt_status") ?? FALLBACK.mdrtStatus,
     recognition: val("recognition") ?? FALLBACK.recognition,

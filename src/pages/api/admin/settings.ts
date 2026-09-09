@@ -5,7 +5,15 @@ import { requireAdmin } from "../../../lib/auth";
 
 export const prerender = false;
 
-const PROFILE_KEYS = ["phone", "whatsapp", "email", "service_area", "years_experience", "mdrt_years", "cot_years"];
+// years_experience and mdrt_years stay on the list but are no longer
+// edited on the profile screen — they are derived from the start years
+// below, and remain only as a manual override if a count ever needs
+// correcting by hand.
+const PROFILE_KEYS = [
+  "phone", "whatsapp", "email", "service_area",
+  "experience_since", "mdrt_since", "cot_years",
+  "years_experience", "mdrt_years",
+];
 const NUMERIC = ["appointment_minutes", "buffer_minutes", "max_per_day"];
 
 export const POST: APIRoute = async ({ request }) => {
@@ -16,7 +24,10 @@ export const POST: APIRoute = async ({ request }) => {
   const db = bindings.DB;
   const form = await request.formData();
   const section = String(form.get("_section") ?? "");
-  const dest = section === "profile" ? "/admin/profile" : "/admin/availability";
+  const dest =
+    section === "profile" ? "/admin/profile"
+    : section === "testimonials" ? "/admin/testimonials"
+    : "/admin/availability";
   if (!db) return new Response(null, { status: 302, headers: { location: dest } });
 
   const now = new Date().toISOString();
@@ -31,7 +42,13 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     const stmts: any[] = [];
 
-    if (section === "profile") {
+    // The line above the review carousel. Kept out of PROFILE_KEYS
+    // because it is a paragraph, not a field: 200 characters would cut
+    // it in half, and an empty one means "show nothing there" rather
+    // than the literal word PENDING the profile fields fall back to.
+    if (section === "testimonials") {
+      stmts.push(put("testimonials_intro", String(form.get("testimonials_intro") ?? "").trim().slice(0, 600)));
+    } else if (section === "profile") {
       for (const key of PROFILE_KEYS) {
         if (!form.has(key)) continue;
         const raw = String(form.get(key) ?? "").trim().slice(0, 200);

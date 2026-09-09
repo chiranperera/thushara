@@ -33,7 +33,7 @@ export const GALLERY_CATEGORIES = [
  * chunk so re-uploading a file called "photo.jpg" never overwrites the
  * previous one.
  */
-export function mediaKey(kind: "gallery" | "guides", name: string, ext: string): string {
+export function mediaKey(kind: "gallery" | "guides" | "testimonials", name: string, ext: string): string {
   const stamp = new Date().toISOString().slice(0, 10);
   const rand = Math.random().toString(36).slice(2, 8);
   return `${kind}/${stamp}-${slugify(name).slice(0, 48) || kind}-${rand}.${ext}`;

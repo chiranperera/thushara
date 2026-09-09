@@ -1,10 +1,14 @@
 ---
 import { services, site } from "../../lib/site";
+import { currentYear } from "../../lib/clock";
 import type { SiteSettings } from "../../lib/settings";
 
 interface Props { settings: SiteSettings }
 const { settings } = Astro.props;
-const year = new Date().getFullYear();
+// Colombo's year, not the Worker's. See lib/clock — UTC would still
+// print the old year to a Sri Lankan reader for the last five and a
+// half hours of every 31 December.
+const year = currentYear();
 const more = [["/about","About"],["/process","Process"],["/testimonials","Testimonials"],["/gallery","Gallery"],["/resources","Resources"],["/faq","FAQ"],["/contact","Contact"]];
 ---
 

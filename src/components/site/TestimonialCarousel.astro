@@ -1,0 +1,171 @@
+---
+/**
+ * The review carousel — consultants, in their own words.
+ *
+ * A continuous right-to-left drift rather than a slideshow that jumps
+ * one card at a time. Three reasons: it never sits still long enough to
+ * look broken when there are only four reviews, it needs no timer and
+ * no JavaScript at all, and a slide-and-pause draws the eye away from
+ * whatever someone is reading further up the page. Movement here is
+ * meant to invite a glance, not demand one.
+ *
+ * The track holds the list twice and animates exactly -50%, so the
+ * second copy is under the cursor at the moment the first finishes and
+ * the loop is seamless. Duration scales with the number of cards so
+ * every card travels at the same speed whether there are four or forty
+ * — a fixed duration would make it crawl as he adds more.
+ *
+ * It stops on hover and on keyboard focus, so nobody has to read a
+ * moving paragraph, and it does not move at all for anyone who has
+ * asked their system for reduced motion — for them it is a plain
+ * scrollable row, which is what the markup already is.
+ */
+import type { SiteSettings } from "../../lib/settings";
+
+export interface Review {
+  id: number;
+  name: string;
+  profession: string;
+  body: string;
+  photo_key: string | null;
+}
+
+interface Props {
+  reviews: Review[];
+  intro: string | null;
+  settings: SiteSettings;
+}
+
+const { reviews, intro } = Astro.props;
+
+/** Initials, for a review with no photograph — better than an empty ring. */
+const initials = (name: string) =>
+  name
+    .replace(/^(Dr|Prof|Mr|Mrs|Ms)\.?\s+/i, "")
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase();
+
+// Below four cards a marquee looks like a mistake — too few to fill the
+// width, so the loop seam is visible and the row lurches. A static grid
+// is the honest presentation until he has collected enough.
+const MIN_TO_SCROLL = 4;
+const scrolls = reviews.length >= MIN_TO_SCROLL;
+// ~9 seconds per card: slow enough to read a line as it passes.
+const seconds = reviews.length * 9;
+---
+
+{reviews.length > 0 && (
+  <div class="mt-8">
+    {intro && (
+      <p class="max-w-[68ch] text-body leading-relaxed text-cream-50/80 md:text-[19px]">{intro}</p>
+    )}
+
+    <div
+      class:list={["reviews mt-9", scrolls && "reviews--scroll"]}
+      style={`--marquee-seconds:${seconds}s`}
+    >
+      <ul class="reviews__track" role="list">
+        {(scrolls ? [...reviews, ...reviews] : reviews).map((r, i) => (
+          <li
+            class="reviews__card"
+            /* The duplicate half is decoration, not content — a screen
+               reader should hear each consultant once. */
+            aria-hidden={scrolls && i >= reviews.length ? "true" : undefined}
+          >
+            <figure class="flex h-full flex-col">
+              <blockquote class="flex-1">
+                <span aria-hidden="true" class="block font-serif text-[38px] leading-none text-gold-400">“</span>
+                <p class="mt-3 font-serif text-[19px] italic leading-relaxed text-cream-50">{r.body}</p>
+              </blockquote>
+              <figcaption class="mt-6 flex items-center gap-3.5 border-t border-cream-50/15 pt-5">
+                {r.photo_key ? (
+                  <img
+                    src={`/media/${r.photo_key}`}
+                    alt=""
+                    width="52" height="52" loading="lazy" decoding="async"
+                    class="size-13 shrink-0 rounded-full object-cover"
+                  />
+                ) : (
+                  <span
+                    aria-hidden="true"
+                    class="flex size-13 shrink-0 items-center justify-center rounded-full bg-cream-50/12 font-display text-body font-extrabold text-gold-400"
+                  >{initials(r.name)}</span>
+                )}
+                <span class="min-w-0">
+                  <span class="block truncate text-body font-bold text-cream-50">{r.name}</span>
+                  <span class="block text-small leading-snug text-cream-50/60">{r.profession}</span>
+                </span>
+              </figcaption>
+            </figure>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+)}
+
+<style>
+  /* Without the scrolling modifier this is just a scrollable row, which
+     is also the reduced-motion presentation and the fallback when there
+     are too few cards to loop. */
+  .reviews__track {
+    display: flex;
+    gap: 1.25rem;
+    margin: 0;
+    padding: 0 0 0.5rem;
+    list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .reviews__card {
+    flex: 0 0 min(85vw, 25rem);
+    scroll-snap-align: start;
+    display: flex;
+    padding: 1.75rem;
+    border: 1px solid color-mix(in srgb, var(--color-cream-50) 16%, transparent);
+    border-radius: 20px;
+    background: color-mix(in srgb, var(--color-cream-50) 5%, transparent);
+  }
+
+  .reviews--scroll {
+    overflow: hidden;
+    /* Softens both ends so cards enter and leave rather than being
+       clipped against a hard edge. */
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+  }
+
+  .reviews--scroll .reviews__track {
+    overflow: visible;
+    width: max-content;
+    animation: reviews-marquee var(--marquee-seconds, 60s) linear infinite;
+  }
+
+  .reviews--scroll:hover .reviews__track,
+  .reviews--scroll:focus-within .reviews__track {
+    animation-play-state: paused;
+  }
+
+  /* Exactly half, because the list is rendered twice — any other value
+     and the loop visibly jumps. The gap is inside the track, so half of
+     the doubled track is one full set plus one gap; translating by 50%
+     lands on the identical frame. */
+  @keyframes reviews-marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reviews--scroll { overflow: visible; -webkit-mask-image: none; mask-image: none; }
+    .reviews--scroll .reviews__track {
+      animation: none;
+      width: auto;
+      overflow-x: auto;
+    }
+  }
+</style>

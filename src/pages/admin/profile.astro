@@ -11,6 +11,8 @@ import { env } from "cloudflare:workers";
 import AdminLayout from "../../layouts/AdminLayout.astro";
 import { requireAdmin } from "../../lib/auth";
 import { getCounts } from "../../lib/admin-data";
+import { currentYear, yearsSince } from "../../lib/clock";
+import { site } from "../../lib/site";
 
 const bindings = env as unknown as Record<string, any>;
 const db = bindings.DB;
@@ -28,6 +30,14 @@ if (db) {
   } catch (e) { console.error("[admin] profile query failed", e); }
 }
 const val = (k: string) => { const v = settings.get(k); return !v || v === "PENDING" ? "" : v; };
+
+// Show him the numbers his start years actually produce, so the effect
+// of what he types is visible rather than something he has to imagine.
+const thisYear = currentYear();
+const derived = {
+  years: yearsSince(Number(settings.get("experience_since")) || site.credentials.experienceSince),
+  mdrt: yearsSince(Number(settings.get("mdrt_since")) || site.credentials.mdrtSince, { inclusive: true }),
+};
 const pending = (k: string) => settings.get(k) === "PENDING";
 ---
 
@@ -63,26 +73,52 @@ const pending = (k: string) => settings.get(k) === "PENDING";
 
       <div class="mt-7 rounded-[18px] bg-ink-900 p-6">
         <p class="eyebrow text-gold-400">Shown on every page</p>
-        <div class="mt-4 grid grid-cols-2 gap-3.5">
+
+        {/* Start years, not counts. He types the year something began
+            once, and the number it produces grows by itself every
+            1 January — which is the whole point: these appear in the
+            hero, the credentials band and the footer of every page, so
+            a number that goes stale goes stale everywhere at once. */}
+        <div class="mt-4 grid gap-3.5 sm:grid-cols-2">
           {[
-            { name:"years_experience", label:"Years of experience", fallback:"16" },
-            { name:"mdrt_years", label:"MDRT years", fallback:"14" },
-            { name:"cot_years", label:"Court of the Table years", fallback:"4" },
+            { name:"experience_since", label:"The year you started", now:`${derived.years} years' experience`, hint:"Appointed 2010" },
+            { name:"mdrt_since",       label:"Your first MDRT year", now:`${derived.mdrt}× MDRT`,             hint:"First qualified 2013" },
           ].map((f)=>(
             <div>
               <label for={f.name} class="text-small font-bold text-cream-50/80">{f.label}</label>
               <input
-                id={f.name} name={f.name} type="number" min="1" max="80"
-                value={settings.get(f.name) ?? f.fallback}
+                id={f.name} name={f.name} type="number" min="1970" max={String(thisYear)}
+                value={settings.get(f.name) ?? ""} placeholder={f.hint}
                 class="mt-2 h-14 w-full rounded-md border border-cream-50/25 bg-cream-50/6 px-4 font-display text-h3 font-extrabold tabular text-cream-50 focus:border-gold-400"
               />
+              <p class="mt-2 text-small text-gold-400">Currently shows: <b>{f.now}</b></p>
             </div>
           ))}
         </div>
-        <p class="mt-3.5 text-small leading-relaxed text-cream-50/65">
-          These two numbers appear in the hero, the credentials band and the footer of every page.
-          Update them yourself each year — nobody should have to call the developer to change a number.
+
+        <p class="mt-4 rounded-lg bg-cream-50/8 px-4 py-3 text-small leading-relaxed text-cream-50/75">
+          You do not need to update these each year. On 1 January both numbers go up by one on
+          their own — this year {derived.years} years and {derived.mdrt}× MDRT, next January
+          {" "}{derived.years + 1} and {derived.mdrt + 1}.
         </p>
+
+        {/* Court of the Table is deliberately not automatic. He
+            qualifies for it in some years and not others, so only he
+            knows when it changes. */}
+        <div class="mt-6 border-t border-cream-50/15 pt-5">
+          <label for="cot_years" class="text-small font-bold text-cream-50/80">
+            Court of the Table — how many times
+          </label>
+          <input
+            id="cot_years" name="cot_years" type="number" min="0" max="80"
+            value={settings.get("cot_years") ?? "4"}
+            class="mt-2 h-14 w-full max-w-[220px] rounded-md border border-cream-50/25 bg-cream-50/6 px-4 font-display text-h3 font-extrabold tabular text-cream-50 focus:border-gold-400"
+          />
+          <p class="mt-2.5 text-small leading-relaxed text-cream-50/65">
+            This one does <b>not</b> update itself, because you do not qualify every year.
+            Change it here yourself the year you qualify again.
+          </p>
+        </div>
       </div>
 
       <button type="submit" class="mt-8 flex min-h-14 w-full items-center justify-center rounded-full bg-navy-600 text-h4 font-bold text-cream-50 hover:bg-navy-500 sm:w-auto sm:px-12">

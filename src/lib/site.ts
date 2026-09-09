@@ -35,6 +35,19 @@ export const site = {
 
   /** Fallbacks. The `settings` table wins at runtime. */
   credentials: {
+    /**
+     * Start years, not counts. Appointed 16 April 2010; first MDRT
+     * 2013 and every year since. The live figures are derived from
+     * these so they grow on their own each 1 January — see lib/clock.
+     *
+     * Note the counts tick over on 1 January rather than on his
+     * appointment anniversary in April. That is what was asked for,
+     * and it is how people say it, but it does mean the "years"
+     * figure runs about three months ahead of the exact date.
+     */
+    experienceSince: 2010,
+    mdrtSince: 2013,
+    /** Only used if the database is unreachable. */
     yearsExperience: 16,
     mdrtYears: 14,
     mdrtStatus: "Lifetime Member",
