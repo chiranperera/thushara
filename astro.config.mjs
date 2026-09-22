@@ -7,7 +7,9 @@ import cloudflare from '@astrojs/cloudflare';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://example.com', // PENDING — domain not yet registered
+  // Live. robots.txt keys off this: any host that is not the canonical
+  // one refuses crawlers, so setting it is what opens the site to search.
+  site: 'https://thushararathnayake.com',
 
   // Preact with compat: identical API for the five hooks this site
   // uses, ~40KB less JavaScript over the wire. On Sri Lankan mobile

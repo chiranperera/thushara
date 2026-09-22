@@ -15,6 +15,25 @@
 	// Leads, testimonials, gallery, resources, FAQ, settings.
 	// Create with: npx wrangler d1 create thushara-db
 	// then paste the returned database_id below.
+
+	// The live domain, as routes rather than custom domains.
+	//
+	// Attaching the hostname directly is the usual way, but Cloudflare
+	// refuses that while a hostname still has its own DNS records, and
+	// this domain has an A record inherited from the old Namecheap
+	// host. Going that way would have meant deleting DNS records on a
+	// live domain that is also carrying his email.
+	//
+	// A route does the same job without touching DNS. The A record
+	// stays, still proxied, and the Worker intercepts every request
+	// before it reaches the origin — which matters here because that
+	// origin is a suspended cPanel account serving "Account Suspended".
+	// Nothing in the mail configuration is involved either way.
+	"routes": [
+		{ "pattern": "thushararathnayake.com/*", "zone_name": "thushararathnayake.com" },
+		{ "pattern": "www.thushararathnayake.com/*", "zone_name": "thushararathnayake.com" }
+	],
+
 	"d1_databases": [
 		{
 			"binding": "DB",
