@@ -133,7 +133,7 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   try {
     const settings = await readCredentialSettings(db);
     const sent = await sendLeadEmails({
-      apiKey: bindings.RESEND_API_KEY ?? "",
+      bindings,
       from: bindings.FROM_EMAIL ?? "",
       adminEmail: bindings.ADMIN_EMAIL ?? "",
       siteUrl: bindings.SITE_URL ?? site.url,

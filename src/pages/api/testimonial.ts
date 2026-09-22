@@ -11,9 +11,9 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
 import { z } from "zod";
-import { Resend } from "resend";
 import { newToken } from "../../lib/auth";
 import { site } from "../../lib/site";
+import { canSend, sendMail } from "../../lib/mailer";
 
 export const prerender = false;
 
@@ -76,17 +76,15 @@ export const POST: APIRoute = async ({ request }) => {
   // Notify Thushara with a one-tap approve link — the workflow that
   // actually gets used. The panel is the fallback, not the main path.
   const base = bindings.SITE_URL ?? site.url;
-  const apiKey = bindings.RESEND_API_KEY;
   const from = bindings.FROM_EMAIL;
   const to = bindings.ADMIN_EMAIL;
 
-  if (apiKey && from && from !== "PENDING" && to && to !== "PENDING") {
-    try {
-      const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-      await new Resend(apiKey).emails.send({
-        from, to,
-        subject: `New review from ${t.name}`,
-        html: `<!doctype html><html><body style="margin:0;background:#F4F1E9;padding:24px 12px">
+  if (canSend(bindings) && from && from !== "PENDING" && to && to !== "PENDING") {
+    const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const sent = await sendMail(bindings, {
+      from, to,
+      subject: `New review from ${t.name}`,
+      html: `<!doctype html><html><body style="margin:0;background:#F4F1E9;padding:24px 12px">
 <table role="presentation" width="100%"><tr><td align="center">
 <table role="presentation" style="max-width:520px;background:#FBFAF6;border:1px solid #DCDEDF;border-radius:16px">
 <tr><td style="background:#071A2E;padding:20px 28px">
@@ -99,9 +97,11 @@ export const POST: APIRoute = async ({ request }) => {
   <a href="${base}/admin/testimonials/approve?token=${approveToken}" style="display:block;margin-top:22px;text-align:center;padding:16px;background:#123A6B;color:#FBFAF6;text-decoration:none;border-radius:999px;font:700 17px/1 -apple-system,sans-serif">Approve &amp; publish</a>
   <a href="${base}/admin/testimonials" style="display:block;margin-top:10px;text-align:center;padding:14px;border:1.5px solid #DCDEDF;color:#123A6B;text-decoration:none;border-radius:999px;font:700 16px/1 -apple-system,sans-serif">Edit or reject first</a>
 </td></tr></table></td></tr></table></body></html>`,
-      });
-    } catch (err) {
-      console.error("[testimonial] notify failed", err);
+    });
+    if (!sent.ok) {
+      // The review is already saved and the approve link still works —
+      // log it so a mail failure never strands a real client's words.
+      console.error(`[testimonial] notify failed (${sent.error}). Approve: ${base}/admin/testimonials/approve?token=${approveToken}`);
     }
   } else {
     console.warn(`[testimonial] email not configured. Approve: ${base}/admin/testimonials/approve?token=${approveToken}`);

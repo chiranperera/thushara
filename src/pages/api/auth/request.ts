@@ -8,9 +8,9 @@
 
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
-import { Resend } from "resend";
 import { newToken, tokenExpiry, pruneTokens, MAGIC_LINK_MINUTES } from "../../../lib/auth";
 import { site } from "../../../lib/site";
+import { canSend, sendMail } from "../../../lib/mailer";
 
 export const prerender = false;
 
@@ -64,23 +64,20 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   const base = bindings.SITE_URL ?? site.url;
   const link = `${base}/admin/auth?token=${encodeURIComponent(token)}`;
 
-  const apiKey = bindings.RESEND_API_KEY;
   const from = bindings.FROM_EMAIL;
 
-  if (!apiKey || !from || from === "PENDING") {
+  if (!canSend(bindings) || !from || from === "PENDING") {
     // Email is not configured yet. Log the link so the build can be
     // exercised locally — never returned in the response body.
     console.warn(`[auth] email not configured. Magic link: ${link}`);
     return json({ ok: true });
   }
 
-  try {
-    const resend = new Resend(apiKey);
-    await resend.emails.send({
-      from,
-      to: email,
-      subject: "Sign in to your website",
-      html: `<!doctype html><html><body style="margin:0;background:#F4F1E9;padding:24px 12px">
+  const sent = await sendMail(bindings, {
+    from,
+    to: email,
+    subject: "Sign in to your website",
+    html: `<!doctype html><html><body style="margin:0;background:#F4F1E9;padding:24px 12px">
 <table role="presentation" width="100%"><tr><td align="center">
 <table role="presentation" style="max-width:480px;background:#FBFAF6;border:1px solid #DCDEDF;border-radius:16px">
 <tr><td style="background:#071A2E;padding:20px 28px">
@@ -95,9 +92,13 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
     If you didn't ask for this, you can ignore it — nothing will happen.
   </p>
 </td></tr></table></td></tr></table></body></html>`,
-    });
-  } catch (err) {
-    console.error("[auth] send failed", err);
+  });
+
+  if (!sent.ok) {
+    // The token is already stored, so the link is still valid — log it
+    // so the admin is never locked out of his own site by a mail
+    // problem. Never returned in the response body.
+    console.error(`[auth] send failed (${sent.error}). Magic link: ${link}`);
   }
 
   return json({ ok: true });

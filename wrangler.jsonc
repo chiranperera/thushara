@@ -34,6 +34,17 @@
 		{ "pattern": "www.thushararathnayake.com/*", "zone_name": "thushararathnayake.com" }
 	],
 
+	// Outbound email, sent by Cloudflare itself rather than a third
+	// party. Included in the Workers Paid plan the site already runs
+	// on, so there is no second account and no second bill — which
+	// matters when the owner is the one who would have to manage them.
+	//
+	// The binding only appears once the domain is onboarded under
+	// Email Service > Email Sending. Until then `canSend()` is false
+	// and the code logs the sign-in link instead of sending it, so the
+	// admin is never locked out while this is being set up.
+	"send_email": [{ "name": "EMAIL" }],
+
 	"d1_databases": [
 		{
 			"binding": "DB",

@@ -6,7 +6,7 @@
  * Spec: design-brief/08-booking-and-automation.md
  */
 
-import { Resend } from "resend";
+import { sendAll } from "./mailer";
 import { site, whatsappLink } from "./site";
 import type { LeadData } from "./lead-schema";
 
@@ -179,7 +179,7 @@ export interface SendResult {
  * into a lost lead. The caller flags the lead instead.
  */
 export async function sendLeadEmails(opts: {
-  apiKey: string;
+  bindings: Record<string, any>;
   from: string;
   adminEmail: string;
   siteUrl: string;
@@ -188,40 +188,30 @@ export async function sendLeadEmails(opts: {
   mdrtYears: number;
   years: number;
 }): Promise<SendResult> {
-  const { apiKey, from, adminEmail, siteUrl, lead, leadId } = opts;
+  const { bindings, from, adminEmail, siteUrl, lead, leadId } = opts;
 
-  if (!apiKey || apiKey === "PENDING" || !adminEmail || adminEmail === "PENDING") {
-    return { ok: false, error: "Email not configured (RESEND_API_KEY / ADMIN_EMAIL pending)" };
+  if (!adminEmail || adminEmail === "PENDING") {
+    return { ok: false, error: "Email not configured (ADMIN_EMAIL pending)" };
   }
 
-  const resend = new Resend(apiKey);
   const professionLabel = PROFESSION_LABEL[lead.profession_category] ?? lead.profession_category;
 
-  const results = await Promise.allSettled([
-    resend.emails.send({
+  return sendAll(bindings, [
+    {
+      label: "admin",
       from,
       to: adminEmail,
       replyTo: lead.email,
       subject: `New enquiry — ${lead.name} (${professionLabel}) — ${lead.services.slice(0, 2).join(", ")}`,
       html: leadNotificationEmail(lead, leadId, siteUrl),
-    }),
-    resend.emails.send({
+    },
+    {
+      label: "prospect",
       from,
       to: lead.email,
       replyTo: adminEmail,
       subject: `Thank you — I'll be in touch`,
       html: leadConfirmationEmail(lead, siteUrl, opts.mdrtYears, opts.years),
-    }),
+    },
   ]);
-
-  const failures = results
-    .map((r, i) => {
-      const who = i === 0 ? "admin" : "prospect";
-      if (r.status === "rejected") return `${who}: ${r.reason}`;
-      if (r.value?.error) return `${who}: ${r.value.error.message}`;
-      return null;
-    })
-    .filter(Boolean);
-
-  return failures.length ? { ok: false, error: failures.join(" | ") } : { ok: true };
 }
