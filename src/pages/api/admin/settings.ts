@@ -10,7 +10,7 @@ export const prerender = false;
 // below, and remain only as a manual override if a count ever needs
 // correcting by hand.
 const PROFILE_KEYS = [
-  "phone", "whatsapp", "email", "service_area",
+  "phone", "phone_secondary", "whatsapp", "email", "service_area",
   "experience_since", "mdrt_since", "cot_years",
   "years_experience", "mdrt_years",
 ];

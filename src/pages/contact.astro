@@ -35,6 +35,17 @@ const wa = whatsappHref(settings.whatsapp, "Hello Thushara, I'd like to ask abou
                 {settings.phone}
               </a>
               <p class="mt-2 text-small text-cream-50/60">Tap to call. This is the fastest way.</p>
+              {/* The second line, here and nowhere else. One number is
+                  the number on every other page — two everywhere would
+                  only leave people wondering which one to ring. */}
+              {settings.phoneSecondaryHref && (
+                <p class="mt-4 text-body text-cream-50/70">
+                  Or{" "}
+                  <a href={settings.phoneSecondaryHref} class="font-bold text-cream-50 underline underline-offset-2 hover:text-gold-400">
+                    {settings.phoneSecondary}
+                  </a>
+                </p>
+              )}
             </>
           ) : (
             <p class="mt-5 font-display text-h2 font-extrabold text-cream-50/30">{site.contact.phoneDisplay}</p>

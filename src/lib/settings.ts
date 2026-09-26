@@ -21,6 +21,10 @@ export interface SiteSettings {
   recognition: string;
   /** null while PENDING — do not render */
   phone: string | null;
+  /** A second line he answers. Contact page only — one number is the
+      number everywhere else, or people do not know which to ring. */
+  phoneSecondary: string | null;
+  phoneSecondaryHref: string | null;
   whatsapp: string | null;
   email: string | null;
   serviceArea: string;
@@ -38,11 +42,13 @@ const FALLBACK: SiteSettings = {
   cotYears: site.credentials.cotYears,
   recognition: site.credentials.recognition,
   phone: null,
+  phoneSecondary: null,
   whatsapp: null,
   email: null,
   serviceArea: site.serviceArea,
   bookingsPaused: false,
   phoneHref: null,
+  phoneSecondaryHref: null,
   whatsappHref: null,
   emailHref: null,
 };
@@ -73,6 +79,7 @@ export async function getSiteSettings(db: any): Promise<SiteSettings> {
   const num = (key: string, fallback: number) => Number(map.get(key)) || fallback;
 
   const phone = val("phone");
+  const phone2 = val("phone_secondary");
   const whatsapp = val("whatsapp");
   const email = val("email");
 
@@ -97,11 +104,13 @@ export async function getSiteSettings(db: any): Promise<SiteSettings> {
     mdrtStatus: val("mdrt_status") ?? FALLBACK.mdrtStatus,
     recognition: val("recognition") ?? FALLBACK.recognition,
     phone,
+    phoneSecondary: phone2,
     whatsapp,
     email,
     serviceArea: val("service_area") ?? FALLBACK.serviceArea,
     bookingsPaused: map.get("bookings_paused") === "1",
     phoneHref: phone ? `tel:${phone.replace(/\s/g, "")}` : null,
+    phoneSecondaryHref: phone2 ? `tel:${phone2.replace(/\s/g, "")}` : null,
     whatsappHref: whatsappHref(whatsapp),
     emailHref: email ? `mailto:${email}` : null,
   };

@@ -500,3 +500,24 @@
 @utility pl-gutter {
   padding-left: max(1.25rem, calc((100vw - var(--container-default)) / 2 + 1.25rem));
 }
+
+/* ------------------------------------------------------------------
+   The hero portrait.
+
+   A cut-out pasted on a gradient reads as a sticker — the eye expects
+   a figure standing in a space to darken the air immediately around
+   it. Two stacked drop-shadows supply that: a tight one that hugs the
+   silhouette so the edge stops looking die-cut, and a wider, lower one
+   that gives him some ground to stand on.
+
+   drop-shadow rather than box-shadow deliberately: it follows the
+   alpha channel, so it traces his actual outline — hair, trophy tip
+   and all — instead of a rectangle.
+   ------------------------------------------------------------------ */
+.hero-portrait {
+  /* Softer and tighter than the first attempt. That one was read as a
+     dark box because the matte still had a faint haze across the whole
+     frame for the shadow to trace — with the matte clean, a light touch
+     is enough and a heavy one just muddies the gradient. */
+  filter: drop-shadow(0 10px 26px rgba(2, 8, 20, 0.38));
+}

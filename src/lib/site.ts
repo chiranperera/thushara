@@ -58,7 +58,7 @@ export const site = {
      * membership count on its own.
      */
     cotYears: 4,
-    cotRecent: "2024, 2025, 2026",
+    cotRecent: "2020, and again in 2024, 2025 and 2026",
     recognition: "Top Performer in Life & General Insurance, Regional",
   },
 
