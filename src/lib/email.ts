@@ -7,7 +7,7 @@
  */
 
 import { sendAll } from "./mailer";
-import { site, whatsappLink } from "./site";
+import { site, services, whatsappLink } from "./site";
 import type { LeadData } from "./lead-schema";
 
 const C = {
@@ -22,6 +22,29 @@ const C = {
   muted: "#6E7377",
   whatsapp: "#25D366",
 } as const;
+
+/** "life-income-protection" → "Life & Income Protection". */
+const serviceNames = (slugs: string[]) =>
+  slugs.map((s) => services.find((x) => x.slug === s)?.title ?? (s === "not-sure" ? "Not sure yet" : s));
+
+const cap = (s: string) => (s ? s[0].toUpperCase() + s.slice(1) : s);
+
+/** "2026-10-12" + "18:00" → "Monday 12 October at 6:00 pm". Falls back to what was sent. */
+function formatWhen(date?: string, time?: string): string {
+  let d = date ?? "";
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d);
+  if (m) {
+    const dt = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+    d = dt.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
+  }
+  let t = time ?? "";
+  const h = /^(\d{1,2}):(\d{2})$/.exec(t);
+  if (h) {
+    const hr = +h[1];
+    t = `${hr % 12 || 12}:${h[2]} ${hr < 12 ? "am" : "pm"}`;
+  }
+  return [d, t].filter(Boolean).join(" at ");
+}
 
 const PROFESSION_LABEL: Record<string, string> = {
   doctor: "Doctor",
@@ -71,7 +94,7 @@ ${inner}
 export function leadNotificationEmail(lead: LeadData, leadId: number, siteUrl: string) {
   const profession = [
     PROFESSION_LABEL[lead.profession_category] ?? lead.profession_category,
-    lead.profession_role || lead.engineering_discipline || lead.profession_other,
+    cap(lead.profession_role || lead.engineering_discipline || lead.profession_other || ""),
   ]
     .filter(Boolean)
     .join(" — ");
@@ -81,7 +104,7 @@ export function leadNotificationEmail(lead: LeadData, leadId: number, siteUrl: s
     lead.phone_whatsapp,
   );
 
-  const when = [lead.preferred_date, lead.preferred_time].filter(Boolean).join(" at ");
+  const when = formatWhen(lead.preferred_date, lead.preferred_time);
 
   return shell(`
 <tr><td style="background:${C.ink};padding:20px 28px">
@@ -112,10 +135,10 @@ ${
 <tr><td style="padding:28px">
   <div style="height:1px;background:${C.border};margin-bottom:24px"></div>
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-    ${row("Interested in", esc(lead.services.join(", ")))}
+    ${row("Interested in", esc(serviceNames(lead.services).join(", ")))}
     ${row("Wants to meet", `${esc(when)} — ${esc(METHOD_LABEL[lead.meeting_method] ?? lead.meeting_method)}`)}
     ${lead.alt_time ? row("Or alternatively", esc(lead.alt_time)) : ""}
-    ${row("Contact", `${esc(lead.phone_whatsapp)}<br>${esc(lead.email)}<br><span style="color:${C.muted};font-size:15px">Prefers ${esc(lead.preferred_contact)}</span>`)}
+    ${row("Contact", `${esc(lead.phone_whatsapp)}<br>${esc(lead.email)}<br><span style="color:${C.muted};font-size:15px">Prefers ${esc(({ whatsapp: "WhatsApp", phone: "a phone call", email: "email" } as Record<string, string>)[lead.preferred_contact] ?? lead.preferred_contact)}</span>`)}
     ${lead.notes ? row("Their note", `<em style="color:${C.text}">“${esc(lead.notes)}”</em>`) : ""}
     ${lead.referring_page ? row("Was reading", esc(lead.referring_page)) : ""}
     ${lead.life_stage ? row("Life stage", esc(lead.life_stage)) : ""}
@@ -132,8 +155,15 @@ ${
  * TO THE PROSPECT — often their first real experience of Thushara.
  * First person, no marketing language, always a way to reply.
  */
-export function leadConfirmationEmail(lead: LeadData, siteUrl: string, mdrtYears: number, years: number) {
-  const when = [lead.preferred_date, lead.preferred_time].filter(Boolean).join(" at ");
+export interface ContactLines {
+  phone: string | null;
+  phoneHref: string | null;
+  whatsapp: string | null;
+  whatsappHref: string | null;
+}
+
+export function leadConfirmationEmail(lead: LeadData, siteUrl: string, mdrtYears: number, years: number, contact?: ContactLines) {
+  const when = formatWhen(lead.preferred_date, lead.preferred_time);
   const first = lead.name.split(" ")[0];
 
   return shell(`
@@ -156,10 +186,18 @@ export function leadConfirmationEmail(lead: LeadData, siteUrl: string, mdrtYears
 
 <tr><td style="padding:20px 28px 0">
   <div style="font:400 18px/1.65 -apple-system,sans-serif;color:${C.text}">
-    <p style="margin:0 0 18px">I'll confirm this shortly. If anything changes, or you'd like to talk sooner, just reply to this email.</p>
+    <p style="margin:0 0 18px">I'll confirm this shortly. If anything changes, or you'd like to talk sooner, just reply to this email${contact?.whatsappHref || contact?.phoneHref ? " or reach me directly" : ""}.</p>
     <p style="margin:0">There's no obligation, and nothing to prepare.</p>
   </div>
 </td></tr>
+${contact?.whatsappHref || contact?.phoneHref ? `
+<tr><td style="padding:20px 28px 0">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+    ${contact.whatsappHref ? `<td width="49%"><a href="${contact.whatsappHref}" style="display:block;text-align:center;padding:14px;background:${C.whatsapp};border-radius:999px;color:#fff;text-decoration:none;font:700 15px/1.2 -apple-system,sans-serif">WhatsApp ${esc(contact.whatsapp ?? "")}</a></td>` : ""}
+    ${contact.whatsappHref && contact.phoneHref ? `<td width="2%"></td>` : ""}
+    ${contact.phoneHref ? `<td width="49%"><a href="${contact.phoneHref}" style="display:block;text-align:center;padding:14px;border:1.5px solid ${C.navy};border-radius:999px;color:${C.navy};text-decoration:none;font:700 15px/1.2 -apple-system,sans-serif">Call ${esc(contact.phone ?? "")}</a></td>` : ""}
+  </tr></table>
+</td></tr>` : ""}
 
 <tr><td style="padding:28px">
   <div style="height:1px;background:${C.border};margin-bottom:20px"></div>
@@ -187,6 +225,7 @@ export async function sendLeadEmails(opts: {
   leadId: number;
   mdrtYears: number;
   years: number;
+  contact?: ContactLines;
 }): Promise<SendResult> {
   const { bindings, from, adminEmail, siteUrl, lead, leadId } = opts;
 
@@ -202,7 +241,7 @@ export async function sendLeadEmails(opts: {
       from,
       to: adminEmail,
       replyTo: lead.email,
-      subject: `New enquiry — ${lead.name} (${professionLabel}) — ${lead.services.slice(0, 2).join(", ")}`,
+      subject: `New enquiry — ${lead.name} (${professionLabel}) — ${serviceNames(lead.services).slice(0, 2).join(", ")}`,
       html: leadNotificationEmail(lead, leadId, siteUrl),
     },
     {
@@ -211,7 +250,7 @@ export async function sendLeadEmails(opts: {
       to: lead.email,
       replyTo: adminEmail,
       subject: `Thank you — I'll be in touch`,
-      html: leadConfirmationEmail(lead, siteUrl, opts.mdrtYears, opts.years),
+      html: leadConfirmationEmail(lead, siteUrl, opts.mdrtYears, opts.years, opts.contact),
     },
   ]);
 }

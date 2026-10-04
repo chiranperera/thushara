@@ -1,23 +1,21 @@
 ---
 /**
- * Shared shell for /privacy, /terms and /disclaimer.
- *
- * These are genuinely required, not filler: the site collects personal
- * data through booking, testimonials and downloads, and insurance is a
- * regulated activity in Sri Lanka supervised by the IRCSL.
- *
- * The wording below is DRAFT — structure and substance are right, but
- * the client must confirm the required regulatory language and check
- * whether SLIC imposes disclosure requirements on its consultants'
- * personal marketing. See design-brief/11, items A1–A2.
+ * Shared shell for /privacy, /terms and /disclaimer. The wording itself
+ * is his, edited under Legal pages in the admin (lib/legal.ts).
  */
 import Layout from "./Layout.astro";
 import Header from "../components/site/Header.astro";
 import Footer from "../components/site/Footer.astro";
 import type { SiteSettings } from "../lib/settings";
 
-interface Props { title: string; heading: string; settings: SiteSettings; description?: string }
-const { title, heading, settings, description } = Astro.props;
+interface Props { title: string; heading: string; settings: SiteSettings; description?: string; updatedAt?: string | null }
+const { title, heading, settings, description, updatedAt } = Astro.props;
+
+// Only shown once he has saved the page himself — the seeded first
+// version carries no date, and an invented one would be worse than none.
+const updated = updatedAt
+  ? new Date(updatedAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Colombo" })
+  : null;
 ---
 
 <Layout title={title} description={description ?? heading}>
@@ -27,7 +25,7 @@ const { title, heading, settings, description } = Astro.props;
     <div class="container-prose px-5">
       <p class="eyebrow text-navy-600">Legal</p>
       <h1 class="mt-4 font-display text-h1 font-extrabold text-ink-900">{heading}</h1>
-      <p class="mt-3 text-small text-warm-500">Last updated · date pending</p>
+      {updated && <p class="mt-3 text-small text-warm-500">Last updated · {updated}</p>}
 
       <span aria-hidden="true" class="mt-9 block h-px w-full bg-warm-200"></span>
 
@@ -35,14 +33,6 @@ const { title, heading, settings, description } = Astro.props;
         <slot />
       </div>
 
-      <div class="mt-12 border-l-2 border-gold-500 bg-cream-100 p-6">
-        <p class="font-mono text-caption leading-relaxed text-warm-500">
-          Draft wording for structure only. The client must confirm the required regulatory
-          language, and check whether Sri Lanka Insurance Corporation imposes disclosure
-          requirements on its consultants' personal marketing. This should be reviewed by someone
-          qualified before launch.
-        </p>
-      </div>
     </div>
   </div>
 

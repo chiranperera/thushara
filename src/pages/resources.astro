@@ -29,17 +29,11 @@ try {
   }
 } catch (e) { console.error("[resources] query failed", e); }
 
-/** Planned guides, shown as slots until the PDFs arrive. */
-const planned = [
-  { slug: "insurance-for-newly-qualified-doctors", title: "Insurance for Newly Qualified Doctors", description: "What you actually need — and what you can skip for now.", life_stage: "starting-out", pdf: "PDF-001", gated: 1 },
-  { slug: "your-first-vehicle-insured-properly", title: "Your First Vehicle, Insured Properly", description: "The five things to check before you sign anything.", life_stage: "starting-out", pdf: "PDF-002", gated: 0 },
-  { slug: "how-much-life-cover", title: "How Much Life Cover Does Your Family Need?", description: "Work out your number in about ten minutes.", life_stage: "building-family", pdf: "PDF-003", gated: 1 },
-  { slug: "starting-at-28-38-48", title: "Starting at 28 vs 38 vs 48", description: "The same monthly amount, three different outcomes.", life_stage: "planning-ahead", pdf: "PDF-004", gated: 1 },
-];
-
-const items = rows.length ? rows : planned;
-const groups = lifeStages.map((s) => ({ ...s, items: items.filter((i: any) => i.life_stage === s.id) }));
-const pending = rows.length === 0;
+// Only guides he has uploaded in the admin. No planned slots: a card
+// for a PDF that does not exist yet is a promise the page cannot keep.
+const groups = lifeStages.map((s) => ({ ...s, items: rows.filter((i: any) => i.life_stage === s.id) }));
+const ungrouped = rows.filter((i: any) => !lifeStages.some((s) => s.id === i.life_stage));
+if (ungrouped.length) groups.push({ id: "other", label: "More guides", ageRange: "", items: ungrouped } as any);
 ---
 
 <Layout title="Free guides" description="Written for people who have never bought insurance before, and who would rather read than be sold to.">
@@ -74,9 +68,9 @@ const pending = rows.length === 0;
                 <span aria-hidden="true" class="flex h-12 w-9 items-center justify-center rounded-sm bg-cream-100"></span>
                 <span class="mt-5 font-display text-h4 font-bold leading-snug text-ink-900">{g.title}</span>
                 <span class="mt-2.5 flex-1 text-body leading-relaxed text-warm-700">{g.description}</span>
-                <span class="mt-4 font-mono text-caption text-warm-400">
-                  {g.pdf ?? g.slug} · {pending ? "pages pending · size pending" : `${g.page_count ?? "—"} pages`}
-                </span>
+                {g.page_count && (
+                  <span class="mt-4 text-caption text-warm-500">{g.page_count} pages</span>
+                )}
                 {g.gated ? (
                   <a href={`/resources/${g.slug}`}
                      class="mt-5 flex min-h-13 items-center justify-center rounded-full bg-navy-600 text-body font-bold text-cream-50 hover:bg-navy-500">
@@ -94,19 +88,12 @@ const pending = rows.length === 0;
         </div>
       ))}
 
-      <div class="max-w-[860px] border-l-2 border-gold-500 bg-cream-100 p-6">
-        <p class="text-body-lg leading-relaxed text-warm-800">
-          One guide is deliberately ungated — no form, straight to the PDF. It costs one lead and
-          buys a great deal of goodwill, and the people who read it and come back are better
-          qualified.
+      {rows.length === 0 && (
+        <p class="max-w-[58ch] text-body-lg leading-relaxed text-warm-700">
+          New guides are on the way. Until then, if you have a question, message me and I'll answer it
+          in plain language.
         </p>
-        {pending && (
-          <p class="mt-3 font-mono text-caption leading-relaxed text-warm-400">
-            Files pending. Thushara uploads these from /admin/resources. Downloads ask for a name
-            and WhatsApp number only, and tag the lead with which guide was taken.
-          </p>
-        )}
-      </div>
+      )}
     </div>
   </section>
 

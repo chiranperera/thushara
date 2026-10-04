@@ -50,6 +50,8 @@ const GROUPS = [
     label: sv.title,
     where: `Shown on the ${sv.title} page`,
   })),
+  { key: "for-doctors" as string | null, label: "For Doctors", where: "Shown on the For Doctors page" },
+  { key: "for-engineers" as string | null, label: "For Engineers", where: "Shown on the For Engineers page" },
 ];
 
 const grouped = GROUPS.map((g) => {

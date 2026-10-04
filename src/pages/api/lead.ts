@@ -15,6 +15,7 @@ import { env } from "cloudflare:workers";
 import { leadSchema } from "../../lib/lead-schema";
 import { sendLeadEmails } from "../../lib/email";
 import { site } from "../../lib/site";
+import { getSiteSettings } from "../../lib/settings";
 
 export const prerender = false;
 
@@ -131,16 +132,25 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   // ---------------------------------------------------------------- NOTIFY SECOND
   let notified = false;
   try {
-    const settings = await readCredentialSettings(db);
+    // His own details from the admin, not the build-time constants: the
+    // enquiry goes to the email he set under My details, and the
+    // client's confirmation carries his own number to reply on.
+    const settings = await getSiteSettings(db);
     const sent = await sendLeadEmails({
       bindings,
       from: bindings.FROM_EMAIL ?? "",
-      adminEmail: bindings.ADMIN_EMAIL ?? "",
+      adminEmail: settings.email ?? bindings.ADMIN_EMAIL ?? "",
       siteUrl: bindings.SITE_URL ?? site.url,
       lead,
       leadId,
       mdrtYears: settings.mdrtYears,
-      years: settings.years,
+      years: settings.yearsExperience,
+      contact: {
+        phone: settings.phone,
+        phoneHref: settings.phoneHref,
+        whatsapp: settings.whatsapp,
+        whatsappHref: settings.whatsappHref,
+      },
     });
     notified = sent.ok;
     if (!sent.ok) console.error("[lead] notification failed", sent.error);
@@ -161,22 +171,3 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   // be asked to resubmit because *our* email provider had a bad minute.
   return json({ ok: true, id: leadId });
 };
-
-async function readCredentialSettings(db: any) {
-  const fallback = {
-    years: site.credentials.yearsExperience,
-    mdrtYears: site.credentials.mdrtYears,
-  };
-  try {
-    const rows = await db
-      .prepare(`SELECT key, value FROM settings WHERE key IN ('years_experience','mdrt_years')`)
-      .all();
-    const map = new Map<string, string>((rows.results ?? []).map((r: any) => [r.key, r.value]));
-    return {
-      years: Number(map.get("years_experience")) || fallback.years,
-      mdrtYears: Number(map.get("mdrt_years")) || fallback.mdrtYears,
-    };
-  } catch {
-    return fallback;
-  }
-}

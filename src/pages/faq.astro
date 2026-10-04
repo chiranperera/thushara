@@ -15,7 +15,7 @@ import Header from "../components/site/Header.astro";
 import Footer from "../components/site/Footer.astro";
 import StickyBar from "../components/site/StickyBar.astro";
 import { getSiteSettings, EDGE_CACHE } from "../lib/settings";
-import { faqs, faqCategories } from "../lib/faq-content";
+import { faqCategories } from "../lib/faq-content";
 
 const bindings = env as unknown as Record<string, any>;
 const settings = await getSiteSettings(bindings.DB);

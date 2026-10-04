@@ -77,12 +77,29 @@ const qualifications = [
  * 2013, so the run is counted back from the current year rather than
  * hard-coded — it stays correct as `mdrt_years` increments.
  */
-const COT_YEARS = [2020, 2024, 2025, 2026];
-const firstMdrtYear = new Date().getFullYear() - settings.mdrtYears + 1;
+const COT_YEARS = settings.cotYearList;
+// Bars start at his first MDRT year. The count is the number he sets by
+// hand, so a year he did not qualify shortens the run rather than
+// pretending it happened.
+const firstMdrtYear = site.credentials.mdrtSince;
 const mdrtBars = Array.from({ length: settings.mdrtYears }, (_, i) => {
   const year = firstMdrtYear + i;
   return { year, cot: COT_YEARS.includes(year) };
 });
+
+// "2020, and again in 2024, 2025 and 2026", from whatever years he typed.
+const listYears = (ys: number[]) =>
+  ys.length < 2 ? ys.join("") : `${ys.slice(0, -1).join(", ")} and ${ys[ys.length - 1]}`;
+const cotSentence = COT_YEARS.length > 1
+  ? `${COT_YEARS[0]}, and again in ${listYears(COT_YEARS.slice(1))}`
+  : listYears(COT_YEARS);
+// Longest run of back-to-back years, for the line about consistency.
+let cotRun = COT_YEARS.length ? 1 : 0;
+for (let i = 1, run = 1; i < COT_YEARS.length; i++) {
+  run = COT_YEARS[i] === COT_YEARS[i - 1] + 1 ? run + 1 : 1;
+  cotRun = Math.max(cotRun, run);
+}
+const RUN_WORDS = ["", "", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"];
 
 /** The four most recent photos, once he has uploaded any. */
 let awards: any[] = [];
@@ -222,8 +239,8 @@ try {
             <p class="mt-5 border-l-2 border-gold-500 pl-5 text-body-lg leading-relaxed text-cream-50/78">
               <strong class="font-bold text-gold-400">Court of the Table</strong> is the tier above
               membership — it takes roughly three times the production. He has reached it
-              {" "}{settings.cotYears} times — {site.credentials.cotRecent}. Three
-              consecutive years says more than any single one of them.
+              {" "}{settings.cotYears} times{cotSentence ? ` — ${cotSentence}` : ""}.
+              {cotRun >= 3 && ` ${RUN_WORDS[cotRun] ?? cotRun} consecutive years says more than any single one of them.`}
             </p>
           )}
 
@@ -365,6 +382,7 @@ try {
   </section>
 
   <!-- ============ AWARDS AND EVENTS ============ -->
+  {awards.length > 0 && (
   <section class="bg-cream-50 py-16 md:py-20">
     <div class="container-default px-5">
       <div class="flex flex-wrap items-baseline justify-between gap-4">
@@ -373,30 +391,22 @@ try {
       </div>
 
       <ul class="mt-9 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {awards.length > 0
-          ? awards.map((g: any) => (
-              <li class="overflow-hidden rounded-xl border border-warm-200 bg-cream-100">
-                <a href="/gallery" class="block">
-                  <img
-                    src={`/media/${g.thumb_key ?? g.image_key}`}
-                    alt={g.alt_text}
-                    width="400" height="400" loading="lazy" decoding="async"
-                    class="aspect-square w-full object-cover"
-                  />
-                </a>
-              </li>
-            ))
-          : ["IMG-GAL-01", "IMG-GAL-02", "IMG-GAL-03", "IMG-GAL-04"].map((slot) => (
-              <li
-                class="flex aspect-square items-center justify-center rounded-xl border border-mist-200 bg-mist-100"
-                data-slot={slot}
-              >
-                <span class="font-mono text-caption text-mist-600">{slot}</span>
-              </li>
-            ))}
+        {awards.map((g: any) => (
+          <li class="overflow-hidden rounded-xl border border-warm-200 bg-cream-100">
+            <a href="/gallery" class="block">
+              <img
+                src={`/media/${g.thumb_key ?? g.image_key}`}
+                alt={g.alt_text}
+                width="400" height="400" loading="lazy" decoding="async"
+                class="aspect-square w-full object-cover"
+              />
+            </a>
+          </li>
+        ))}
       </ul>
     </div>
   </section>
+  )}
 
   <!-- ============ CTA ============ -->
   <section class="bg-ink-950 py-16 md:py-24">
@@ -417,6 +427,16 @@ try {
         {settings.phoneHref && (
           <a href={settings.phoneHref} class="text-center font-display text-h4 font-bold text-cream-50 hover:text-gold-400">
             {settings.phone}
+          </a>
+        )}
+        {settings.phoneSecondaryHref && (
+          <a href={settings.phoneSecondaryHref} class="text-center font-display text-h4 font-bold text-cream-50 hover:text-gold-400">
+            {settings.phoneSecondary}
+          </a>
+        )}
+        {settings.whatsappSecondaryHref && (
+          <a target="_blank" rel="noopener noreferrer" href={settings.whatsappSecondaryHref} class="mx-auto flex w-fit items-center gap-2 text-small font-bold text-cream-50/70 hover:text-gold-400">
+            <span aria-hidden="true" class="size-2 rounded-full bg-whatsapp"></span>WhatsApp {settings.whatsappSecondary}
           </a>
         )}
       </div>

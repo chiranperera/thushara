@@ -71,7 +71,8 @@ export interface ServiceContent {
   whyMeIntro: string;
   /** "Why work with me", from the copy's own section. */
   whyMe: string[];
-  faqs: FaqItem[];
+  /** Moved to the faqs table — edited in /admin/faq. */
+  faqs?: FaqItem[];
   /** Closing line, from the copy. */
   closing: string;
   /** Second half of the closing, where the copy carries one. */
@@ -139,19 +140,7 @@ export const serviceContent: Record<string, ServiceContent> = {
         { lead: "Extensions where your work needs them", body: "Optional cover added for the specific exposures of your field rather than sold as a single shape." },
       ],
     },
-    faqs: [
-      { q: "Do I need this if my employer already has cover?", a: "Copy pending. Answer must distinguish employer policies from personal cover and avoid absolute claims." },
-      { q: "What isn't covered?", a: "Copy pending. Must set out the main exclusions plainly, including deliberate wrongdoing." },
-      { q: "How quickly can cover start?", a: "Copy pending." },
-      { q: "What happens if I change profession?", a: "Copy pending." },
-    ],
     closing: "Don't let a professional claim put your career and financial future at risk.",
-    table: {
-      caption: "Indicative guidance",
-      heading: "What cover level do people at your stage take?",
-      columns: ["Newly qualified", "Established", "Own practice"],
-      rows: ["Doctors & healthcare", "Engineers & architects", "Lawyers, accountants, IT"],
-    },
   },
 
   "motor-insurance": {
@@ -206,12 +195,6 @@ export const serviceContent: Record<string, ServiceContent> = {
         { lead: "Competitive premiums, flexible payment", body: "Payment options that fit how you are actually paid, and a renewal reminder so cover never lapses by accident." },
       ],
     },
-    faqs: [
-      { q: "What's the difference between comprehensive and third-party?", a: "Copy pending. Must explain plainly without steering the reader toward the more expensive option by default." },
-      { q: "How is my premium worked out?", a: "Copy pending." },
-      { q: "What happens to my no-claims bonus if I claim?", a: "Copy pending." },
-      { q: "Can I insure a vehicle I've just bought?", a: "Copy pending." },
-    ],
     closing: "Whether you are buying a new vehicle, renewing, or looking for better protection, I am here to help.",
   },
 
@@ -264,11 +247,6 @@ export const serviceContent: Record<string, ServiceContent> = {
         { lead: "Long-term stability", body: "Backed by Sri Lanka Insurance Corporation, which is the point of a contract measured in decades." },
       ],
     },
-    faqs: [
-      { q: "How much cover does my family actually need?", a: "Copy pending. Should point to the calculator rather than give a number here." },
-      { q: "What's the difference between this and a lump sum policy?", a: "Copy pending." },
-      { q: "What happens if my circumstances change?", a: "Copy pending." },
-    ],
     closing: "Your income is your family's foundation. Protect it today so your loved ones can continue their lives with confidence tomorrow.",
   },
 
@@ -322,11 +300,6 @@ export const serviceContent: Record<string, ServiceContent> = {
         { lead: "Fast and reliable claims support", body: "With me handling the submission and the follow-up, which is the part people dread." },
       ],
     },
-    faqs: [
-      { q: "Are pre-existing conditions covered?", a: "Copy pending. Must be accurate about waiting periods and exclusions." },
-      { q: "Which hospitals can I use?", a: "Copy pending." },
-      { q: "Can I add my parents or children?", a: "Copy pending." },
-    ],
     closing: "Your health is priceless. Don't let unexpected medical expenses affect your financial future.",
   },
 
@@ -377,11 +350,6 @@ export const serviceContent: Record<string, ServiceContent> = {
         { lead: "Knowing it is settled", body: "The peace of mind of knowing your child's education is provided for, whatever else changes." },
       ],
     },
-    faqs: [
-      { q: "What happens if I can't keep up the payments?", a: "Copy pending. Must be honest about lapse and surrender." },
-      { q: "Can I use the money for something other than education?", a: "Copy pending." },
-      { q: "When should I start?", a: "Copy pending." },
-    ],
     closing: "The best gift you can give your child is the opportunity to learn without financial worries.",
   },
 
@@ -435,11 +403,6 @@ export const serviceContent: Record<string, ServiceContent> = {
         { lead: "Peace of mind, long before the date", body: "Knowing the plan exists changes how the working years feel, not only the retired ones." },
       ],
     },
-    faqs: [
-      { q: "I'm 28 — isn't this far too early?", a: "Copy pending. Should show the arithmetic rather than argue." },
-      { q: "What if I need the money before retirement?", a: "Copy pending." },
-      { q: "How does this sit alongside EPF and ETF?", a: "Copy pending." },
-    ],
     closing: "The earlier you start, the more time your savings have to grow.",
     closingBody:
       "A well-planned retirement is what lets you spend those years on the things you actually want to do, and on the people you want to do them with, rather than on arithmetic.",
@@ -497,11 +460,6 @@ export const serviceContent: Record<string, ServiceContent> = {
         { lead: "Backed by the state-owned insurer", body: "Trusted cover from Sri Lanka's leading state-owned insurer, which matters most in exactly the years everyone claims at once." },
       ],
     },
-    faqs: [
-      { q: "How do I work out the right sum insured?", a: "Copy pending." },
-      { q: "Am I covered for flood and landslide?", a: "Copy pending. Must be precise about what is and isn't included." },
-      { q: "Does this cover a property I rent out?", a: "Copy pending." },
-    ],
     closing: "Don't wait for unexpected events to put your home and finances at risk.",
   },
 
@@ -555,11 +513,6 @@ export const serviceContent: Record<string, ServiceContent> = {
         { lead: "Backed by the state-owned insurer", body: "Trusted cover from Sri Lanka's leading state-owned insurer, recognised by embassies and universities." },
       ],
     },
-    faqs: [
-      { q: "My university asks for proof of cover — can you provide it?", a: "Copy pending." },
-      { q: "How quickly can cover be arranged?", a: "Copy pending." },
-      { q: "Does it cover pre-existing medical conditions?", a: "Copy pending. Must be accurate." },
-    ],
     closing: "Don't let unexpected disruptions affect your journey or your finances.",
   },
 };

@@ -40,7 +40,7 @@ const { reviews, intro } = Astro.props;
 
 /** Initials, for a review with no photograph — better than an empty ring. */
 const initials = (name: string) =>
-  name
+  (name ?? "")
     .replace(/^(Dr|Prof|Mr|Mrs|Ms)\.?\s+/i, "")
     .split(/\s+/)
     .slice(0, 2)
@@ -55,6 +55,11 @@ const MIN_TO_SCROLL = 4;
 const scrolls = reviews.length >= MIN_TO_SCROLL;
 // ~9 seconds per card: slow enough to read a line as it passes.
 const seconds = reviews.length * 9;
+
+// Long reviews show their first five lines on the card, with a button
+// for the rest. Roughly what five lines of the card's italic serif hold,
+// so a review that already fits never gets a pointless "Read more".
+const LONG = 260;
 ---
 
 {reviews.length > 0 && (
@@ -78,7 +83,15 @@ const seconds = reviews.length * 9;
             <figure class="flex h-full flex-col">
               <blockquote class="flex-1">
                 <span aria-hidden="true" class="block font-serif text-[38px] leading-none text-gold-400">“</span>
-                <p class="mt-3 font-serif text-[19px] italic leading-relaxed text-cream-50">{r.body}</p>
+                <p
+                  class="mt-3 whitespace-pre-line font-serif text-[19px] italic leading-relaxed text-cream-50"
+                  data-clamp={r.body.length > LONG ? "" : undefined}
+                >{r.body}</p>
+                {r.body.length > LONG && (
+                  <button type="button" data-read-more aria-expanded="false" class="mt-3 text-small font-bold text-gold-400 underline underline-offset-4 hover:text-gold-300">
+                    Read more
+                  </button>
+                )}
               </blockquote>
               <figcaption class="mt-6 flex items-center gap-3.5 border-t border-cream-50/15 pt-5">
                 {r.photo_key ? (
@@ -92,11 +105,11 @@ const seconds = reviews.length * 9;
                   <span
                     aria-hidden="true"
                     class="flex size-13 shrink-0 items-center justify-center rounded-full bg-cream-50/12 font-display text-body font-extrabold text-gold-400"
-                  >{initials(r.name)}</span>
+                  >{initials(r.name) || "“"}</span>
                 )}
                 <span class="min-w-0">
-                  <span class="block truncate text-body font-bold text-cream-50">{r.name}</span>
-                  <span class="block text-small leading-snug text-cream-50/60">{r.profession}</span>
+                  {r.name && <span class="block truncate text-body font-bold text-cream-50">{r.name}</span>}
+                  {r.profession && <span class="block text-small leading-snug text-cream-50/60">{r.profession}</span>}
                 </span>
               </figcaption>
             </figure>
@@ -106,6 +119,11 @@ const seconds = reviews.length * 9;
     </div>
   </div>
 )}
+
+<script>
+  import { bindReadMore } from "../../lib/read-more";
+  bindReadMore();
+</script>
 
 <style>
   /* Without the scrolling modifier this is just a scrollable row, which

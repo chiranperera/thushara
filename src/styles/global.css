@@ -521,3 +521,12 @@
      is enough and a heavy one just muddies the gradient. */
   filter: drop-shadow(0 10px 26px rgba(2, 8, 20, 0.38));
 }
+
+/* Long reviews: five lines until "Read more" is pressed (lib/read-more). */
+[data-clamp]:not([data-open]) {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
+  overflow: hidden;
+}

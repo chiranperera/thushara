@@ -79,11 +79,17 @@ const differentiators = [
 
 const professions = ["Doctors", "Engineers", "Lawyers", "Architects", "Accountants", "Consultants"];
 
-const guides = [
-  { title: "Insurance for Newly Qualified Doctors", body: "What you actually need — and what you can skip for now.", slot: "PDF-001" },
-  { title: "Your First Motor Insurance Policy", body: "A plain-English guide to what you're signing.", slot: "PDF-002" },
-  { title: "How Much Life Cover Does Your Family Need?", body: "Work out your number in about ten minutes.", slot: "PDF-003" },
-];
+// Guides he has uploaded in the admin — the first three. The section
+// is left out entirely until there is at least one real PDF.
+let guides: any[] = [];
+try {
+  if (db) {
+    const res = await db
+      .prepare(`SELECT slug, title, description, gated FROM resources WHERE published = 1 ORDER BY sort_order, id LIMIT 3`)
+      .all();
+    guides = res.results ?? [];
+  }
+} catch (e) { console.error("[home] guides query failed", e); }
 
 
 /**
@@ -430,28 +436,17 @@ function serviceThumb(slug: string) {
   </section>
 
   <!-- ============ TESTIMONIALS ============ -->
+  {/* Left out until he has approved at least one real review. */}
+  {testimonials.length > 0 && (
   <section class="bg-ink-900 py-16 md:py-24">
     <div class="container-default px-5">
       <div class="flex items-baseline justify-between gap-6">
         <p class="eyebrow text-gold-400">In their words</p>
-        {testimonials.length > 0 && (
-          <a href="/testimonials" class="text-body font-bold text-cream-50 hover:text-gold-400">Read all testimonials →</a>
-        )}
+        <a href="/testimonials" class="text-body font-bold text-cream-50 hover:text-gold-400">Read all testimonials →</a>
       </div>
 
       <div class="mt-8 border-t border-cream-50/20 pt-10">
-        {testimonials.length > 0 ? (
-          <TestimonialCarousel reviews={testimonials} intro={testimonialsIntro} settings={settings} />
-        ) : (
-          <>
-            {testimonialsIntro && (
-              <p class="max-w-[68ch] text-body leading-relaxed text-cream-50/80 md:text-[19px]">{testimonialsIntro}</p>
-            )}
-            <p class="mt-6 max-w-[56ch] font-serif text-quote italic leading-relaxed text-cream-50/70">
-              Reviews are being collected. Real client words only — nothing invented.
-            </p>
-          </>
-        )}
+        <TestimonialCarousel reviews={testimonials} intro={testimonialsIntro} settings={settings} />
       </div>
 
       <div class="mt-10 border-t border-cream-50/20 pt-7">
@@ -461,30 +456,32 @@ function serviceThumb(slug: string) {
       </div>
     </div>
   </section>
+  )}
 
   <!-- ============ GUIDES ============ -->
+  {guides.length > 0 && (
   <section class="bg-cream-50 py-16 md:py-24">
     <div class="container-default px-5">
-      <h2 class="font-display text-h2 font-extrabold text-navy-600">Free guides, no jargon</h2>
+      <div class="flex items-baseline justify-between gap-6">
+        <h2 class="font-display text-h2 font-extrabold text-navy-600">Free guides, no jargon</h2>
+        <a href="/resources" class="text-body font-bold text-navy-600 hover:text-navy-400">All guides →</a>
+      </div>
 
       <ul class="mt-10 grid gap-4 md:grid-cols-3">
         {guides.map((g) => (
           <li class="flex flex-col rounded-[20px] border border-warm-200 bg-white p-7">
             <span aria-hidden="true" class="flex h-12 w-9 items-center justify-center rounded-sm bg-cream-100"></span>
             <span class="mt-5 font-display text-h4 font-bold leading-snug text-ink-900">{g.title}</span>
-            <span class="mt-2.5 flex-1 text-body leading-relaxed text-warm-700">{g.body}</span>
-            <span class="mt-4 font-mono text-caption text-warm-400">{g.slot} · file pending</span>
-            <span class="mt-5 flex min-h-13 items-center justify-center rounded-full border-[1.5px] border-navy-600 text-body font-bold text-navy-600">
-              Download
-            </span>
+            <span class="mt-2.5 flex-1 text-body leading-relaxed text-warm-700">{g.description}</span>
+            <a href={`/resources/${g.slug}`} class="mt-5 flex min-h-13 items-center justify-center rounded-full border-[1.5px] border-navy-600 text-body font-bold text-navy-600 hover:bg-navy-50">
+              {g.gated ? "Download" : "Read the guide"}
+            </a>
           </li>
         ))}
       </ul>
-      <p class="mt-5 text-small text-warm-500">
-        Download asks for a name and WhatsApp number only, and tags the lead with which guide was taken.
-      </p>
     </div>
   </section>
+  )}
 
   <!-- ============ FINAL CTA ============ -->
   <section class="bg-ink-900 py-20 md:py-28">
@@ -511,6 +508,16 @@ function serviceThumb(slug: string) {
       {settings.phoneHref && (
         <a href={settings.phoneHref} class="mt-8 inline-block font-display text-h4 font-bold text-navy-300 hover:text-gold-400">
           {settings.phone}
+        </a>
+      )}
+      {settings.phoneSecondaryHref && (
+        <a href={settings.phoneSecondaryHref} class="mx-auto mt-2 block w-fit font-display text-h4 font-bold text-navy-300 hover:text-gold-400">
+          {settings.phoneSecondary}
+        </a>
+      )}
+      {settings.whatsappSecondaryHref && (
+        <a target="_blank" rel="noopener noreferrer" href={settings.whatsappSecondaryHref} class="mx-auto flex w-fit items-center gap-2 text-small font-bold text-navy-300 hover:text-gold-400">
+          <span aria-hidden="true" class="size-2 rounded-full bg-whatsapp"></span>WhatsApp {settings.whatsappSecondary}
         </a>
       )}
     </div>

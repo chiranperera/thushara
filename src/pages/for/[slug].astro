@@ -46,6 +46,20 @@ try {
   }
 } catch (e) { console.error("[persona] testimonials query failed", e); }
 
+// Questions come from /admin/faq, filed under "for-doctors" or
+// "for-engineers". Only answered, published ones appear; the section
+// hides when there are none.
+let faqs: { q: string; a: string }[] = [];
+try {
+  if (db) {
+    const res = await db
+      .prepare(`SELECT question, answer FROM faqs WHERE service = ? AND published = 1 ORDER BY sort_order, id`)
+      .bind(`for-${p.slug}`)
+      .all();
+    faqs = ((res.results ?? []) as any[]).map((r) => ({ q: r.question, a: r.answer }));
+  }
+} catch (e) { console.error("[persona] faqs query failed", e); }
+
 const wa = whatsappHref(
   settings.whatsapp,
   `Hi Thushara, I'm a ${noun} and I'd like to ask about cover.`,
@@ -156,9 +170,6 @@ const bookHref = `/book?profession=${p.bookingProfession}`;
             <p class="mt-2 max-w-[62ch] text-body-lg leading-relaxed text-warm-700">{a.body}</p>
           </div>
         ))}
-        <p class="font-mono text-caption leading-relaxed text-warm-400">
-          Copy pending client approval. No figures used until Thushara supplies verifiable ones.
-        </p>
       </div>
     </div>
   </section>
@@ -231,12 +242,13 @@ const bookHref = `/book?profession=${p.bookingProfession}`;
   )}
 
   <!-- ============ FAQ ============ -->
+  {faqs.length > 0 && (
   <section class="bg-cream-50 py-16 md:py-20">
     <div class="container-default px-5">
       <h2 class="font-display text-h2 font-extrabold text-navy-600">{p.faqHeading}</h2>
 
       <div class="mt-9 max-w-[860px]">
-        {p.faqs.map((f, i) => (
+        {faqs.map((f, i) => (
           <details class="faq group border-t border-warm-200 last:border-b" open={i === 0}>
             <summary class="flex cursor-pointer list-none items-center justify-between gap-6 py-6 text-h4 font-bold text-ink-900 [&::-webkit-details-marker]:hidden">
               {f.q}
@@ -255,6 +267,7 @@ const bookHref = `/book?profession=${p.bookingProfession}`;
       </a>
     </div>
   </section>
+  )}
 
   <!-- ============ CTA ============ -->
   <section class="bg-ink-950 py-16 md:py-24">

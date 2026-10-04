@@ -2,6 +2,7 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
 import { requireAdmin } from "../../../lib/auth";
+import { LEGAL_PAGES, LEGAL_MAX } from "../../../lib/legal";
 
 export const prerender = false;
 
@@ -10,8 +11,9 @@ export const prerender = false;
 // below, and remain only as a manual override if a count ever needs
 // correcting by hand.
 const PROFILE_KEYS = [
-  "phone", "phone_secondary", "whatsapp", "email", "service_area",
-  "experience_since", "mdrt_since", "cot_years",
+  "phone", "phone_secondary", "whatsapp", "whatsapp_secondary", "email", "service_area",
+  "experience_since", "mdrt_since", "cot_years", "cot_year_list",
+  "mdrt_status", "recognition",
   "years_experience", "mdrt_years",
 ];
 const NUMERIC = ["appointment_minutes", "buffer_minutes", "max_per_day"];
@@ -27,6 +29,7 @@ export const POST: APIRoute = async ({ request }) => {
   const dest =
     section === "profile" ? "/admin/profile"
     : section === "testimonials" ? "/admin/testimonials"
+    : section === "legal" ? "/admin/legal"
     : "/admin/availability";
   if (!db) return new Response(null, { status: 302, headers: { location: dest } });
 
@@ -48,6 +51,14 @@ export const POST: APIRoute = async ({ request }) => {
     // than the literal word PENDING the profile fields fall back to.
     if (section === "testimonials") {
       stmts.push(put("testimonials_intro", String(form.get("testimonials_intro") ?? "").trim().slice(0, 600)));
+    } else if (section === "legal") {
+      // His privacy policy, terms and disclaimer. Only the pages the
+      // form actually sent are touched, so saving one never blanks
+      // another.
+      for (const { key } of Object.values(LEGAL_PAGES)) {
+        if (!form.has(key)) continue;
+        stmts.push(put(key, String(form.get(key) ?? "").trim().slice(0, LEGAL_MAX)));
+      }
     } else if (section === "profile") {
       for (const key of PROFILE_KEYS) {
         if (!form.has(key)) continue;

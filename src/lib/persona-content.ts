@@ -50,7 +50,6 @@ export interface Persona {
   products: { slug: string; note: string }[];
   testimonialsHeading: string;
   faqHeading: string;
-  faqs: { q: string; a: string }[];
   ctaHeading: string;
   ctaBody: string;
 }
@@ -109,12 +108,6 @@ export const personas: Record<string, Persona> = {
     ],
     testimonialsHeading: "From doctors",
     faqHeading: "Questions doctors ask",
-    faqs: [
-      { q: "Does the hospital's cover protect me personally?", a: "Copy pending. Must distinguish institutional cover from personal cover without overstating the gap." },
-      { q: "I'm still an intern. Is it too early?", a: "Copy pending." },
-      { q: "What happens when I start private practice?", a: "Copy pending." },
-      { q: "Can we do all of this over WhatsApp?", a: "Copy pending." },
-    ],
     ctaHeading: "Half an hour, and you'll know where you stand.",
     ctaBody: "Free, no obligation, and scheduled around your clinic.",
   },
@@ -171,12 +164,6 @@ export const personas: Record<string, Persona> = {
     ],
     testimonialsHeading: "From engineers",
     faqHeading: "Questions engineers ask",
-    faqs: [
-      { q: "My employer carries cover for the practice. Do I need my own?", a: "Copy pending. Must distinguish practice cover from personal cover without overstating the gap." },
-      { q: "I'm not chartered yet. Is it too early?", a: "Copy pending." },
-      { q: "Does cover follow me if I change firms?", a: "Copy pending." },
-      { q: "What about work I signed off years ago?", a: "Copy pending. Must be accurate about claims-made versus occurrence cover." },
-    ],
     ctaHeading: "Half an hour, and you'll know where you stand.",
     ctaBody: "Free, no obligation, and scheduled around your site hours.",
   },

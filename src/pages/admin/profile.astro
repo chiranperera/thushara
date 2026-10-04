@@ -36,7 +36,7 @@ const val = (k: string) => { const v = settings.get(k); return !v || v === "PEND
 const thisYear = currentYear();
 const derived = {
   years: yearsSince(Number(settings.get("experience_since")) || site.credentials.experienceSince),
-  mdrt: yearsSince(Number(settings.get("mdrt_since")) || site.credentials.mdrtSince, { inclusive: true }),
+  mdrt: Number(settings.get("mdrt_years")) || yearsSince(Number(settings.get("mdrt_since")) || site.credentials.mdrtSince, { inclusive: true }),
 };
 const pending = (k: string) => settings.get(k) === "PENDING";
 ---
@@ -54,9 +54,13 @@ const pending = (k: string) => settings.get(k) === "PENDING";
       <div class="flex flex-col gap-5">
         {[
           { name:"phone", label:"Phone", type:"tel", placeholder:"+94 XX XXX XXXX" },
+          { name:"phone_secondary", label:"Second phone", type:"tel", placeholder:"+94 XX XXX XXXX" },
           { name:"whatsapp", label:"WhatsApp number", type:"tel", placeholder:"+94 XX XXX XXXX" },
+          { name:"whatsapp_secondary", label:"Second WhatsApp number", type:"tel", placeholder:"+94 XX XXX XXXX" },
           { name:"email", label:"Email", type:"email", placeholder:"you@yourdomain.com" },
           { name:"service_area", label:"Service area", type:"text", placeholder:"Island-wide · Colombo & suburbs" },
+          { name:"mdrt_status", label:"MDRT status", type:"text", placeholder:"Lifetime Member" },
+          { name:"recognition", label:"Award or recognition line", type:"text", placeholder:"Top Performer in Life & General Insurance, Regional" },
         ].map((f)=>(
           <div>
             <label for={f.name} class="text-small font-bold text-warm-800">{f.label}</label>
@@ -74,49 +78,53 @@ const pending = (k: string) => settings.get(k) === "PENDING";
       <div class="mt-7 rounded-[18px] bg-ink-900 p-6">
         <p class="eyebrow text-gold-400">Shown on every page</p>
 
-        {/* Start years, not counts. He types the year something began
-            once, and the number it produces grows by itself every
-            1 January — which is the whole point: these appear in the
-            hero, the credentials band and the footer of every page, so
-            a number that goes stale goes stale everywhere at once. */}
+        {/* Years of experience is a start year: he types it once and
+            the count grows by itself every 1 January. MDRT is a count he
+            sets himself, because it counts qualifications — a year he
+            does not qualify must not add one. */}
         <div class="mt-4 grid gap-3.5 sm:grid-cols-2">
-          {[
-            { name:"experience_since", label:"The year you started", now:`${derived.years} years' experience`, hint:"Appointed 2010" },
-            { name:"mdrt_since",       label:"Your first MDRT year", now:`${derived.mdrt}× MDRT`,             hint:"First qualified 2013" },
-          ].map((f)=>(
-            <div>
-              <label for={f.name} class="text-small font-bold text-cream-50/80">{f.label}</label>
-              <input
-                id={f.name} name={f.name} type="number" min="1970" max={String(thisYear)}
-                value={settings.get(f.name) ?? ""} placeholder={f.hint}
-                class="mt-2 h-14 w-full rounded-md border border-cream-50/25 bg-cream-50/6 px-4 font-display text-h3 font-extrabold tabular text-cream-50 focus:border-gold-400"
-              />
-              <p class="mt-2 text-small text-gold-400">Currently shows: <b>{f.now}</b></p>
-            </div>
-          ))}
+          <div>
+            <label for="experience_since" class="text-small font-bold text-cream-50/80">The year you started</label>
+            <input
+              id="experience_since" name="experience_since" type="number" min="1970" max={String(thisYear)}
+              value={settings.get("experience_since") ?? ""} placeholder="Appointed 2010"
+              class="mt-2 h-14 w-full rounded-md border border-cream-50/25 bg-cream-50/6 px-4 font-display text-h3 font-extrabold tabular text-cream-50 focus:border-gold-400"
+            />
+            <p class="mt-2 text-small text-gold-400">Currently shows: <b>{derived.years} years' experience</b></p>
+          </div>
+          <div>
+            <label for="mdrt_years" class="text-small font-bold text-cream-50/80">MDRT — how many times</label>
+            <input
+              id="mdrt_years" name="mdrt_years" type="number" min="1" max="80"
+              value={String(derived.mdrt)}
+              class="mt-2 h-14 w-full rounded-md border border-cream-50/25 bg-cream-50/6 px-4 font-display text-h3 font-extrabold tabular text-cream-50 focus:border-gold-400"
+            />
+            <p class="mt-2 text-small text-gold-400">Currently shows: <b>{derived.mdrt}× MDRT</b></p>
+          </div>
         </div>
 
         <p class="mt-4 rounded-lg bg-cream-50/8 px-4 py-3 text-small leading-relaxed text-cream-50/75">
-          You do not need to update these each year. On 1 January both numbers go up by one on
-          their own — this year {derived.years} years and {derived.mdrt}× MDRT, next January
-          {" "}{derived.years + 1} and {derived.mdrt + 1}.
+          Years of experience goes up by one on its own every 1 January — {derived.years} this year,
+          {" "}{derived.years + 1} next year. The MDRT number does <b>not</b> change by itself: update it
+          here the year you qualify again.
         </p>
 
         {/* Court of the Table is deliberately not automatic. He
             qualifies for it in some years and not others, so only he
             knows when it changes. */}
         <div class="mt-6 border-t border-cream-50/15 pt-5">
-          <label for="cot_years" class="text-small font-bold text-cream-50/80">
-            Court of the Table — how many times
+          <label for="cot_year_list" class="text-small font-bold text-cream-50/80">
+            Court of the Table — the years you reached it
           </label>
           <input
-            id="cot_years" name="cot_years" type="number" min="0" max="80"
-            value={settings.get("cot_years") ?? "4"}
-            class="mt-2 h-14 w-full max-w-[220px] rounded-md border border-cream-50/25 bg-cream-50/6 px-4 font-display text-h3 font-extrabold tabular text-cream-50 focus:border-gold-400"
+            id="cot_year_list" name="cot_year_list" type="text" inputmode="numeric"
+            value={settings.get("cot_year_list") ?? ""} placeholder="2020, 2024, 2025, 2026"
+            class="mt-2 h-14 w-full rounded-md border border-cream-50/25 bg-cream-50/6 px-4 font-display text-h4 font-extrabold tabular text-cream-50 focus:border-gold-400"
           />
           <p class="mt-2.5 text-small leading-relaxed text-cream-50/65">
             This one does <b>not</b> update itself, because you do not qualify every year.
-            Change it here yourself the year you qualify again.
+            Add the new year here, separated by commas, the year you qualify again. The website
+            counts them for you.
           </p>
         </div>
       </div>

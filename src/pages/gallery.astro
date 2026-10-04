@@ -39,9 +39,6 @@ try {
 } catch (e) { console.error("[gallery] query failed", e); }
 
 const shown = filter === "all" ? items : items.filter((i) => i.category === filter);
-// Launch state: nothing uploaded yet. Slots are shown so the shape is
-// legible and Thushara can see what to upload — never fake photographs.
-const placeholders = ["IMG-GAL-01 · MDRT & Awards", "IMG-GAL-02", "IMG-GAL-03", "IMG-GAL-04", "IMG-GAL-05", "IMG-GAL-06"];
 ---
 
 <Layout title="Awards and moments" description="MDRT recognition, client events, and the milestones along the way.">
@@ -85,28 +82,9 @@ const placeholders = ["IMG-GAL-01 · MDRT & Awards", "IMG-GAL-02", "IMG-GAL-03",
           ))}
         </ul>
       ) : (
-        <>
-          <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {placeholders.map((slot, i) => (
-              <li class="flex aspect-4/3 items-center justify-center rounded-xl border border-mist-200 bg-mist-100 p-6 text-center">
-                <span>
-                  {i === 0 && <span aria-hidden="true" class="mx-auto mb-2 block size-3.5 rotate-45 bg-mist-400"></span>}
-                  <span class="block font-mono text-caption font-bold tracking-wider text-mist-600">{slot}</span>
-                  {i === 0 && (
-                    <span class="mt-2 block max-w-[30ch] font-mono text-caption leading-relaxed text-mist-500">
-                      Caption required for every image — the caption is what makes an award photo
-                      meaningful to someone who does not know the organisation.
-                    </span>
-                  )}
-                </span>
-              </li>
-            ))}
-          </ul>
-          <p class="mt-7 max-w-[62ch] text-body leading-relaxed text-warm-500">
-            Photographs are being collected. Thushara uploads these himself from
-            <span class="font-mono text-caption"> /admin/gallery</span> — no developer needed.
-          </p>
-        </>
+        <p class="max-w-[62ch] text-body-lg leading-relaxed text-warm-700">
+          {items.length > 0 ? "No photographs in this category yet." : "Photographs will appear here soon."}
+        </p>
       )}
     </div>
   </section>

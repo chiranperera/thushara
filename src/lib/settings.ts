@@ -18,14 +18,19 @@ export interface SiteSettings {
   mdrtStatus: string;
   /** Court of the Table years. 0 hides it rather than printing a zero. */
   cotYears: number;
+  /** The years he reached Court of the Table, oldest first. Empty if he has not typed them. */
+  cotYearList: number[];
   recognition: string;
   /** null while PENDING — do not render */
   phone: string | null;
-  /** A second line he answers. Contact page only — one number is the
-      number everywhere else, or people do not know which to ring. */
+  /** A second line he answers. Header shows only the first number;
+      the footer, contact page and call blocks show both. */
   phoneSecondary: string | null;
   phoneSecondaryHref: string | null;
   whatsapp: string | null;
+  /** WhatsApp on the second line. Shown beside `phoneSecondary`. */
+  whatsappSecondary: string | null;
+  whatsappSecondaryHref: string | null;
   email: string | null;
   serviceArea: string;
   bookingsPaused: boolean;
@@ -40,16 +45,19 @@ const FALLBACK: SiteSettings = {
   mdrtYears: site.credentials.mdrtYears,
   mdrtStatus: site.credentials.mdrtStatus,
   cotYears: site.credentials.cotYears,
+  cotYearList: [],
   recognition: site.credentials.recognition,
   phone: null,
   phoneSecondary: null,
   whatsapp: null,
+  whatsappSecondary: null,
   email: null,
   serviceArea: site.serviceArea,
   bookingsPaused: false,
   phoneHref: null,
   phoneSecondaryHref: null,
   whatsappHref: null,
+  whatsappSecondaryHref: null,
   emailHref: null,
 };
 
@@ -81,7 +89,9 @@ export async function getSiteSettings(db: any): Promise<SiteSettings> {
   const phone = val("phone");
   const phone2 = val("phone_secondary");
   const whatsapp = val("whatsapp");
+  const whatsapp2 = val("whatsapp_secondary");
   const email = val("email");
+  const cotList = [...new Set((val("cot_year_list") ?? "").match(/\d{4}/g)?.map(Number) ?? [])].sort((a, b) => a - b);
 
   return {
     // Both counts are computed from the year each thing began rather
@@ -97,21 +107,30 @@ export async function getSiteSettings(db: any): Promise<SiteSettings> {
     yearsExperience:
       num("years_experience", 0) ||
       yearsSince(num("experience_since", site.credentials.experienceSince)),
+    // MDRT is a count he sets by hand in the admin, like Court of the
+    // Table: it counts qualifications, not calendar years. The derived
+    // figure is only a fallback for a database that predates 0005.
     mdrtYears:
       num("mdrt_years", 0) ||
       yearsSince(num("mdrt_since", site.credentials.mdrtSince), { inclusive: true }),
-    cotYears: Number(map.get("cot_years") ?? FALLBACK.cotYears) || 0,
+    // He types the years themselves ("2020, 2024, 2025, 2026"); the
+    // count is how many there are, so the number and the years printed
+    // beside it can never disagree. The bare count is the fallback.
+    cotYears: cotList.length || Number(map.get("cot_years") ?? FALLBACK.cotYears) || 0,
+    cotYearList: cotList,
     mdrtStatus: val("mdrt_status") ?? FALLBACK.mdrtStatus,
     recognition: val("recognition") ?? FALLBACK.recognition,
     phone,
     phoneSecondary: phone2,
     whatsapp,
+    whatsappSecondary: whatsapp2,
     email,
     serviceArea: val("service_area") ?? FALLBACK.serviceArea,
     bookingsPaused: map.get("bookings_paused") === "1",
     phoneHref: phone ? `tel:${phone.replace(/\s/g, "")}` : null,
     phoneSecondaryHref: phone2 ? `tel:${phone2.replace(/\s/g, "")}` : null,
     whatsappHref: whatsappHref(whatsapp),
+    whatsappSecondaryHref: whatsappHref(whatsapp2),
     emailHref: email ? `mailto:${email}` : null,
   };
 }

@@ -44,7 +44,9 @@ export const POST: APIRoute = async ({ request }) => {
   const profession = String(form.get("profession") ?? "").trim().slice(0, 160);
   const body = String(form.get("body") ?? "").trim().slice(0, 2000);
 
-  if (!name || !profession || !body) return back("error=empty");
+  // Only the words are required. A client's name, title or photo can
+  // arrive later, and he fills them in when they do.
+  if (!body) return back("error=empty");
   // Only required when creating: an edit is not a fresh assertion.
   if (!id && !form.get("consent")) return back("error=consent");
 

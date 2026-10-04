@@ -533,6 +533,16 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
             {settings.phone}
           </a>
         )}
+        {settings.phoneSecondaryHref && (
+          <a href={settings.phoneSecondaryHref} class="text-center font-display text-h4 font-bold text-cream-50 hover:text-gold-400">
+            {settings.phoneSecondary}
+          </a>
+        )}
+        {settings.whatsappSecondaryHref && (
+          <a target="_blank" rel="noopener noreferrer" href={settings.whatsappSecondaryHref} class="mx-auto flex w-fit items-center gap-2 text-small font-bold text-cream-50/70 hover:text-gold-400">
+            <span aria-hidden="true" class="size-2 rounded-full bg-whatsapp"></span>WhatsApp {settings.whatsappSecondary}
+          </a>
+        )}
       </div>
     </div>
   </section>
