@@ -238,7 +238,8 @@ export async function sendLeadEmails(opts: {
   return sendAll(bindings, [
     {
       label: "admin",
-      from,
+      // His own copy says where it came from rather than wearing his name.
+      from: from && !from.includes("<") ? `Your website <${from}>` : from,
       to: adminEmail,
       replyTo: lead.email,
       subject: `New enquiry — ${lead.name} (${professionLabel}) — ${serviceNames(lead.services).slice(0, 2).join(", ")}`,

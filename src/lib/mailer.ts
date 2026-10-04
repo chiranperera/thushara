@@ -15,6 +15,8 @@
  * `{ ok: false }` and decides what to tell the person.
  */
 
+import { site } from "./site";
+
 export interface MailResult {
   ok: boolean;
   error?: string;
@@ -56,7 +58,9 @@ export async function sendMail(
   try {
     await email.send({
       to: msg.to,
-      from: msg.from,
+      // A bare address shows in the inbox as "info". With a name it shows
+      // as him — the first thing a new client sees of the reply.
+      from: msg.from.includes("<") ? msg.from : { email: msg.from, name: site.name },
       subject: msg.subject,
       html: msg.html,
       ...(msg.replyTo ? { replyTo: msg.replyTo } : {}),
