@@ -118,6 +118,21 @@ const referringPage = Astro.request.headers.get("referer") ?? undefined;
     <h1 class="sr-only">Book a consultation with {site.name}</h1>
     <div class="md:grid md:grid-cols-[minmax(0,1fr)_300px] md:gap-16 md:items-start">
       <div>
+        {/* Until the form below comes to life (about a second on a phone),
+            its buttons are just pictures. Remember a profession tapped in
+            that gap and show it as chosen; the form picks it up on start. */}
+        <script is:inline>
+          document.addEventListener("click", function (e) {
+            if (window.__bookingReady) return;
+            var b = e.target && e.target.closest && e.target.closest("[data-early-choice]");
+            if (!b) return;
+            window.__earlyChoice = b.getAttribute("data-early-choice");
+            document.querySelectorAll("[data-early-choice]").forEach(function (x) {
+              x.style.background = x === b ? "var(--color-navy-600)" : "";
+              x.style.color = x === b ? "var(--color-cream-50)" : "";
+            });
+          }, true);
+        </script>
         <BookingForm
           client:load
           days={days}

@@ -93,6 +93,20 @@ export default function BookingForm({
     } catch {
       /* corrupt draft is not worth surfacing */
     }
+    // 6 Oct 2026: a profession tapped in the second before the form came
+    // to life was lost — the page looked ready but nothing happened. The
+    // page records that early tap (see book.astro); honour it now, over
+    // any old draft, because it is what the person just chose.
+    const w = window as unknown as { __earlyChoice?: string; __bookingReady?: boolean };
+    if (w.__earlyChoice && w.__earlyChoice in professions) {
+      setValues((v) => ({ ...v, profession_category: w.__earlyChoice, profession_role: "", engineering_discipline: "", profession_other: "" }));
+      setStep(0);
+    }
+    w.__bookingReady = true;
+    document.querySelectorAll<HTMLElement>("[data-early-choice]").forEach((x) => {
+      x.style.background = "";
+      x.style.color = "";
+    });
   }, []);
 
   useEffect(() => {
@@ -352,6 +366,7 @@ function Step1({ values, errors, set }: { values: Values; errors: Errors; set: (
         {(Object.keys(professions) as Array<keyof typeof professions>).map((key) => (
           <ChoiceCard
             key={key}
+            earlyChoice={key}
             selected={cat === key}
             label={professions[key].label}
             onClick={() =>
@@ -1040,15 +1055,18 @@ function ChoiceCard({
   selected,
   onClick,
   compact,
+  earlyChoice,
 }: {
   label: string;
   selected: boolean;
   onClick: () => void;
   compact?: boolean;
+  earlyChoice?: string;
 }) {
   return (
     <button
       type="button"
+      data-early-choice={earlyChoice}
       aria-pressed={selected}
       onClick={onClick}
       className={`flex items-center justify-center rounded-lg border-[1.5px] text-center font-bold transition-colors ${
