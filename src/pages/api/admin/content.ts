@@ -93,22 +93,24 @@ export const POST: APIRoute = async ({ request }) => {
 
     /* --------------------------------------------------- reorder */
     if (action === "move" && id) {
+      // 6 Oct 2026: moving swapped with the next row in the WHOLE table, so a
+      // question on the engineers page could trade places with one on the
+      // Questions page, and rows with the same number never moved at all.
+      // Now: the list it sits in (for questions, the same page) is put in
+      // order, the two neighbours swap, and the list is numbered 1, 2, 3…
       const dir = String(form.get("dir")) === "up" ? "up" : "down";
-      const me: any = await db.prepare(`SELECT sort_order FROM ${spec.table} WHERE id = ?`).bind(id).first();
+      const me: any = await db.prepare(`SELECT * FROM ${spec.table} WHERE id = ?`).bind(id).first();
       if (me) {
-        const neighbour: any = await db
-          .prepare(
-            dir === "up"
-              ? `SELECT id, sort_order FROM ${spec.table} WHERE sort_order < ? ORDER BY sort_order DESC LIMIT 1`
-              : `SELECT id, sort_order FROM ${spec.table} WHERE sort_order > ? ORDER BY sort_order ASC LIMIT 1`,
-          )
-          .bind(me.sort_order)
-          .first();
-        if (neighbour) {
-          await db.batch([
-            db.prepare(`UPDATE ${spec.table} SET sort_order = ? WHERE id = ?`).bind(neighbour.sort_order, id),
-            db.prepare(`UPDATE ${spec.table} SET sort_order = ? WHERE id = ?`).bind(me.sort_order, neighbour.id),
-          ]);
+        const sameList = spec.table === "faqs"
+          ? db.prepare(`SELECT id FROM faqs WHERE service IS ? ORDER BY sort_order, id`).bind(me.service ?? null)
+          : db.prepare(`SELECT id FROM ${spec.table} ORDER BY sort_order, id`);
+        const ids: number[] = ((await sameList.all()).results ?? []).map((r: any) => r.id);
+        const at = ids.indexOf(id);
+        const to = dir === "up" ? at - 1 : at + 1;
+        if (at >= 0 && to >= 0 && to < ids.length) {
+          [ids[at], ids[to]] = [ids[to], ids[at]];
+          await db.batch(ids.map((rid, n) =>
+            db.prepare(`UPDATE ${spec.table} SET sort_order = ? WHERE id = ?`).bind(n + 1, rid)));
         }
       }
       return back(spec.page, "saved=1");

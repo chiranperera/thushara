@@ -1,8 +1,8 @@
 ---
 /**
  * /admin/availability — drives the booking slot picker.
- * Evening and weekend rows are highlighted because they convert
- * doctors and engineers better than anything else on this screen.
+ * 6 Oct 2026, Chiran: one row per day of the week. Thushara picks the
+ * start and end time for each day and switches the day on or off.
  */
 export const prerender = false;
 
@@ -38,9 +38,12 @@ if (db) {
 const num = (k: string, d: number) => Number(settings.get(k)) || d;
 const paused = settings.get("bookings_paused") === "1";
 const DAY = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-const fmt = (t: string) => { const [h,m]=t.split(":").map(Number); const p=h<12?"am":"pm"; const hr=h%12===0?12:h%12; return `${hr}:${String(m).padStart(2,"0")} ${p}`; };
-/** Evenings and weekends — the slots that win this audience. */
-const isKey = (w: any) => Number(w.start_time.split(":")[0]) >= 17 || w.day_of_week === 0 || w.day_of_week === 6;
+/** Monday first, the way he reads a week. One row per day. */
+const week = [1, 2, 3, 4, 5, 6, 0].map((dow) => {
+  const w = windows.find((r) => r.day_of_week === dow);
+  return { dow, name: DAY[dow], start: w?.start_time ?? "09:00", end: w?.end_time ?? "17:00", on: w ? w.active === 1 : false };
+});
+const badTimes = Astro.url.searchParams.get("times") === "bad";
 ---
 
 <AdminLayout title="When I'm available" newLeads={counts.newLeads} pendingReviews={counts.pendingReviews}>
@@ -53,38 +56,41 @@ const isKey = (w: any) => Number(w.start_time.split(":")[0]) >= 17 || w.day_of_w
     <form method="POST" action="/api/admin/settings" class="mt-8 max-w-[760px]">
       <input type="hidden" name="_section" value="availability" />
 
+      {badTimes && (
+        <p class="mb-4 rounded-lg border border-error/30 bg-error/8 px-4 py-3 text-body text-error">
+          A day's end time must be later than its start time. Those days were left as they were.
+        </p>
+      )}
       <div class="overflow-hidden rounded-[18px] border border-warm-200 bg-white">
-        <div class="grid grid-cols-[1fr_1.4fr_auto] border-b border-warm-200 bg-cream-100">
-          {["Day","Hours","On"].map((h)=>(
-            <div class="px-5 py-3.5 text-caption font-bold tracking-[.06em] uppercase text-navy-600/80">{h}</div>
+        <div class="grid grid-cols-[1.1fr_1fr_1fr_auto] gap-3 border-b border-warm-200 bg-cream-100 px-5">
+          {["Day","Start","End","Open"].map((h)=>(
+            <div class="py-3.5 text-caption font-bold tracking-[.06em] uppercase text-navy-600/80">{h}</div>
           ))}
         </div>
-        {windows.map((w)=>(
-          <div class={`grid grid-cols-[1fr_1.4fr_auto] items-center border-b border-warm-100 last:border-0 ${isKey(w) ? "bg-gold-100/40" : ""}`}>
-            <div class="px-5 py-4 text-body font-bold text-ink-800">
-              {w.label ?? DAY[w.day_of_week]}
-            </div>
-            <div class="px-5 py-4 text-body text-warm-700">{fmt(w.start_time)} – {fmt(w.end_time)}</div>
-            <div class="px-5 py-4">
-              <label class="flex cursor-pointer items-center gap-2">
-                <input type="checkbox" name={`window_${w.id}`} checked={w.active===1} class="size-6 accent-navy-600" />
-                <span class="sr-only">Enable {w.label ?? DAY[w.day_of_week]}</span>
-              </label>
-            </div>
+        {week.map((d)=>(
+          <div class="grid grid-cols-[1.1fr_1fr_1fr_auto] items-center gap-3 border-b border-warm-100 px-5 py-3 last:border-0">
+            <div class="text-body font-bold text-ink-800">{d.name}</div>
+            <input type="time" name={`start_${d.dow}`} value={d.start} step="900" aria-label={`${d.name} start time`}
+              class="h-12 w-full rounded-md border border-warm-200 bg-white px-3 text-body tabular focus:border-navy-400" />
+            <input type="time" name={`end_${d.dow}`} value={d.end} step="900" aria-label={`${d.name} end time`}
+              class="h-12 w-full rounded-md border border-warm-200 bg-white px-3 text-body tabular focus:border-navy-400" />
+            <label class="flex cursor-pointer items-center justify-center px-2">
+              <input type="checkbox" name={`on_${d.dow}`} checked={d.on} class="size-6 accent-navy-600" />
+              <span class="sr-only">{d.name} open for bookings</span>
+            </label>
           </div>
         ))}
       </div>
 
-      <p class="mt-3 rounded-md border border-gold-300 bg-gold-100 px-4 py-3 text-small leading-relaxed text-warm-900">
-        The highlighted rows are evenings and weekends. They convert doctors and engineers better
-        than anything else here — a Medical Officer can't take a call at 2pm.
+      <p class="mt-3 text-small leading-relaxed text-warm-600">
+        Untick a day you don't work. People can only pick times between the start and end you set.
       </p>
 
       <div class="mt-7 grid gap-4 sm:grid-cols-2">
         {[
-          { name:"appointment_minutes", label:"Appointment length", value:num("appointment_minutes",30), suffix:"minutes" },
-          { name:"buffer_minutes", label:"Gap between appointments", value:num("buffer_minutes",15), suffix:"minutes" },
-          { name:"max_per_day", label:"Most bookings in a day", value:num("max_per_day",4), suffix:"" },
+          { name:"appointment_minutes", label:"Appointment length", value:num("appointment_minutes",30), suffix:"minutes", hint:"How long each meeting lasts." },
+          { name:"buffer_minutes", label:"Gap between appointments", value:num("buffer_minutes",15), suffix:"minutes", hint:"Rest time after each meeting before the next can start." },
+          { name:"max_per_day", label:"Most bookings in a day", value:num("max_per_day",4), suffix:"per day", hint:"Once this many people have booked a day, its other times are hidden — even if your hours have room for more." },
         ].map((f)=>(
           <div>
             <label for={f.name} class="text-small font-bold text-warm-800">{f.label}</label>
@@ -93,6 +99,7 @@ const isKey = (w: any) => Number(w.start_time.split(":")[0]) >= 17 || w.day_of_w
                 class="h-14 w-28 rounded-md border border-warm-200 bg-white px-4 text-h4 tabular focus:border-navy-400" />
               {f.suffix && <span class="text-body text-warm-500">{f.suffix}</span>}
             </div>
+            <p class="mt-1.5 max-w-[36ch] text-small leading-relaxed text-warm-500">{f.hint}</p>
           </div>
         ))}
       </div>
@@ -126,3 +133,14 @@ const isKey = (w: any) => Number(w.start_time.split(":")[0]) >= 17 || w.day_of_w
     </form>
   </div>
 </AdminLayout>
+
+<script>
+  // 6 Oct 2026, Chiran: the time picker only opened from the little clock
+  // icon. Clicking anywhere in the box now opens it.
+  document.querySelectorAll<HTMLInputElement>('input[type="time"]').forEach((el) => {
+    el.style.cursor = "pointer";
+    el.addEventListener("click", () => {
+      try { el.showPicker(); } catch {}
+    });
+  });
+</script>

@@ -81,7 +81,7 @@ const COT_YEARS = settings.cotYearList;
 // Bars start at his first MDRT year. The count is the number he sets by
 // hand, so a year he did not qualify shortens the run rather than
 // pretending it happened.
-const firstMdrtYear = site.credentials.mdrtSince;
+const firstMdrtYear = settings.mdrtSince;
 const mdrtBars = Array.from({ length: settings.mdrtYears }, (_, i) => {
   const year = firstMdrtYear + i;
   return { year, cot: COT_YEARS.includes(year) };

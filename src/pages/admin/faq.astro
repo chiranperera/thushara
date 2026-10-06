@@ -54,6 +54,26 @@ const GROUPS = [
   { key: "for-engineers" as string | null, label: "For Engineers", where: "Shown on the For Engineers page" },
 ];
 
+// 6 Oct 2026, Chiran: "I chose Motor in the drop-down and it never showed on
+// the motor page." The only drop-down was the Questions-page heading, which
+// does not place a question on any page. Every form now asks the real
+// question first — which page — and the heading second.
+const PAGE_OPTIONS = GROUPS.map((g) => ({
+  value: g.key ?? "",
+  label: g.key ? `${g.label} page` : "Questions page only",
+}));
+/** The Questions-page heading that matches each page, as the default. */
+const CATEGORY_FOR: Record<string, string> = {
+  "professional-indemnity": "Professional Indemnity",
+  "motor-insurance": "Motor",
+  "life-income-protection": "Life & Income Protection",
+  "health-insurance": "Health",
+  "children-education": "Education & Retirement",
+  "retirement-plan": "Education & Retirement",
+  "house-property": "Property",
+  "travel-insurance": "Travel",
+};
+
 const grouped = GROUPS.map((g) => {
   const items = rows.filter((r) => (g.key ? r.service === g.key : !r.service));
   return { ...g, items, unanswered: items.filter((r) => !r.answer?.trim()).length };
@@ -68,7 +88,7 @@ const field = "w-full rounded-md border border-warm-200 bg-white px-3.5 py-3 tex
     <h1 class="font-display text-h1 font-extrabold text-ink-900">Questions</h1>
     <p class="mt-1.5 max-w-[64ch] text-body leading-relaxed text-warm-600">
       These appear on your <a href="/faq" class="font-bold text-navy-600 underline">Questions page</a>.
-      Anything you tie to a service also shows on that service's own page.
+      Choose a page under “Show on” and the question appears on that page.
     </p>
 
     {saved && <p class="mt-5 rounded-lg border border-navy-200 bg-navy-50 px-4 py-3 text-body text-navy-600">Saved.</p>}
@@ -109,12 +129,11 @@ const field = "w-full rounded-md border border-warm-200 bg-white px-3.5 py-3 tex
           ) : (
             <ul class="mt-5 flex flex-col gap-4">
               {g.items.map((r, i) => (
-                <li class={`rounded-[18px] border bg-white p-5 ${!r.answer?.trim() ? "border-gold-300 bg-gold-100/30" : r.published ? "border-warm-200" : "border-warm-200 bg-cream-100 opacity-70"}`}>
+                <li id={`q-${r.id}`} data-service={r.service ?? ""} class={`scroll-mt-24 rounded-[18px] border bg-white p-5 ${!r.answer?.trim() ? "border-gold-300 bg-gold-100/30" : r.published ? "border-warm-200" : "border-warm-200 bg-cream-100 opacity-70"}`}>
                   <form method="POST" action="/api/admin/content" class="flex flex-col gap-3">
                     <input type="hidden" name="_kind" value="faq" />
                     <input type="hidden" name="id" value={r.id} />
                     <input type="hidden" name="dir" value="down" />
-                    <input type="hidden" name="service" value={r.service ?? ""} />
 
                     <input name="question" value={r.question} required class={`${field} h-13 font-bold`} />
 
@@ -126,18 +145,14 @@ const field = "w-full rounded-md border border-warm-200 bg-white px-3.5 py-3 tex
                       placeholder="Answer it the way you would on the phone. Plain, honest and short."
                     >{r.answer}</textarea>
 
-                    {/* The category only does anything on the site-wide
-                        Questions page, where it splits the list into
-                        headed groups. On a service page the questions
-                        are already grouped by being on that page, so
-                        showing the dropdown there is a control that
-                        does nothing. */}
-                    {!g.key && (
-                      <select name="category" class={`${field} h-12 max-w-[280px]`}>
-                        <option value="">No group</option>
-                        {faqCategories.map((c) => <option value={c} selected={c === r.category}>{c}</option>)}
-                      </select>
-                    )}
+                    <div class="grid gap-3 sm:grid-cols-2">
+                      <label class="text-small font-bold text-warm-800">
+                        Show on
+                        <select name="service" class={`${field} mt-1.5 h-12`}>
+                          {PAGE_OPTIONS.map((o) => <option value={o.value} selected={o.value === (r.service ?? "")}>{o.label}</option>)}
+                        </select>
+                      </label>
+                    </div>
 
                     <div class="flex flex-wrap items-center gap-2">
                       <button type="submit" name="_action" value="save"
@@ -173,7 +188,6 @@ const field = "w-full rounded-md border border-warm-200 bg-white px-3.5 py-3 tex
             <form method="POST" action="/api/admin/content" class="mt-4 flex flex-col gap-3 rounded-[18px] border border-warm-200 bg-cream-100 p-5">
               <input type="hidden" name="_kind" value="faq" />
               <input type="hidden" name="_action" value="create" />
-              <input type="hidden" name="service" value={g.key ?? ""} />
 
               <div>
                 <label class="text-small font-bold text-warm-800" for={`nq-${g.key ?? "site"}`}>
@@ -187,17 +201,17 @@ const field = "w-full rounded-md border border-warm-200 bg-white px-3.5 py-3 tex
                 <textarea id={`na-${g.key ?? "site"}`} name="answer" required rows="4" class={`${field} mt-2 leading-relaxed`}
                   placeholder="Say it the way you would on the phone. Plain, honest, and short."></textarea>
               </div>
-              {!g.key && (
-                <div>
-                  <label class="text-small font-bold text-warm-800" for="new-category">Group it under</label>
-                  <select id="new-category" name="category" class={`${field} mt-2 h-13 max-w-[280px]`}>
-                    {faqCategories.map((c) => <option value={c}>{c}</option>)}
+              <div class="grid gap-3 sm:grid-cols-2">
+                <label class="text-small font-bold text-warm-800">
+                  Show on
+                  <select name="service" class={`${field} mt-2 h-13`}>
+                    {PAGE_OPTIONS.map((o) => <option value={o.value} selected={o.value === (g.key ?? "")}>{o.label}</option>)}
                   </select>
-                </div>
-              )}
+                </label>
+              </div>
 
               <button type="submit" class="mt-1 flex min-h-13 w-fit items-center rounded-full bg-navy-600 px-8 text-body font-bold text-cream-50 hover:bg-navy-500">
-                Add it to {g.label}
+                Add question
               </button>
             </form>
           </details>
@@ -208,6 +222,82 @@ const field = "w-full rounded-md border border-warm-200 bg-white px-3.5 py-3 tex
 </AdminLayout>
 
 <script>
+  // 6 Oct 2026, Chiran: "every save jumps me back to the top and I have to
+  // scroll to find the question again." Saving now happens in place. Only
+  // when the list itself changes (a question moved page, added, deleted,
+  // reordered) does the page reload — and then it comes back to the same
+  // spot, or to the question in its new place.
+  const KEY = "faq-admin-return";
+  try { history.scrollRestoration = "manual"; } catch {}
+  let back: { y?: number; id?: string | null } | null = null;
+  try { back = JSON.parse(sessionStorage.getItem(KEY) ?? "null"); sessionStorage.removeItem(KEY); } catch {}
+  const goBack = () => {
+    if (!back) return;
+    const el = back.id ? document.getElementById(back.id) : null;
+    if (el) el.scrollIntoView({ block: "center" });
+    else window.scrollTo(0, back.y ?? 0);
+  };
+  if (back) {
+    // Once now, and again after fonts and layout settle, so nothing nudges it.
+    goBack();
+    window.addEventListener("load", () => { goBack(); setTimeout(goBack, 150); }, { once: true });
+    const el = back.id ? document.getElementById(back.id) : null;
+    if (el) {
+      el.classList.add("ring-2", "ring-gold-500");
+      setTimeout(() => el.classList.remove("ring-2", "ring-gold-500"), 2500);
+    }
+  }
+
+  // Some browsers leave out which button sent the form, so remember the
+  // last one pressed — otherwise ↑, ↓ and Hide would all act like Save.
+  let lastButton: HTMLButtonElement | null = null;
+  document.addEventListener("click", (e) => {
+    lastButton = (e.target as HTMLElement)?.closest<HTMLButtonElement>("button[type='submit']") ?? null;
+  }, true);
+
+  document.addEventListener("submit", async (e) => {
+    const form = e.target as HTMLFormElement;
+    if (!form.matches('form[action="/api/admin/content"]')) return;
+    e.preventDefault();
+    const submitter = ((e as SubmitEvent).submitter as HTMLButtonElement | null)
+      ?? (lastButton && lastButton.form === form ? lastButton : null);
+    const data = new FormData(form, submitter);
+    const action = String(data.get("_action") ?? "save");
+    const li = form.closest("li[id^='q-']") as HTMLElement | null;
+    const newService = String(data.get("service") ?? "");
+    const samePlace = action === "save" && li && li.dataset.service === newService;
+
+    if (submitter) submitter.disabled = true;
+    let ok = false;
+    try {
+      const res = await fetch(form.action, { method: "POST", body: data });
+      ok = res.ok && !/[?&]error=/.test(res.url);
+    } catch {}
+    if (submitter) submitter.disabled = false;
+
+    if (!ok) { alert("That did not save. A question and an answer are both needed."); return; }
+
+    if (samePlace) {
+      // Nothing moved: say so beside the button and stay put.
+      let note = form.querySelector<HTMLElement>(".js-saved");
+      if (!note) {
+        note = document.createElement("span");
+        note.className = "js-saved text-small font-bold text-navy-600";
+        submitter?.after(note);
+      }
+      note.textContent = "Saved ✓";
+      setTimeout(() => { if (note) note.textContent = ""; }, 2500);
+      return;
+    }
+    try {
+      sessionStorage.setItem(KEY, JSON.stringify({
+        y: window.scrollY,
+        id: li && (action === "save" || action === "move" || action === "toggle") ? li.id : null,
+      }));
+    } catch {}
+    location.reload();
+  });
+
   // Tapping an unanswered question drops it into the add form, so he
   // never retypes a question the site already asks.
   document.querySelectorAll<HTMLButtonElement>(".js-prefill").forEach((b) => {
@@ -220,6 +310,7 @@ const field = "w-full rounded-md border border-warm-200 bg-white px-3.5 py-3 tex
       (document.getElementById("answer") as HTMLTextAreaElement)?.focus({ preventScroll: true });
     });
   });
+
 
   document.addEventListener("click", (e) => {
     const el = (e.target as HTMLElement)?.closest("[data-confirm]");

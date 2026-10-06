@@ -36,7 +36,7 @@ const val = (k: string) => { const v = settings.get(k); return !v || v === "PEND
 const thisYear = currentYear();
 const derived = {
   years: yearsSince(Number(settings.get("experience_since")) || site.credentials.experienceSince),
-  mdrt: Number(settings.get("mdrt_years")) || yearsSince(Number(settings.get("mdrt_since")) || site.credentials.mdrtSince, { inclusive: true }),
+  mdrt: yearsSince(Number(settings.get("mdrt_since")) || site.credentials.mdrtSince, { inclusive: true }),
 };
 const pending = (k: string) => settings.get(k) === "PENDING";
 ---
@@ -93,10 +93,10 @@ const pending = (k: string) => settings.get(k) === "PENDING";
             <p class="mt-2 text-small text-gold-400">Currently shows: <b>{derived.years} years' experience</b></p>
           </div>
           <div>
-            <label for="mdrt_years" class="text-small font-bold text-cream-50/80">MDRT — how many times</label>
+            <label for="mdrt_since" class="text-small font-bold text-cream-50/80">Your first MDRT year</label>
             <input
-              id="mdrt_years" name="mdrt_years" type="number" min="1" max="80"
-              value={String(derived.mdrt)}
+              id="mdrt_since" name="mdrt_since" type="number" min="1970" max={String(thisYear)}
+              value={settings.get("mdrt_since") ?? ""} placeholder="First qualified 2013"
               class="mt-2 h-14 w-full rounded-md border border-cream-50/25 bg-cream-50/6 px-4 font-display text-h3 font-extrabold tabular text-cream-50 focus:border-gold-400"
             />
             <p class="mt-2 text-small text-gold-400">Currently shows: <b>{derived.mdrt}× MDRT</b></p>
@@ -104,9 +104,9 @@ const pending = (k: string) => settings.get(k) === "PENDING";
         </div>
 
         <p class="mt-4 rounded-lg bg-cream-50/8 px-4 py-3 text-small leading-relaxed text-cream-50/75">
-          Years of experience goes up by one on its own every 1 January — {derived.years} this year,
-          {" "}{derived.years + 1} next year. The MDRT number does <b>not</b> change by itself: update it
-          here the year you qualify again.
+          You do not need to update these. On 1 January both numbers go up by one on their own —
+          this year {derived.years} years and {derived.mdrt}× MDRT, next year {derived.years + 1} years
+          and {derived.mdrt + 1}× MDRT.
         </p>
 
         {/* Court of the Table is deliberately not automatic. He

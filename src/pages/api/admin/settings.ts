@@ -42,6 +42,7 @@ export const POST: APIRoute = async ({ request }) => {
       )
       .bind(key, value, now);
 
+  let badTimes = false;
   try {
     const stmts: any[] = [];
 
@@ -75,15 +76,22 @@ export const POST: APIRoute = async ({ request }) => {
       }
       stmts.push(put("bookings_paused", form.get("bookings_paused") ? "1" : "0"));
 
-      // Unchecked checkboxes are simply absent, so every window is set
-      // explicitly from what the form did send.
-      const ids: number[] = [];
-      const res = await db.prepare(`SELECT id FROM availability`).all();
-      for (const r of res.results ?? []) ids.push(Number((r as any).id));
-      for (const id of ids) {
-        stmts.push(
-          db.prepare(`UPDATE availability SET active = ? WHERE id = ?`).bind(form.has(`window_${id}`) ? 1 : 0, id),
-        );
+      // One window per day of the week: its start, end and whether it is
+      // open. An unticked box is simply absent from the form, so every
+      // day is written explicitly. A day whose end is not after its start
+      // keeps its old times rather than producing a day with no slots.
+      const HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
+      for (let dow = 0; dow < 7; dow++) {
+        if (!form.has(`start_${dow}`)) continue;
+        const start = String(form.get(`start_${dow}`) ?? "").slice(0, 5);
+        const end = String(form.get(`end_${dow}`) ?? "").slice(0, 5);
+        const on = form.has(`on_${dow}`) ? 1 : 0;
+        if (HHMM.test(start) && HHMM.test(end) && end > start) {
+          stmts.push(db.prepare(`UPDATE availability SET start_time = ?, end_time = ?, active = ? WHERE day_of_week = ?`).bind(start, end, on, dow));
+        } else {
+          badTimes = true;
+          stmts.push(db.prepare(`UPDATE availability SET active = ? WHERE day_of_week = ?`).bind(on, dow));
+        }
       }
     }
 
@@ -92,5 +100,5 @@ export const POST: APIRoute = async ({ request }) => {
     console.error("[admin] settings save failed", err);
   }
 
-  return new Response(null, { status: 302, headers: { location: `${dest}?saved=1` } });
+  return new Response(null, { status: 302, headers: { location: `${dest}?saved=1${badTimes ? "&times=bad" : ""}` } });
 };

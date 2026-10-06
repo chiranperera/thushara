@@ -15,6 +15,8 @@ export interface SiteSettings {
   yearsExperience: number;
   /** Derived from `mdrt_since`, not stored. Grows on 1 January. */
   mdrtYears: number;
+  /** His first MDRT year; the count runs from here. */
+  mdrtSince: number;
   mdrtStatus: string;
   /** Court of the Table years. 0 hides it rather than printing a zero. */
   cotYears: number;
@@ -43,6 +45,7 @@ export interface SiteSettings {
 const FALLBACK: SiteSettings = {
   yearsExperience: site.credentials.yearsExperience,
   mdrtYears: site.credentials.mdrtYears,
+  mdrtSince: site.credentials.mdrtSince,
   mdrtStatus: site.credentials.mdrtStatus,
   cotYears: site.credentials.cotYears,
   cotYearList: [],
@@ -107,12 +110,12 @@ export async function getSiteSettings(db: any): Promise<SiteSettings> {
     yearsExperience:
       num("years_experience", 0) ||
       yearsSince(num("experience_since", site.credentials.experienceSince)),
-    // MDRT is a count he sets by hand in the admin, like Court of the
-    // Table: it counts qualifications, not calendar years. The derived
-    // figure is only a fallback for a database that predates 0005.
-    mdrtYears:
-      num("mdrt_years", 0) ||
-      yearsSince(num("mdrt_since", site.credentials.mdrtSince), { inclusive: true }),
+    // 6 Oct 2026, Chiran: MDRT grows by one every 1 January, exactly like
+    // the years of experience — counted from his first MDRT year, 2013
+    // inclusive. (On 4 Oct it was briefly a hand-set number; he reversed
+    // that.) Only Court of the Table is entered by hand.
+    mdrtYears: yearsSince(num("mdrt_since", site.credentials.mdrtSince), { inclusive: true }),
+    mdrtSince: num("mdrt_since", site.credentials.mdrtSince),
     // He types the years themselves ("2020, 2024, 2025, 2026"); the
     // count is how many there are, so the number and the years printed
     // beside it can never disagree. The bare count is the fallback.

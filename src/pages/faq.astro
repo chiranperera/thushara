@@ -47,7 +47,7 @@ const key = (s: string) => s.trim().toLowerCase();
  */
 const merged = live
   .filter((r) => !r.service)
-  .map((r) => ({ q: r.question, a: r.answer, category: r.category ?? "Getting started", ready: true }));
+  .map((r) => ({ q: r.question, a: r.answer, category: r.category ?? "More questions", ready: true }));
 
 const categories = [...faqCategories, ...merged.map((f) => f.category)].filter(
   (c, i, all) => all.indexOf(c) === i,
