@@ -14,20 +14,21 @@ import { z } from "zod";
 import { newToken } from "../../lib/auth";
 import { site } from "../../lib/site";
 import { canSend, sendMail } from "../../lib/mailer";
+import { IMAGE_TYPES, MAX_IMAGE_BYTES, extFor, mediaKey } from "../../lib/media";
+import { getSiteSettings } from "../../lib/settings";
 
 export const prerender = false;
 
+// 6 Oct 2026, Chiran: the form Thushara sends to clients asks only for
+// name, title, the review and an optional photo.
 const schema = z.object({
   name: z.string({ error: "Please add your name" }).trim().min(2, "Please add your name").max(120),
-  profession: z.string({ error: "What do you do?" }).trim().min(2, "What do you do?").max(120),
-  service: z.string().trim().max(120).optional(),
-  rating: z.coerce.number().int().min(1).max(5).optional(),
+  profession: z.string({ error: "Please add your title or workplace" }).trim().min(2, "Please add your title or workplace").max(160),
   body: z
     .string({ error: "Please write a few words" })
     .trim()
     .min(30, "A sentence or two would help — about 30 characters minimum")
     .max(2000),
-  email: z.string({ error: "I need an email to verify this is genuine" }).trim().email("Please check that email address"),
   consent: z.literal(true, { error: "I need your permission to publish this" }),
   website: z.string().max(0).optional(), // honeypot
 });
@@ -39,9 +40,15 @@ export const POST: APIRoute = async ({ request }) => {
   const bindings = env as unknown as Record<string, any>;
   const db = bindings.DB;
 
-  let payload: unknown;
-  try { payload = await request.json(); } catch { return json({ ok: false }, 400); }
-
+  let form: FormData;
+  try { form = await request.formData(); } catch { return json({ ok: false }, 400); }
+  const payload = {
+    name: form.get("name") ?? undefined,
+    profession: form.get("profession") ?? undefined,
+    body: form.get("body") ?? undefined,
+    consent: form.get("consent") === "on" || form.get("consent") === "true",
+    website: form.get("website") ?? "",
+  };
   const parsed = schema.safeParse(payload);
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
@@ -56,17 +63,32 @@ export const POST: APIRoute = async ({ request }) => {
   const t = parsed.data;
   if (!db) return json({ ok: false, message: "Couldn't save that just now. Please try again shortly." }, 503);
 
+  // The photo is optional; a bad one is a field error, not a lost review.
+  let photoKey: string | null = null;
+  const file = form.get("photo");
+  if (file instanceof File && file.size > 0) {
+    if (!IMAGE_TYPES.includes(file.type)) return json({ ok: false, fieldErrors: { photo: "Please use a JPG, PNG or WebP photo" } }, 422);
+    if (file.size > MAX_IMAGE_BYTES) return json({ ok: false, fieldErrors: { photo: "That photo is over 6 MB — please choose a smaller one" } }, 422);
+    const bucket = bindings.MEDIA;
+    if (bucket) {
+      photoKey = mediaKey("testimonials", t.name, extFor(file.type));
+      try {
+        await bucket.put(photoKey, file.stream(), { httpMetadata: { contentType: file.type } });
+      } catch (err) {
+        console.error("[testimonial] photo upload failed", err);
+        photoKey = null;
+      }
+    }
+  }
+
   const approveToken = newToken();
   try {
     await db
       .prepare(
-        `INSERT INTO testimonials (name, profession, service, rating, body, email, consent_at, status, approve_token, created_at)
-         VALUES (?,?,?,?,?,?,?, 'pending', ?, ?)`,
+        `INSERT INTO testimonials (name, profession, body, photo_key, consent_at, status, approve_token, created_at)
+         VALUES (?,?,?,?,?, 'pending', ?, ?)`,
       )
-      .bind(
-        t.name, t.profession, t.service ?? null, t.rating ?? null, t.body, t.email,
-        new Date().toISOString(), approveToken, new Date().toISOString(),
-      )
+      .bind(t.name, t.profession, t.body, photoKey, new Date().toISOString(), approveToken, new Date().toISOString())
       .run();
   } catch (err) {
     console.error("[testimonial] insert failed", err);
@@ -77,7 +99,8 @@ export const POST: APIRoute = async ({ request }) => {
   // actually gets used. The panel is the fallback, not the main path.
   const base = bindings.SITE_URL ?? site.url;
   const from = bindings.FROM_EMAIL;
-  const to = bindings.ADMIN_EMAIL;
+  // To the email under My details, like enquiries; the admin login email is the fallback.
+  const to = (await getSiteSettings(db)).email ?? bindings.ADMIN_EMAIL;
 
   if (canSend(bindings) && from && from !== "PENDING" && to && to !== "PENDING") {
     const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -92,7 +115,7 @@ export const POST: APIRoute = async ({ request }) => {
 </td></tr>
 <tr><td style="padding:28px">
   <div style="font:700 22px/1.2 -apple-system,sans-serif;color:#071A2E">${esc(t.name)}</div>
-  <div style="font:400 16px/1.4 -apple-system,sans-serif;color:#6E7377;margin-top:3px">${esc(t.profession)}${t.rating ? ` · ${t.rating}/5` : ""}</div>
+  <div style="font:400 16px/1.4 -apple-system,sans-serif;color:#6E7377;margin-top:3px">${esc(t.profession)}${photoKey ? " · photo attached" : ""}</div>
   <div style="margin-top:18px;padding:18px;background:#F4F1E9;border-radius:12px;font:400 17px/1.6 -apple-system,sans-serif;color:#16181A">${esc(t.body)}</div>
   <a href="${base}/admin/testimonials/approve?token=${approveToken}" style="display:block;margin-top:22px;text-align:center;padding:16px;background:#123A6B;color:#FBFAF6;text-decoration:none;border-radius:999px;font:700 17px/1 -apple-system,sans-serif">Approve &amp; publish</a>
   <a href="${base}/admin/testimonials" style="display:block;margin-top:10px;text-align:center;padding:14px;border:1.5px solid #DCDEDF;color:#123A6B;text-decoration:none;border-radius:999px;font:700 16px/1 -apple-system,sans-serif">Edit or reject first</a>

@@ -1,8 +1,11 @@
 ---
 /**
- * /testimonials/share — public submission.
- * Posts to /api/testimonial, which stores it as PENDING and emails
- * Thushara a one-tap approve link. Never auto-published.
+ * /testimonials/share — the review form Thushara sends to clients.
+ * 6 Oct 2026, Chiran: not linked anywhere on the site; Thushara shares
+ * the link himself (copy or WhatsApp from Admin › Reviews). Name, title,
+ * the review and an optional photo. Posts to /api/testimonial, which
+ * stores it as PENDING and emails him an approve link. Never
+ * auto-published, never indexed.
  */
 export const prerender = false;
 
@@ -11,13 +14,11 @@ import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/site/Header.astro";
 import Footer from "../../components/site/Footer.astro";
 import { getSiteSettings, EDGE_CACHE } from "../../lib/settings";
-import { services } from "../../lib/site";
 
 const bindings = env as unknown as Record<string, any>;
 const settings = await getSiteSettings(bindings.DB);
 Astro.response.headers.set("cache-control", EDGE_CACHE);
 
-const professions = ["Doctor / Healthcare","Engineer","Lawyer","Accountant","Architect","Business owner","IT professional","Teacher","Other professional","Retired"];
 ---
 
 <Layout title="Share your experience" description="Two minutes, and it helps the next person decide whether to call." noindex>
@@ -40,34 +41,11 @@ const professions = ["Doctor / Healthcare","Engineer","Lawyer","Accountant","Arc
           </div>
 
           <div>
-            <label for="profession" class="text-small font-bold text-warm-800">Profession</label>
-            <select id="profession" name="profession" required
-              class="mt-2 h-14 w-full rounded-md border border-warm-200 bg-white px-4 text-body focus:border-navy-400">
-              <option value="">Select</option>
-              {professions.map((p) => <option value={p}>{p}</option>)}
-            </select>
-            <p class="mt-1.5 text-small text-warm-500">Drives filtering on the testimonials page.</p>
+            <label for="profession" class="text-small font-bold text-warm-800">Your title or workplace</label>
+            <input id="profession" name="profession" required maxlength="160"
+              placeholder="e.g. Consultant Physician, Colombo"
+              class="mt-2 h-14 w-full rounded-md border border-warm-200 bg-white px-4 text-body focus:border-navy-400" />
             <p class="err mt-2 hidden text-small text-danger"></p>
-          </div>
-
-          <div>
-            <label for="service" class="text-small font-bold text-warm-800">Which service?</label>
-            <select id="service" name="service"
-              class="mt-2 h-14 w-full rounded-md border border-warm-200 bg-white px-4 text-body focus:border-navy-400">
-              <option value="">Select</option>
-              {services.map((s) => <option value={s.title}>{s.title}</option>)}
-            </select>
-          </div>
-
-          <div>
-            <span class="text-small font-bold text-warm-800">Your rating</span>
-            <div id="rating" class="mt-2 flex gap-3" role="radiogroup" aria-label="Your rating">
-              {[1,2,3,4,5].map((n) => (
-                <button type="button" data-star={n} role="radio" aria-checked="false" aria-label={`${n} out of 5`}
-                  class="size-11 rounded-full border border-warm-300 bg-white transition-colors"></button>
-              ))}
-            </div>
-            <input type="hidden" name="rating" id="ratingValue" />
           </div>
 
           <div>
@@ -79,10 +57,10 @@ const professions = ["Doctor / Healthcare","Engineer","Lawyer","Accountant","Arc
           </div>
 
           <div>
-            <label for="email" class="text-small font-bold text-warm-800">Email address</label>
-            <input id="email" name="email" type="email" required autocomplete="email"
-              class="mt-2 h-14 w-full rounded-md border border-warm-200 bg-white px-4 text-body focus:border-navy-400" />
-            <p class="mt-1.5 text-small text-warm-500">Used to verify this is genuine. Never published.</p>
+            <label for="photo" class="text-small font-bold text-warm-800">Your photo <span class="font-normal text-warm-500">(optional)</span></label>
+            <input id="photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp"
+              class="mt-2 block w-full text-body text-warm-700 file:mr-4 file:rounded-full file:border-0 file:bg-navy-50 file:px-5 file:py-3 file:font-bold file:text-navy-600" />
+            <p class="mt-1.5 text-small text-warm-500">A clear photo of your face works best. JPG or PNG, up to 6 MB.</p>
             <p class="err mt-2 hidden text-small text-danger"></p>
           </div>
 
@@ -94,7 +72,7 @@ const professions = ["Doctor / Healthcare","Engineer","Lawyer","Accountant","Arc
             <label class="flex cursor-pointer items-start gap-3">
               <input type="checkbox" name="consent" required class="mt-0.5 size-6 shrink-0 rounded border-[1.5px] border-warm-300 accent-navy-600" />
               <span class="text-body text-warm-900">
-                I'm happy for this to be published on the website, with my name and profession.
+                I'm happy for this to be published on the website, with my name, title and photo.
               </span>
             </label>
             <p class="err mt-2 hidden text-small text-danger"></p>
@@ -127,21 +105,6 @@ const professions = ["Doctor / Healthcare","Engineer","Lawyer","Accountant","Arc
   const done = document.getElementById("done")!;
   const wrap = form.parentElement!;
 
-  // rating
-  let rating = 0;
-  const stars = [...document.querySelectorAll<HTMLButtonElement>("[data-star]")];
-  const paint = () => stars.forEach((s, i) => {
-    const on = i < rating;
-    s.style.background = on ? "#C9962F" : "#fff";
-    s.style.borderColor = on ? "#C9962F" : "#BCBFC2";
-    s.setAttribute("aria-checked", String(i + 1 === rating));
-  });
-  stars.forEach((s) => s.addEventListener("click", () => {
-    rating = Number(s.dataset.star);
-    (document.getElementById("ratingValue") as HTMLInputElement).value = String(rating);
-    paint();
-  }));
-
   const clearErrors = () => document.querySelectorAll(".err").forEach((e) => { e.classList.add("hidden"); e.textContent = ""; });
   const showError = (field: string, msg: string) => {
     const el = document.getElementById(field) ?? document.querySelector(`[name="${field}"]`);
@@ -156,14 +119,11 @@ const professions = ["Doctor / Healthcare","Engineer","Lawyer","Accountant","Arc
     btn.textContent = "Sending…";
 
     const fd = new FormData(form);
-    const payload: Record<string, unknown> = Object.fromEntries(fd.entries());
-    payload.consent = fd.get("consent") === "on";
-    if (rating) payload.rating = rating; else delete payload.rating;
+    const photo = fd.get("photo");
+    if (photo instanceof File && photo.size === 0) fd.delete("photo");
 
     try {
-      const res = await fetch("/api/testimonial", {
-        method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload),
-      });
+      const res = await fetch("/api/testimonial", { method: "POST", body: fd });
       const data = await res.json().catch(() => null);
       if (res.ok && data?.ok) {
         form.classList.add("hidden");

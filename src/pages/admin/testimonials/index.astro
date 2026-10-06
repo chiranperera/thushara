@@ -29,6 +29,7 @@ const tab = tabParam === "published" || tabParam === "pending"
   ? tabParam
   : counts.pendingReviews > 0 ? "pending" : "published";
 const ok = Astro.url.searchParams.get("ok");
+const shareLink = `${Astro.url.origin}/testimonials/share`;
 const err = Astro.url.searchParams.get("e");
 
 let rows: TestimonialRow[] = [];
@@ -161,6 +162,26 @@ const problems: Record<string, string> = {
       </form>
     </details>
 
+    <!-- ============ ASK A CLIENT ============ -->
+    {/* 6 Oct 2026, Chiran: the review form is not on the public site any
+        more; he sends this link to the clients he wants a review from. */}
+    <div class="mt-8 max-w-[860px] rounded-[18px] border border-navy-200 bg-navy-50 p-6">
+      <h2 class="font-display text-h3 font-extrabold text-ink-900">Ask a client for a review</h2>
+      <p class="mt-1.5 max-w-[64ch] text-small leading-relaxed text-warm-700">
+        Send this link to a client. They add their name, title, a few words and a photo if they like.
+        It comes here for you to approve — nothing goes on the website until you do.
+      </p>
+      <div class="mt-4 flex flex-wrap items-center gap-2.5">
+        <input id="share-link" readonly value={shareLink}
+          class="h-12 min-w-0 flex-1 rounded-md border border-warm-200 bg-white px-3.5 text-small text-ink-900" />
+        <button type="button" id="copy-link"
+          class="flex min-h-12 items-center rounded-full bg-navy-600 px-6 text-small font-bold text-cream-50 hover:bg-navy-500">Copy link</button>
+        <a target="_blank" rel="noopener noreferrer"
+          href={`https://wa.me/?text=${encodeURIComponent(`Hello, thank you for trusting me with your cover. If you have two minutes, I would be grateful for a short review: ${shareLink}`)}`}
+          class="flex min-h-12 items-center rounded-full bg-whatsapp px-6 text-small font-bold text-white">Send on WhatsApp</a>
+      </div>
+    </div>
+
     <div class="mt-6 flex gap-2">
       <a
         href="/admin/testimonials?tab=pending"
@@ -189,6 +210,9 @@ const problems: Record<string, string> = {
           <li class="rounded-[18px] border border-warm-200 bg-white p-6">
             <div class="flex items-start justify-between gap-3">
               <div class="min-w-0">
+                {tab === "pending" && t.photo_key && (
+                  <img src={`/media/${t.photo_key}`} alt="" width="56" height="56" class="mb-2 size-14 rounded-full object-cover" />
+                )}
                 <p class="text-h4 font-bold text-ink-800">{t.name}</p>
                 <p class="mt-0.5 text-small text-warm-500">
                   {t.profession}{t.service ? ` · ${t.service}` : ""} · {relativeTime(t.created_at)}
@@ -281,10 +305,19 @@ const problems: Record<string, string> = {
     <div class="mt-9 max-w-[720px] rounded-[18px] bg-ink-900 p-6">
       <p class="eyebrow text-gold-400">The workflow that gets used</p>
       <p class="mt-2.5 text-body leading-relaxed text-cream-50/78">
-        When a review arrives you'll get an email with the full text and an
-        <strong class="text-cream-50"> Approve &amp; publish</strong> button. One tap and it's live —
-        you'll rarely need to open this screen.
+        When a client sends a review through your link you'll get an email with the full text and an
+        <strong class="text-cream-50"> Approve &amp; publish</strong> button. One tap and it's live.
       </p>
     </div>
   </div>
 </AdminLayout>
+
+<script>
+  document.getElementById("copy-link")?.addEventListener("click", async (e) => {
+    const input = document.getElementById("share-link") as HTMLInputElement;
+    const btn = e.currentTarget as HTMLButtonElement;
+    try { await navigator.clipboard.writeText(input.value); } catch { input.select(); document.execCommand("copy"); }
+    btn.textContent = "Copied ✓";
+    setTimeout(() => (btn.textContent = "Copy link"), 2000);
+  });
+</script>
